@@ -1,148 +1,401 @@
 ![NRSuite Banner](screenshots/banner.png)
 
-# NRSuite-Android-CN（简体中文汉化版）
+# NRSuite
 
-> 📢 **说明**：本项目是 [NRSuite (Android)](https://github.com/7wp81x/nrsuite-android) 的**简体中文本地化（汉化）版本**。所有界面文本、操作提示、系统状态及日志均已完成高质量中文本地化翻译，严格保留与原项目相同的 [MIT 开源许可证](./LICENSE)。
+> 📢 **说明 / Note**：本项目是 [NRSuite (7wp81x/nrsuite-android)](https://github.com/7wp81x/nrsuite-android) 的**简体中文汉化版**。保持与原项目完全相同的开源协议与架构功能。
 
-NRSuite 是一款配合定制 ESP32 固件使用的 Android 伴侣端应用，旨在将 Wi-Fi 与低功耗蓝牙（BLE）安全测试与无线攻防工具链带入高效、便携的手机工作流中——无需携带笔记本电脑。
+NRSuite is an Android companion app paired with custom ESP32 firmware, built to bring Wi-Fi and BLE security research tooling into a fast, portable phone-based workflow - no laptop required.
 
-只需通过 USB-OTG（串口）将 Android 手机连接到烧录了 NRSuite 固件的 ESP32 开发板，即可将其作为便携式 Wi-Fi / BLE 攻防与无线安全检测平台。
+It connects to any ESP32 dev board flashed with NRSuite firmware over USB-OTG (serial), and drives it as a Wi-Fi/BLE offense and defense platform.
 
-> ⚠️ **仅供授权测试使用**：NRSuite 仅用于经过授权的安全研究与渗透测试，严禁用于未授权设备或恶意用途。详情参见 [LEGAL.md](./LEGAL.md)。
-
----
-
-## 原版项目及生态
-
-| 项目 | 说明 |
-|---|---|
-| [原版 Android 客户端 (7wp81x/nrsuite-android)](https://github.com/7wp81x/nrsuite-android) | 原版英文客户端仓库 |
-| [ESP32 固件 (nrsuite-firmware)](https://github.com/7wp81x/nrsuite-firmware) | ESP32 固件源码（PlatformIO / ESP-IDF） |
-| [通信协议规范 (nrsuite-protocol)](https://github.com/7wp81x/nrsuite-protocol) | 串口通讯帧协议规范与文档 |
+> **Authorized use only.** NRSuite is for security research and testing on networks and devices you own or are explicitly authorized to test. See [LEGAL.md](./LEGAL.md).
 
 ---
 
-## 功能特性
+## Community
 
-<details open>
-<summary><strong>无线安全测试（Wi-Fi / 802.11）</strong></summary>
+Join the NRSuite Discord server for setup help, build showcases, release news, and development discussion:
 
-- [x] **Wi-Fi 扫描** - AP 与信道探测，显示 SSID、BSSID、RSSI、加密方式与 WPS 标识
-- [x] **信标伪造 (Beacon Spam)** - 广播自定义或隐藏 SSID
-- [x] **解除认证 (Deauthentication)** - 注入 Deauth 管理帧
-- [x] **钓鱼热点 (Evil Twin)** - 伪造流氓 AP 并挂载强制认证门户
-- [x] **强制认证门户 (Captive Portal)** - 自定义 HTML 钓鱼捕获页面
-- [x] **数据包嗅探 (Packet Sniffer)** - 混杂模式监听捕获，支持导出 PCAP 文件
-- [x] **隐藏 AP 探测 (Hidden AP Revealer)** - 被动监听隐藏 AP，结合探测请求候选列表与关联帧还原 SSID
-- [ ] **PMKID 捕获**
+[![Discord](https://img.shields.io/badge/Discord-Join%20the%20server-5865F2?logo=discord&logoColor=white)](https://discord.gg/nnU9QSX5UZ)
 
-</details>
+Use `#support` for help, `#showcase` for builds, and `#github` for repo/code discussion.
 
-<details open>
-<summary><strong>无线防御与环境检测</strong></summary>
+---
 
-- [x] **Deauth 洪水检测** - 被动监听 Deauth / Disassoc 帧，支持 BSSID、客户端、RSSI 及原因过滤，实时告警并记录日志
-- [x] **伪造 AP 检测器 (Rogue AP)** - 比对周围可见 AP 与 OUI 规则，标记同名 SSID 仿冒、安全降级等可疑热点
-- [x] **客户端探针检测 (Client Presence)** - 被动探测 Probe / Assoc / Reassoc / Auth 管理帧，支持主动触发重连探测
-- [x] **追踪器检测 (Tracker Detector)** - 检测周围类似 Apple Find My / AirTag 的 BLE 寻物防丢器广播
-- [ ] **Karma / MANA 攻击检测**
-- [ ] **未授权 RFID 读卡器检测**
-- [ ] **干扰检测 (Jam Detector)**（仅检测）
+## Table of Contents
 
-</details>
+- [Community](#community)
+- [Features](#features)
+- [Installation](#installation)
+- [Getting Started](#getting-started)
+- [Requirements](#requirements)
+- [Building from Source](#building-from-source)
+- [Wire Protocol](#wire-protocol)
+- [Screenshots](#screenshots)
+- [Hardware Images](#hardware-images)
+- [Contributing](#contributing)
+- [Related Repos](#related-repos)
+- [Versioning](#versioning--compatibility)
+- [License](#license)
 
-<details open>
-<summary><strong>蓝牙（BLE）</strong></summary>
+---
 
-- [x] **BLE 扫描器** - 发现周围低功耗蓝牙设备、RSSI、广播厂商数据及服务 UUID
-- [x] **BLE GATT 属性画像** - 枚举分析 BLE 设备的只读 GATT 服务与特征值
-- [x] **BLE HID** - 模拟蓝牙键盘鼠标并执行 DuckyScript 脚本
-- [ ] **FastPair 模型识别**
+## Features
 
-</details>
+<details>
+<summary><strong>Wireless</strong></summary>
 
-<details open>
-<summary><strong>HID 与 BadUSB</strong></summary>
-
-- [x] **DuckyScript 编辑器** - 创建、导入和导出 Hak5 DuckyScript 脚本
-- [x] **BadUSB** - 通过 USB 模拟 HID 键盘输入载荷
-- [x] **多设备 USB 会话** - 支持同时连接多个 USB 串口设备独立管理与交互
-- [x] **BadUSB 目标选择器** - 随时切换注入目标设备而不中断其他通讯连接
+- [x] **Wi-Fi Scan** - AP/channel discovery with SSID, BSSID, RSSI, security, and WPS flags
+- [x] **Beacon Spam** - broadcast custom or hidden SSIDs
+- [x] **Deauthentication** - deauth frame injection
+- [x] **Evil Twin** - rogue AP with captive portal
+- [x] **Captive Portal** - custom HTML credential capture
+- [x] **Packet Sniffer** - monitor-mode capture with PCAP export
+- [x] **Hidden AP Revealer** - passive hidden AP detection, probe-request SSID candidates, and association-based SSID resolution
+- [ ] **PMKID Capture**
 
 </details>
 
-<details open>
-<summary><strong>凭据与握手包</strong></summary>
+<details>
+<summary><strong>Detection</strong></summary>
 
-- [x] **WPA 握手包捕获与离线爆破** - 4-way 握手包捕获、校验与本地字典离线验证
-- [x] **凭据管理器** - 本地安全存储与管理捕获到的无线凭据
+- [x] **Deauth Detector** - passive deauth/disassoc monitoring with BSSID, client, RSSI, and reason filters; async alerts; live logs
+- [x] **Rogue AP Detector** - compares nearby visible APs and OUI rules to flag duplicate SSIDs, security downgrades, and suspected impersonation
+- [x] **Client/Presence Detector** - passive probe/assoc/reassoc/auth monitoring with optional active deauth-trigger mode
+- [x] **Tracker Detector** - Find My / AirTag-style advertisement detection with repeated sightings
+- [ ] **Karma/MANA Detector**
+- [ ] **Unauthorized RFID Reader Detector**
+- [ ] **Jam Detector** (detection only - see [FEATURES.md](./FEATURES.md#explicitly-out-of-scope))
 
 </details>
 
-<details open>
-<summary><strong>存储、固件与辅助工具</strong></summary>
+<details>
+<summary><strong>BLE</strong></summary>
 
-- [x] **板载存储管理 (Mass Storage)** - 浏览、删除 ESP32 Flash 中的文件，支持 USB MSC 模式
-- [x] **手机端固件烧录 (ESP32 Flasher)** - 直接在手机上通过 USB-OTG 烧录 NRSuite 固件，无需电脑
-- [x] **通用串口监视器 (Serial Monitor)** - 支持连接任意 ESP32 或 USB-UART 设备进行原生串口监视与调试
-- [x] **离线 MAC 厂商查询** - 内置离线 OUI 数据库查询 MAC 所属硬件厂商
-- [x] **固件设备持久标识** - 支持读取并显示设备的 NVS 标识（`NRxxxxxxx`），方便重连识别
+- [x] **BLE Scanner** - device discovery with names, RSSI, manufacturer data, service UUIDs, and service badges
+- [x] **BLE GATT Profile** - read-only service/characteristic enumeration with integrated BLE target scanner
+- [x] **BLE HID** - Bluetooth LE keyboard/mouse HID and DuckyScript payloads
+- [ ] **FastPair Model Identification** - map FastPair model IDs to known device names/types
+
+</details>
+
+<details>
+<summary><strong>HID / BadUSB</strong></summary>
+
+- [x] **Ducky Script Editor** - create, import, and export DuckyScript payloads
+- [x] **BadUSB** - HID injection via USB
+- [x] **Multi-device USB sessions** - connect and use multiple USB serial devices independently, with per-device permissions and connection state
+- [x] **BadUSB device picker** - choose the target USB device without interrupting other connections
+
+</details>
+
+<details>
+<summary><strong>Credentials</strong></summary>
+
+- [x] **WPA Handshake Capture/Crack** - capture and offline dictionary cracking
+- [x] **Credential Manager** - local storage and management of captured credentials
+
+</details>
+
+<details>
+<summary><strong>Storage, Firmware & Tools</strong></summary>
+
+- [x] **Mass Storage** - list/delete files on ESP32 flash and enter USB MSC mode
+- [x] **ESP32 Flasher** - flash NRSuite firmware directly from the app over USB
+- [x] **Serial Monitor** - raw USB serial monitor for any ESP32 or USB-UART firmware
+- [x] **MAC Lookup** - offline OUI/vendor lookup for any MAC address
+- [x] **Persistent firmware device ID** - `NRxxxxxxx` NVS ID shown in the app so devices remain identifiable across reconnects
+
+</details>
+
+### Visible but not yet functional
+
+The following modules appear in the app as disabled ("Unavailable") placeholder cards, reserving their place in the catalog ahead of firmware support:
+
+- [ ] **IR** (infrared transmit/receive)
+- [ ] **RF** (Sub-GHz)
+- [ ] **RFID/NFC**
+
+### Planned
+
+For a full status and roadmap breakdown across every phase, see [FEATURES.md](./FEATURES.md).
+
+<details>
+<summary><strong>Mesh (ESP-NOW) - Planned</strong></summary>
+
+- [ ] **Shared Group Key Provisioning**
+- [ ] **Dynamic Master Election**
+- [ ] **Client Idle/Standby Mode**
+- [ ] **Encrypted ESP-NOW Transport**
+- [ ] **Activation Handshake**
+- [ ] **Session Locking**
+- [ ] **Heartbeat/Auto-Timeout**
+- [ ] **Distributed Sensor Reporting**
+- [ ] **Triangulation Engine**
+
+</details>
+
+<details>
+<summary><strong>Mesh Chat - Planned</strong></summary>
+
+- [ ] **ESP-NOW Chat Transport**
+- [ ] **Multi-hop Relay**
+- [ ] **Store-and-Forward**
+- [ ] **Message Fragmentation**
+- [ ] **Sender Aliases**
+- [ ] **Quick/Canned Messages**
+- [ ] **Chat/Sensor Traffic Prioritization**
+
+</details>
+
+<details>
+<summary><strong>Remote Camera Node - Planned</strong></summary>
+
+- [ ] **Live Feed Streaming**
+- [ ] **Snapshot-on-Trigger**
+- [ ] **Motion Detection**
+- [ ] **Deep-sleep/Low-power Mode**
+- [ ] **SD Card Buffering**
+- [ ] **Mesh Manager Integration**
+
+</details>
+
+<details>
+<summary><strong>Peripheral Radios - Planned</strong></summary>
+
+- [ ] **IR** - Capture/Replay, Universal Remote DB, TV-off brute-force
+- [ ] **Sub-GHz (CC1101)** - Scanner, Capture/Replay, Protocol Decoder
+- [ ] **nRF24** - RC/Device Scanner, MouseJack-style analysis, Packet Sniffer
+- [ ] **RFID/NFC** - Read, Emulate, Write/Clone, Access Control Analyzer
+- [ ] **LoRa** - long-range relay node support
 
 </details>
 
 ---
 
-## 界面预览
+## Installation
 
-| 首页仪表盘 | 功能模块目录 | 运行日志 |
-|---|---|---|
-| ![首页](screenshots/home.jpg) | ![功能目录](screenshots/module-catalog.jpg) | ![日志](screenshots/logs-screen.jpg) |
+### Option A - Prebuilt APK (recommended for beta)
 
-| 设备连接管理 | Wi-Fi 扫描 | 数据包嗅探器 |
-|---|---|---|
-| ![设备管理](screenshots/device-manager.jpg) | ![WiFi扫描](screenshots/wifi-scan.jpg) | ![嗅探器](screenshots/packet-sniffer.jpg) |
+1. Download the latest `nrsuite-vX.X.X-beta.apk` from [Releases](../../releases).
+2. Verify the SHA256 checksum listed in the release notes before installing:
+   ```sh
+   # Linux / macOS
+   sha256sum nrsuite-vX.X.X-beta.apk
 
-| Deauth 攻击检测 | 伪造 AP 检测器 | BLE 扫描器 |
-|---|---|---|
-| ![Deauth检测](screenshots/deauth-detector.jpg) | ![Rogue AP](screenshots/rogue-ap.jpg) | ![BLE扫描](screenshots/ble-scanner.jpg) |
+   # Windows (PowerShell)
+   certutil -hashfile nrsuite-vX.X.X-beta.apk SHA256
+   ```
+3. Enable **Install from unknown sources** on your device if needed - Settings → Security.
+4. Install the APK.
 
-| BadUSB 注入 | 凭据管理器 | 固件烧录器 |
-|---|---|---|
-| ![BadUSB](screenshots/badusb.jpg) | ![凭据管理](screenshots/credential-manager.jpg) | ![固件烧录](screenshots/firmware-flasher.jpg) |
-
----
-
-## 安装与快速上手
-
-### 1. 下载 APK
-进入本仓库的 [Releases 页面](../../releases) 下载最新版本的 `nrsuite-cn-vX.X.X.apk` 并安装到手机。
-
-### 2. 硬件准备与连接
-1. 准备一块兼容的 ESP32 开发板（推荐 ESP32-S2 或 ESP32-S3 等支持原生 USB 的型号）。
-2. 将 NRSuite 固件烧录至 ESP32（可以使用本 App 内置的**固件烧录器**直接刷入，或在电脑上使用 PlatformIO 烧录）。
-3. 使用 USB-OTG 转接线/线缆将 ESP32 连接到手机。
-4. 打开 NRSuite-Android-CN，授予 USB 权限后即可开始使用。
-
-### 3. 环境与系统要求
-- **Android 系统版本**：Android 8.0 (API 26) 及以上
-- **硬件支持**：手机必须支持 USB-OTG（USB Host 模式）
-
----
-
-## 从源码编译
+### Option B - Build from source
 
 ```sh
-git clone https://github.com/AMM2034567/NRSuite-Android-CN.git
-cd NRSuite-Android-CN
+git clone https://github.com/7wp81x/nrsuite-android.git
+cd nrsuite-android
 ./gradlew assembleDebug
 ```
 
-编译输出目录：`app/build/outputs/apk/debug/app-debug.apk`
+Output: `app/build/outputs/apk/debug/app-debug.apk`
+
+You can also open the project in Android Studio and sync Gradle - see [Building from Source](#building-from-source) for prerequisites.
+
+### Flashing the ESP32
+
+You also need an ESP32 dev board flashed with NRSuite firmware. Flash it directly from inside the app using the built-in flasher, or manually via PlatformIO - see [nrsuite-firmware](https://github.com/7wp81x/nrsuite-firmware) for supported boards and instructions.
 
 ---
 
-## 开源许可证
+## Getting Started
 
-本项目遵循与原项目完全相同的 [MIT License](./LICENSE)。
+1. Flash NRSuite firmware to your ESP32 - use the in-app flasher, or PlatformIO from [nrsuite-firmware](https://github.com/7wp81x/nrsuite-firmware).
+2. Connect your ESP32 to your phone via a USB-OTG cable.
+3. Open NRSuite - the app auto-detects the connected device.
+4. Grant USB host permission when prompted (one-time per device).
+5. Select a module from the home screen and start testing.
 
-本项目仅供学习、测试及已获得授权的安全评估使用。开发者不对任何因不当使用造成的损失承担责任。详见 [LEGAL.md](./LEGAL.md)。
+---
+
+## Requirements
+
+### Android device
+
+- Android 8.0 (API 26) or higher
+- USB-OTG support (required - the app uses USB host mode to communicate with the ESP32)
+- USB-OTG cable or adapter
+
+### Hardware
+
+- Any ESP32 development board flashed with NRSuite firmware
+- See [nrsuite-firmware](https://github.com/7wp81x/nrsuite-firmware) for supported boards and flashing instructions
+
+---
+
+## Building from Source
+
+### Prerequisites
+
+- Android Studio Ladybug or newer (latest stable recommended)
+- JDK 11 (bundled with Android Studio)
+- Android SDK with API 36 (`compileSdk`) and API 26 (`minSdk`) installed
+
+### Steps
+
+```sh
+git clone https://github.com/7wp81x/nrsuite-android.git
+cd nrsuite-android
+./gradlew assembleDebug
+```
+
+Signed release APKs are published by the maintainer. For testing your own changes, the debug build is sufficient.
+
+### Project Structure
+
+```
+app/src/main/java/com/swp81x/nrsuite/
+  core/
+    ble/               # BLE scan/profile/tracker models and scan limits
+    credentials/       # Credential storage models and store
+    defense/           # Rogue AP / client-presence / hidden-AP / deauth-alert models, OUI heuristics
+    eapol/             # EAPOL frame parser (for WPA handshake capture)
+    flasher/           # ESP32 in-app flasher (SLIP codec, USB serial transport)
+    history/           # Session history entries
+    log/               # Log entry model (Logs screen, live module logs)
+    oui/               # Offline OUI/vendor database (MAC Lookup, defense modules)
+    pcap/              # Pcap file reader and writer
+    protocol/          # Frame codec and NrJson wire protocol (shared with firmware)
+    session/           # Connection state and NrSession manager
+    sniff/             # Sniff request model
+    storage/           # Mass storage models (ESP32 flash file browser)
+    usb/               # USB serial transport, device catalog, NrTransport
+    wifi/              # Pcap SSID parser
+    wpa/               # WPA handshake parser, verifier, and cracker
+  service/
+    NrSuiteForegroundService.kt   # Foreground service keeping USB session alive
+  ui/
+    components/       # Reusable Compose components
+    theme/            # Color, typography, theme
+    NRSuiteApp.kt     # App entry point and module catalog
+    NRSuiteContent.kt # Shell navigation, permission flow, screen dispatch
+    HomeScreen.kt     # Dashboard, categories, module list
+    LogsScreen.kt     # Logs and session history
+    DeviceScreen.kt   # USB device selection and connection state
+    SettingsScreen.kt # Settings and firmware flasher
+    ModuleAvailability.kt # Shared "module unavailable on this board" banner/FAB gating
+    RogueApScreen.kt / DeauthDetectorScreen.kt / ClientPresenceScreen.kt /
+    HiddenApScreen.kt / TrackerDetectorScreen.kt   # Defense modules
+    BleScannerScreen.kt / BleProfileScreen.kt / BleScreen.kt   # BLE recon + BLE HID
+    MacLookupScreen.kt / SerialMonitorScreen.kt    # Tools / firmware utilities
+    *Screen.kt        # Remaining feature module screens
+  MainActivity.kt
+  MainViewModel.kt               # Application-scoped controller
+  MainViewModelUsb.kt            # USB discovery, permission, connection lifecycle
+  MainViewModelFlasher.kt        # Firmware image selection and flashing
+  MainViewModelWifi.kt           # Scan, deauth, beacon, sniff
+  MainViewModelPortal.kt         # Captive Portal and Evil Twin
+  MainViewModelBle.kt            # BLE HID
+  MainViewModelBleScanner.kt     # BLE device discovery
+  MainViewModelBleProfile.kt     # BLE GATT enumeration
+  MainViewModelStorage.kt        # Mass storage, BadUSB, DuckyScript
+  MainViewModelCredentials.kt    # Credential sessions and WPA cracking
+  MainViewModelDefense.kt        # Shared defense-module plumbing
+  MainViewModelRogueAp.kt        # Rogue AP Detector
+  MainViewModelHiddenAp.kt       # Hidden AP Revealer
+  MainViewModelClientPresence.kt # Client Detector
+  MainViewModelTracker.kt        # Tracker Detector
+  MainViewModelOui.kt            # MAC Lookup
+  MainViewModelSerialMonitor.kt  # Serial Monitor
+  NrSuiteApplication.kt
+```
+
+---
+
+## Wire Protocol
+
+NRSuite uses a custom framing protocol (`FrameCodec` / `NrJson`) over USB serial between the app and the ESP32 firmware. The protocol spec is versioned separately in [nrsuite-protocol](https://github.com/7wp81x/nrsuite-protocol) so the app and firmware can evolve independently without silent breaking changes.
+
+> If your contribution touches any app ↔ firmware communication, **update the protocol spec first** and reference the spec version in your PR.
+
+---
+
+## Screenshots
+
+| Home | Modules | Logs |
+|---|---|---|
+| ![Home](screenshots/home.jpg) | ![Modules](screenshots/module-catalog.jpg) | ![Logs](screenshots/logs-screen.jpg) |
+
+| Device Manager | WiFi Scan | Packet Sniffer |
+|---|---|---|
+| ![Device Manager](screenshots/device-manager.jpg) | ![WiFi Scan](screenshots/wifi-scan.jpg) | ![Packet Sniffer](screenshots/packet-sniffer.jpg) |
+
+| Deauth Detector | Rogue AP Detector | BLE Scanner |
+|---|---|---|
+| ![Deauth Detector](screenshots/deauth-detector.jpg) | ![Rogue AP Detector](screenshots/rogue-ap.jpg) | ![BLE Scanner](screenshots/ble-scanner.jpg) |
+
+| BadUSB | Credential Manager | Firmware Flasher |
+|---|---|---|
+| ![BadUSB](screenshots/badusb.jpg) | ![Credential Manager](screenshots/credential-manager.jpg) | ![Firmware Flasher](screenshots/firmware-flasher.jpg) |
+
+More screenshots in [./screenshots/](./screenshots/).
+
+---
+
+## Hardware Images
+
+| USB hub + ESP32-S2 | ESP32-S3 SuperMini |
+|---|---|
+| ![USB hub and ESP32-S2 hardware setup](screenshots/hardware-setup-usb-hub-esp32-s2.jpg) | ![ESP32-S3 SuperMini hardware setup](screenshots/hardware-setup-esp32-s3-supermini.jpg) |
+
+---
+
+## Contributing
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for the full guide: branching model, PR process, testing expectations, and legal/ethical scope boundaries.
+
+**Short version:**
+
+- Open an issue before starting any non-trivial feature.
+- Branch from `develop`, not `main`.
+- One feature or fix per PR.
+- Test on real hardware for anything touching USB serial, the flasher, or module screens.
+- Jamming features (RF/Wi-Fi/BLE denial-of-service transmission) will not be merged - see [CONTRIBUTING.md](./CONTRIBUTING.md).
+
+---
+
+## Related Repos
+
+| Repo | Contents |
+|---|---|
+| [nrsuite-firmware](https://github.com/7wp81x/nrsuite-firmware) | ESP32 firmware (PlatformIO / ESP-IDF) |
+| [nrsuite-protocol](https://github.com/7wp81x/nrsuite-protocol) | Wire protocol specification |
+
+---
+
+## Versioning & Compatibility
+
+| App version | Firmware version | Protocol spec |
+|---|---|---|
+| v1.0.0-beta.2 | v1.0.0-beta.2 | v1.0 |
+
+This table is updated with each release. Always check compatibility before mixing app and firmware versions.
+
+---
+
+## Security
+
+If you find a vulnerability in NRSuite itself (for example, a flaw in the mesh encryption scheme, credential storage, or the USB flasher), please report it privately rather than opening a public issue. See [SECURITY.md](./SECURITY.md).
+
+---
+
+## License
+
+[MIT](./LICENSE)
+
+This license covers redistribution of the code. It does not authorize use of the tool against systems you do not own or lack explicit permission to test. See [LEGAL.md](./LEGAL.md).
+
+---
+
+## Disclaimer
+
+NRSuite is a tool for security research and authorized red-team operations, intended for legal and authorized security testing purposes only. Use of this software for any malicious or unauthorized activity is strictly prohibited. By downloading, installing, or using NRSuite, you agree to comply with all applicable laws and regulations. This software is provided free of charge; the developers assume no liability for any misuse. Use at your own risk. See [LEGAL.md](./LEGAL.md) for full terms.
