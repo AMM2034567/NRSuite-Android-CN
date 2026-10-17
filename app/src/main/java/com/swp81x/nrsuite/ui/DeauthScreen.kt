@@ -140,12 +140,12 @@ fun DeauthScreen(
                         running -> Unit
                         !validBssid -> Toast.makeText(
                             context,
-                            "Select a valid target BSSID first.",
+                            "请先选择有效的目标 BSSID。",
                             Toast.LENGTH_SHORT,
                         ).show()
                         !validClient -> Toast.makeText(
                             context,
-                            "Enter a valid client MAC or use FF:FF:FF:FF:FF:FF.",
+                            "请输入有效的客户端 MAC 地址或使用 FF:FF:FF:FF:FF:FF。",
                             Toast.LENGTH_SHORT,
                         ).show()
                         else -> confirmStart = true
@@ -164,7 +164,7 @@ fun DeauthScreen(
                         color = MaterialTheme.colorScheme.onPrimary,
                     )
                 } else {
-                    Icon(Icons.Default.PlayArrow, contentDescription = "Send deauth")
+                    Icon(Icons.Default.PlayArrow, contentDescription = "发送 Deauth 攻击")
                 }
             }
         }
@@ -173,14 +173,14 @@ fun DeauthScreen(
     if (confirmStart) {
         AlertDialog(
             onDismissRequest = { confirmStart = false },
-            title = { Text("Send deauth frames?") },
+            title = { Text("发送 Deauth 解除认证数据帧？") },
             text = {
                 Text(
-                    "Target: $bssid\n" +
-                        "Client: $client\n" +
-                        "Channel: $channel\n" +
-                        "Count: ${if (count <= 0) "firmware default" else count}\n\n" +
-                        "This disrupts connectivity for affected clients. Only use this on networks you own or are authorized to test."
+                    "目标 AP: $bssid\n" +
+                        "客户端: $client\n" +
+                        "信道: $channel\n" +
+                        "发包数量: ${if (count <= 0) "固件默认" else count}\n\n" +
+                        "此操作将中断受影响客户端的无线网络连接。仅限在您拥有或获得授权测试的网络中执行。"
                 )
             },
             confirmButton = {
@@ -190,12 +190,12 @@ fun DeauthScreen(
                         onStart(bssid.trim(), channel, client.trim(), count, duration, intervalMs)
                     },
                 ) {
-                    Text("Send")
+                    Text("发送")
                 }
             },
             dismissButton = {
                 TextButton(onClick = { confirmStart = false }) {
-                    Text("Cancel")
+                    Text("取消")
                 }
             },
         )
@@ -247,15 +247,15 @@ private fun ConfigZone(
                 Spacer(Modifier.width(10.dp))
                 Column(Modifier.weight(1f)) {
                     Text(
-                        text = "Deauth configuration",
+                        text = "Deauth 攻击配置",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
                     )
                     Text(
                         text = when {
-                            running -> "Burst running"
-                            sentFrames > 0 -> "$sentFrames frame(s) sent"
-                            else -> "Targeted deauthentication burst"
+                            running -> "正在发送攻击包"
+                            sentFrames > 0 -> "已发送 $sentFrames 帧"
+                            else -> "针对指定目标的 Deauth 攻击"
                         },
                         style = MaterialTheme.typography.bodySmall,
                         color = NrOnSurfaceVariant,
@@ -264,7 +264,7 @@ private fun ConfigZone(
                 IconButton(onClick = onToggle) {
                     Icon(
                         imageVector = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                        contentDescription = if (expanded) "Collapse" else "Expand",
+                        contentDescription = if (expanded) "折叠" else "展开",
                     )
                 }
             }
@@ -276,17 +276,17 @@ private fun ConfigZone(
                         onClick = onScanWifi,
                         enabled = connected && !scanning && !running,
                     ) {
-                        Text(if (scanning) "Scanning..." else "Scan WiFi for targets")
+                        Text(if (scanning) "正在扫描..." else "扫描周围 WiFi 目标")
                     }
 
                     if (networks.isNotEmpty()) {
                         Spacer(Modifier.height(6.dp))
                         Text(
-                            text = "Select target",
+                            text = "选择攻击目标",
                             style = MaterialTheme.typography.labelLarge,
                         )
                         networks.forEach { network ->
-                            val ssid = network.optString("ssid").ifBlank { "(hidden)" }
+                            val ssid = network.optString("ssid").ifBlank { "(隐藏)" }
                             val bssidValue = network.optString("bssid")
                             val channelValue = network.optInt("channel", 1)
                             NetworkTargetRow(
@@ -316,35 +316,35 @@ private fun ConfigZone(
                         onValueChange = onClientChange,
                         modifier = Modifier.fillMaxWidth(),
                         enabled = !running,
-                        label = { Text("Client MAC") },
+                        label = { Text("客户端 MAC") },
                         isError = !validClient,
                         singleLine = true,
                     )
 
                     Spacer(Modifier.height(10.dp))
                     Text(
-                        text = "Channel: $channel (auto from selected target)",
+                        text = "信道: $channel (根据所选目标自动设置)",
                         style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
                         color = NrOnSurfaceVariant,
                     )
                     Spacer(Modifier.height(8.dp))
                     NumberStepper(
-                        label = "Count",
-                        valueText = if (count <= 0) "default" else count.toString(),
+                        label = "攻击次数",
+                        valueText = if (count <= 0) "默认" else count.toString(),
                         enabled = !running,
                         onDecrease = { onCountChange(count - 5) },
                         onIncrease = { onCountChange(count + 5) },
                     )
                     NumberStepper(
-                        label = "Duration",
-                        valueText = if (duration <= 0) "default" else "${duration}s",
+                        label = "持续时间",
+                        valueText = if (duration <= 0) "默认" else "${duration} 秒",
                         enabled = !running,
                         onDecrease = { onDurationChange(duration - 5) },
                         onIncrease = { onDurationChange(duration + 5) },
                     )
                     NumberStepper(
-                        label = "Interval",
-                        valueText = "$intervalMs ms",
+                        label = "发送间隔",
+                        valueText = "$intervalMs 毫秒",
                         enabled = !running,
                         onDecrease = { onIntervalChange(intervalMs - 10) },
                         onIncrease = { onIntervalChange(intervalMs + 10) },
@@ -352,7 +352,7 @@ private fun ConfigZone(
 
                     Spacer(Modifier.height(8.dp))
                     Text(
-                        text = "Count 0 uses the firmware default. Duration is passed through for parity with the Termux CLI.",
+                        text = "次数设为 0 时使用固件默认值。持续时间参数用于保持与 Termux CLI 一致。",
                         style = MaterialTheme.typography.bodySmall,
                         color = NrOnSurfaceVariant,
                     )
@@ -360,7 +360,7 @@ private fun ConfigZone(
                     if (!connected) {
                         Spacer(Modifier.height(10.dp))
                         Text(
-                            text = "Connect a device before starting deauth.",
+                            text = "启动 Deauth 攻击前请先连接设备。",
                             style = MaterialTheme.typography.bodySmall,
                             color = StatusAmber,
                         )
@@ -391,7 +391,7 @@ private fun NumberStepper(
         IconButton(onClick = onDecrease, enabled = enabled) {
             Icon(
                 imageVector = Icons.Default.Remove,
-                contentDescription = "Decrease $label",
+                contentDescription = "减小 $label",
             )
         }
         Text(
@@ -402,7 +402,7 @@ private fun NumberStepper(
         IconButton(onClick = onIncrease, enabled = enabled) {
             Icon(
                 imageVector = Icons.Default.Add,
-                contentDescription = "Increase $label",
+                contentDescription = "增加 $label",
             )
         }
     }
@@ -429,17 +429,17 @@ private fun ResultZone(
                 .padding(16.dp),
         ) {
             Text(
-                text = "Deauth status",
+                text = "Deauth 攻击状态",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
             )
             Spacer(Modifier.height(8.dp))
             StatusIndicator(
                 label = when {
-                    !connected -> "No device connected"
-                    running -> "Sending burst"
-                    sentFrames > 0 -> "Completed"
-                    else -> "Ready"
+                    !connected -> "未连接设备"
+                    running -> "正在发送攻击帧"
+                    sentFrames > 0 -> "已完成"
+                    else -> "就绪"
                 },
                 color = when {
                     !connected -> StatusNeutral
@@ -451,7 +451,7 @@ private fun ResultZone(
 
             Spacer(Modifier.height(16.dp))
             Text(
-                text = "Frames sent",
+                text = "已发送帧数",
                 style = MaterialTheme.typography.labelLarge,
                 color = NrOnSurfaceVariant,
             )
@@ -464,14 +464,14 @@ private fun ResultZone(
             if (targetBssid.isNotBlank()) {
                 Spacer(Modifier.height(12.dp))
                 Text(
-                    text = "Target: $targetBssid",
+                    text = "目标: $targetBssid",
                     style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
                     color = NrOnSurfaceVariant,
                 )
             }
             if (activeChannel > 0) {
                 Text(
-                    text = "Channel: $activeChannel",
+                    text = "信道: $activeChannel",
                     style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
                     color = NrOnSurfaceVariant,
                 )
@@ -480,7 +480,7 @@ private fun ResultZone(
             if (!connected) {
                 Spacer(Modifier.height(24.dp))
                 Text(
-                    text = "Connect a device before starting deauth.",
+                    text = "启动 Deauth 攻击前请先连接设备。",
                     style = MaterialTheme.typography.bodySmall,
                     color = NrOnSurfaceVariant,
                 )

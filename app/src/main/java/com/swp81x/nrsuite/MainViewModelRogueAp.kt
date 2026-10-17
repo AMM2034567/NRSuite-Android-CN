@@ -110,17 +110,17 @@ internal fun MainViewModel.deleteOuiRuleImpl(id: String) {
 internal fun MainViewModel.startRogueApDetectorImpl() {
     val activeSession = session
     if (activeSession == null) {
-        appendLog("Connect to a device before starting the Rogue AP detector.")
+        appendLog("启动流氓 AP 检测器前请先连接设备。")
         return
     }
     if (_rogueApRunning.value) return
-    if (!ensureRadioIdle("Rogue AP Detector")) return
+    if (!ensureRadioIdle("流氓 AP 检测器")) return
 
     _rogueApRunning.value = true
     _rogueApAlerts.value = emptyList()
     updateForegroundService()
-    appendLog("Rogue AP detector started; automatic nearby comparison every ${ROGUE_AP_SCAN_INTERVAL_MS / 1000}s.")
-    addHistory("rogue_ap", "Rogue AP detector started", HistoryLevel.SUCCESS)
+    appendLog("流氓 AP 检测器已启动；每隔 ${ROGUE_AP_SCAN_INTERVAL_MS / 1000} 秒自动比对附近热点。")
+    addHistory("rogue_ap", "流氓 AP 检测器已启动", HistoryLevel.SUCCESS)
 
     rogueApScanJob?.cancel()
     rogueApScanJob = scope.launch {
@@ -138,8 +138,8 @@ internal fun MainViewModel.stopRogueApDetectorImpl() {
     rogueApScanJob = null
     _rogueApScanning.value = false
     updateForegroundService()
-    appendLog("Rogue AP detector stopped.")
-    addHistory("rogue_ap", "Rogue AP detector stopped", HistoryLevel.INFO)
+    appendLog("流氓 AP 检测器已停止。")
+    addHistory("rogue_ap", "流氓 AP 检测器已停止", HistoryLevel.INFO)
 }
 
 private suspend fun MainViewModel.performRogueApScan(activeSession: com.swp81x.nrsuite.core.session.NrSession) {
@@ -151,7 +151,7 @@ private suspend fun MainViewModel.performRogueApScan(activeSession: com.swp81x.n
     _rogueApLastScanAt.value = timeHmNow()
 
     if (count == null || count < 0) {
-        appendLog("Rogue AP scan failed or timed out.")
+        appendLog("流氓 AP 扫描失败或超时。")
         return
     }
 
@@ -191,14 +191,20 @@ private suspend fun MainViewModel.performRogueApScan(activeSession: com.swp81x.n
     newAlerts
         .filter { "${it.bssid}|${it.category}" !in existingKeys }
         .forEach { alert ->
+            val categoryLabel = when (alert.category) {
+                RogueApCategory.EVIL_TWIN -> "恶魔双胞胎"
+                RogueApCategory.FAKE_PORTAL -> "虚假门户"
+                RogueApCategory.SECURITY_DOWNGRADE -> "安全协议降级"
+                RogueApCategory.UNKNOWN_ROGUE -> "未知伪造 AP"
+            }
             appendLog(
-                "Rogue AP detected: ${alert.category.name} ${alert.ssid} " +
-                    "(${alert.bssid}) ch ${alert.channel} ${alert.rssi} dBm"
+                "检测到流氓 AP：$categoryLabel ${alert.ssid} " +
+                    "(${alert.bssid}) 信道 ${alert.channel} ${alert.rssi} dBm"
             )
         }
     addHistory(
         "rogue_ap",
-        "${newAlerts.size} suspicious AP observation(s)",
+        "${newAlerts.size} 个可疑 AP 观察记录",
         HistoryLevel.ERROR,
     )
 }
@@ -226,7 +232,7 @@ private fun MainViewModel.classifyNearbyDuplicates(
             if (action == OuiRuleAction.BLACKLIST) {
                 val ruleLabel = ouiRule.label.takeIf { it.isNotBlank() }
                     ?: ouiRule.ouiPrefix
-                reasons += "Blacklisted OUI: $ruleLabel"
+                reasons += "黑名单 OUI：$ruleLabel"
             }
 
             if (group.size >= 2) {
@@ -236,7 +242,7 @@ private fun MainViewModel.classifyNearbyDuplicates(
                     thisSecurity < highestSecurity &&
                     action != OuiRuleAction.WHITELIST
                 ) {
-                    reasons += "Lower security than other APs advertising SSID '${ap.ssid}'"
+                    reasons += "安全配置低于广播相同 SSID '${ap.ssid}' 的其他热点"
                 }
 
                 val prefixes = group.mapNotNull { ouiPrefixOf(it.bssid) }.distinct()
@@ -247,7 +253,7 @@ private fun MainViewModel.classifyNearbyDuplicates(
                     }
                     val anyProtected = group.any { isProtected(it) }
                     if (!thisProtected && (anotherProtected || !anyProtected)) {
-                        reasons += "Different OUI from other APs advertising SSID '${ap.ssid}'"
+                        reasons += "OUI 厂商与广播相同 SSID '${ap.ssid}' 的其他热点不同"
                     }
                 }
             }
@@ -255,9 +261,9 @@ private fun MainViewModel.classifyNearbyDuplicates(
             if (reasons.isEmpty()) return@forEach
 
             val category = when {
-                reasons.any { it.startsWith("Lower security") } ->
+                reasons.any { it.startsWith("Lower security") || it.startsWith("安全配置低于") } ->
                     RogueApCategory.SECURITY_DOWNGRADE
-                reasons.any { it.startsWith("Different OUI") } -> RogueApCategory.EVIL_TWIN
+                reasons.any { it.startsWith("Different OUI") || it.startsWith("OUI 厂商与") } -> RogueApCategory.EVIL_TWIN
                 else -> RogueApCategory.UNKNOWN_ROGUE
             }
             val confidence = when {

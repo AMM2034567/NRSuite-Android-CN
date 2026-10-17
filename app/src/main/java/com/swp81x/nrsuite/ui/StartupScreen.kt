@@ -40,7 +40,7 @@ fun StartupScreen() {
             )
             Spacer(Modifier.height(6.dp))
             Text(
-                text = "Wireless research toolkit",
+                text = "无线安全研究工具箱",
                 style = MaterialTheme.typography.bodyMedium,
                 color = NrOnSurfaceVariant,
             )

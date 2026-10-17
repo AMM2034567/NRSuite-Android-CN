@@ -9,7 +9,7 @@ fun SavedScriptPicker(
     selectedName: String?,
     onSelect: (String) -> Unit,
     enabled: Boolean = true,
-    label: String = "Saved scripts",
+    label: String = "已保存脚本",
     modifier: Modifier = Modifier,
 ) {
     SavedItemDropdown(

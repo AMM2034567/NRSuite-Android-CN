@@ -24,7 +24,7 @@ internal fun MainViewModel.setBadUsbPayloadImpl(uri: Uri, name: String?) {
     _badUsbPayloadName.value = name ?: uri.lastPathSegment ?: "payload.txt"
     _badUsbProgress.value = 0
     _badUsbArmedFingerprints.value = emptySet()
-    appendLog("BadUSB payload selected: ${_badUsbPayloadName.value}")
+    appendLog("已选择 BadUSB 有效载荷：${_badUsbPayloadName.value}")
 }
 
 internal fun MainViewModel.clearBadUsbPayloadImpl() {
@@ -33,7 +33,7 @@ internal fun MainViewModel.clearBadUsbPayloadImpl() {
     _badUsbSavedScriptText.value = null
     _badUsbProgress.value = 0
     _badUsbArmedFingerprints.value = emptySet()
-    appendLog("BadUSB payload cleared.")
+    appendLog("已清除 BadUSB 有效载荷。")
 }
 
 internal fun MainViewModel.saveDuckyScriptImpl(name: String, script: String) {
@@ -41,13 +41,13 @@ internal fun MainViewModel.saveDuckyScriptImpl(name: String, script: String) {
     if (cleanName.isBlank()) return
     _duckyScriptMap.update { it + (cleanName to script) }
     persistDuckyScriptsImpl()
-    appendLog("Saved DuckyScript '$cleanName'.")
+    appendLog("已保存 DuckyScript 脚本 '$cleanName'。")
 }
 
 internal fun MainViewModel.deleteDuckyScriptImpl(name: String) {
     _duckyScriptMap.update { it - name }
     persistDuckyScriptsImpl()
-    appendLog("Deleted DuckyScript '$name'.")
+    appendLog("已删除 DuckyScript 脚本 '$name'。")
 }
 
 internal fun MainViewModel.useBadUsbSavedScriptImpl(name: String) {
@@ -56,7 +56,7 @@ internal fun MainViewModel.useBadUsbSavedScriptImpl(name: String) {
     _badUsbPayloadName.value = name
     _badUsbSavedScriptText.value = script
     _badUsbArmedFingerprints.value = emptySet()
-    appendLog("BadUSB script selected: $name")
+    appendLog("已选择 BadUSB 脚本：$name")
 }
 
 internal fun MainViewModel.useBleSavedScriptImpl(name: String) {
@@ -64,7 +64,7 @@ internal fun MainViewModel.useBleSavedScriptImpl(name: String) {
     _blePayloadUri.value = null
     _blePayloadName.value = name
     _bleSavedScriptText.value = script
-    appendLog("BLE script selected: $name")
+    appendLog("已选择 BLE 脚本：$name")
 }
 
 internal fun MainViewModel.loadDuckyScriptsImpl() {
@@ -87,7 +87,7 @@ internal fun MainViewModel.selectBadUsbTargetImpl(device: UsbDevice) {
     val entry = _devices.value.firstOrNull { it.device.deviceId == device.deviceId }
         ?: UsbSerialDeviceCatalog.find(usbManager, device)
     if (entry == null) {
-        appendLog("No supported USB serial driver for ${device.deviceName}.")
+        appendLog("未找到适用于 ${device.deviceName} 的支持的 USB 串口驱动。")
         return
     }
     val previousDeviceId = _badUsbTargetDevice.value?.device?.deviceId
@@ -95,34 +95,34 @@ internal fun MainViewModel.selectBadUsbTargetImpl(device: UsbDevice) {
     if (previousDeviceId != entry.device.deviceId) {
         _badUsbProgress.value = 0
     }
-    appendLog("BadUSB target: ${entry.displayName}")
+    appendLog("BadUSB 目标：${entry.displayName}")
 }
 
 internal fun MainViewModel.armBadUsbImpl(mscMode: Boolean) {
     val targetEntry = _badUsbTargetDevice.value
     if (targetEntry == null) {
-        appendLog("Choose a BadUSB target device first.")
+        appendLog("请先选择 BadUSB 目标设备。")
         return
     }
 
     val targetFingerprint = deviceFingerprintImpl(targetEntry.device)
     val targetSession = deviceSessions[targetFingerprint]?.session
     if (targetSession == null) {
-        appendLog("Connect the selected BadUSB target first.")
+        appendLog("请先连接所选的 BadUSB 目标设备。")
         return
     }
 
     val targetState = targetSession.state.value as? ConnectionState.Connected
     if (targetState == null) {
-        appendLog("The selected BadUSB target is not connected.")
+        appendLog("所选的 BadUSB 目标设备未连接。")
         return
     }
     if (targetState.chip !in setOf("ESP32-S2", "ESP32-S3")) {
-        appendLog("BadUSB requires ESP32-S2 or ESP32-S3 (selected chip: ${targetState.chip ?: "unknown"}).")
+        appendLog("BadUSB 功能需要 ESP32-S2 或 ESP32-S3（当前芯片：${targetState.chip ?: "未知"}）。")
         return
     }
     if (targetState.features.isNotEmpty() && "badusb" !in targetState.features) {
-        appendLog("The selected firmware does not advertise BadUSB support.")
+        appendLog("所选固件不支持 BadUSB 功能。")
         return
     }
     if (_badUsbUploading.value) return
@@ -130,7 +130,7 @@ internal fun MainViewModel.armBadUsbImpl(mscMode: Boolean) {
     val payloadUri = _badUsbPayloadUri.value
     val savedScript = _badUsbSavedScriptText.value
     if (payloadUri == null && savedScript == null) {
-        appendLog("Choose a DuckyScript payload first.")
+        appendLog("请先选择 DuckyScript 有效载荷。")
         return
     }
 
@@ -149,11 +149,11 @@ internal fun MainViewModel.armBadUsbImpl(mscMode: Boolean) {
                     }.getOrNull()
                 }
             if (bytes == null) {
-                appendLog("Could not read the selected BadUSB payload.")
+                appendLog("无法读取所选的 BadUSB 有效载荷。")
                 return@launch
             }
             if (bytes.isEmpty()) {
-                appendLog("BadUSB payload is empty.")
+                appendLog("BadUSB 有效载荷为空。")
                 return@launch
             }
 
@@ -180,11 +180,11 @@ internal fun MainViewModel.armBadUsbImpl(mscMode: Boolean) {
                         success = true
                         break
                     }
-                    appendLog("BadUSB chunk attempt $attempt failed; retrying...")
+                    appendLog("BadUSB 分块尝试第 $attempt 次失败；正在重试...")
                     delay(300)
                 }
                 if (!success) {
-                    appendLog("BadUSB upload failed at byte $offset.")
+                    appendLog("BadUSB 在字节 $offset 处上传失败。")
                     return@launch
                 }
 
@@ -203,12 +203,12 @@ internal fun MainViewModel.armBadUsbImpl(mscMode: Boolean) {
             if (response?.optBoolean("ok") == true) {
                 _badUsbArmedFingerprints.update { it + targetFingerprint }
                 appendLog(
-                    "BadUSB payload armed on ${targetEntry.displayName}. " +
-                        "Unplug and re-plug the device to execute it once."
+                    "已在 ${targetEntry.displayName} 上装填 BadUSB 有效载荷。" +
+                        "拔出并重新插入设备即可执行一次。"
                 )
-                addHistory("badusb", "Payload armed for ${targetEntry.displayName}", HistoryLevel.SUCCESS)
+                addHistory("badusb", "已为 ${targetEntry.displayName} 装填有效载荷", HistoryLevel.SUCCESS)
             } else {
-                appendLog("Failed to arm BadUSB payload: ${response?.optString("msg") ?: "timeout"}")
+                appendLog("装填 BadUSB 有效载荷失败：${response?.optString("msg") ?: "超时"}")
             }
         } finally {
             _badUsbUploading.value = false
@@ -219,7 +219,7 @@ internal fun MainViewModel.armBadUsbImpl(mscMode: Boolean) {
 internal fun MainViewModel.refreshStorageImpl() {
     val activeSession = session
     if (activeSession == null) {
-        appendLog("Connect to a device before browsing storage.")
+        appendLog("浏览存储前请先连接设备。")
         return
     }
     if (_storageLoading.value) return
@@ -229,7 +229,7 @@ internal fun MainViewModel.refreshStorageImpl() {
         val response = activeSession.sendCommand("MSC_LIST", timeoutMs = 8_000)
         _storageLoading.value = false
         if (response?.optBoolean("ok") != true) {
-            appendLog("Failed to list storage: ${response?.optString("msg") ?: "timeout"}")
+            appendLog("获取存储列表失败：${response?.optString("msg") ?: "超时"}")
             return@launch
         }
 
@@ -249,14 +249,14 @@ internal fun MainViewModel.refreshStorageImpl() {
             }
         }
         _storageFiles.value = files
-        appendLog("Storage: ${files.size} file(s), ${_storageFree.value} bytes free.")
+        appendLog("存储：${files.size} 个文件，剩余可用 ${_storageFree.value} 字节。")
     }
 }
 
 internal fun MainViewModel.deleteStorageFileImpl(name: String) {
     val activeSession = session
     if (activeSession == null) {
-        appendLog("Connect to a device before deleting files.")
+        appendLog("删除文件前请先连接设备。")
         return
     }
     scope.launch {
@@ -266,10 +266,10 @@ internal fun MainViewModel.deleteStorageFileImpl(name: String) {
             timeoutMs = 8_000,
         )
         if (response?.optBoolean("ok") == true) {
-            appendLog("Deleted $name.")
+            appendLog("已删除 $name。")
             refreshStorageImpl()
         } else {
-            appendLog("Failed to delete $name: ${response?.optString("msg") ?: "timeout"}")
+            appendLog("删除 $name 失败：${response?.optString("msg") ?: "超时"}")
         }
     }
 }
@@ -277,24 +277,24 @@ internal fun MainViewModel.deleteStorageFileImpl(name: String) {
 internal fun MainViewModel.startMassStorageImpl() {
     val activeSession = session
     if (activeSession == null) {
-        appendLog("Connect to a device before entering mass storage mode.")
+        appendLog("进入大容量存储模式前请先连接设备。")
         return
     }
     val chip = (_connectionState.value as? ConnectionState.Connected)?.chip
     if (chip !in setOf("ESP32-S2", "ESP32-S3")) {
-        appendLog("Mass storage start requires ESP32-S2 or ESP32-S3 (connected chip: ${chip ?: "unknown"}).")
+        appendLog("启动大容量存储需要 ESP32-S2 或 ESP32-S3（当前芯片：${chip ?: "未知"}）。")
         return
     }
 
     scope.launch {
-        appendLog("Switching device to USB mass storage mode...")
+        appendLog("正在将设备切换至 USB 大容量存储模式...")
         val response = activeSession.sendCommand("START_MSC", timeoutMs = 5_000)
         if (response?.optBoolean("ok") == true) {
-            appendLog("Device is rebooting into mass storage mode; the USB bridge will disappear.")
+            appendLog("设备正在重启进入大容量存储模式；USB 桥接将被断开。")
         } else if (response == null) {
-            appendLog("No response, expected: USB is re-enumerating as mass storage.")
+            appendLog("无响应（符合预期）：USB 正在重新枚举为大容量存储设备。")
         } else {
-            appendLog("Device refused mass storage mode: ${response.optString("msg")}")
+            appendLog("设备拒绝大容量存储模式：${response.optString("msg")}")
         }
     }
 }

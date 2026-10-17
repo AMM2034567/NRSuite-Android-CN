@@ -14,11 +14,11 @@ import org.json.JSONObject
 internal fun MainViewModel.startHiddenApImpl(fixed: Boolean, channel: Int) {
     val activeSession = session
     if (activeSession == null) {
-        appendLog("Connect to a device before starting hidden AP detection.")
+        appendLog("启动隐藏 AP 探测前请先连接设备。")
         return
     }
     if (_hiddenApRunning.value || _hiddenApStarting.value) return
-    if (!ensureRadioIdle("Hidden AP Revealer")) return
+    if (!ensureRadioIdle("隐藏 AP 探测器")) return
 
     val safeChannel = channel.coerceIn(1, 14)
     _hiddenApFixed.value = fixed
@@ -35,7 +35,7 @@ internal fun MainViewModel.startHiddenApImpl(fixed: Boolean, channel: Int) {
         try {
             // One-time baseline scan. This is best-effort: if it fails or the
             // user moves, passive detection still runs without filtering.
-            appendLog("Running baseline WiFi scan for Hidden AP Revealer...")
+            appendLog("正在为隐藏 AP 探测器执行 WiFi 基准扫描...")
             val baselineCount = activeSession.scanWifi(timeoutMs = 15_000)
             if (baselineCount != null && baselineCount >= 0) {
                 delay(150)
@@ -44,9 +44,9 @@ internal fun MainViewModel.startHiddenApImpl(fixed: Boolean, channel: Int) {
                         network.optString("ssid").isBlank()
                 }
                 seedHiddenApObservationsFromScan()
-                appendLog("Revealer baseline: $baselineCount scan result(s), $hiddenSeeds hidden seed(s).")
+                appendLog("探测器基准扫描：发现 $baselineCount 个扫描结果，$hiddenSeeds 个隐藏网络种子。")
             } else {
-                appendLog("Revealer baseline scan failed; continuing with passive detection only.")
+                appendLog("探测器基准扫描失败；仅继续进行被动探测。")
             }
 
             val args = JSONObject().apply {
@@ -57,14 +57,14 @@ internal fun MainViewModel.startHiddenApImpl(fixed: Boolean, channel: Int) {
             val response = activeSession.sendCommand("START_HIDDEN_AP", args, timeoutMs = 10_000)
             if (response?.optBoolean("ok") == true) {
                 _hiddenApRunning.value = true
-                appendLog("Hidden AP Revealer started (${if (fixed) "fixed" else "hopping"} channel).")
-                addHistory("hidden_ap", "Hidden AP Revealer started", HistoryLevel.SUCCESS)
+                appendLog("隐藏 AP 探测器已启动（${if (fixed) "固定" else "跳频"}信道）。")
+                addHistory("hidden_ap", "隐藏 AP 探测器已启动", HistoryLevel.SUCCESS)
             } else {
                 _hiddenApCurrentHopChannel.value = null
-                appendLog("Failed to start hidden AP detection: ${response?.optString("msg") ?: "timeout"}")
+                appendLog("启动隐藏 AP 探测失败：${response?.optString("msg") ?: "超时"}")
             }
         } catch (t: Throwable) {
-            appendLog("Hidden AP Revealer start failed: ${t.message ?: t.javaClass.simpleName}")
+            appendLog("隐藏 AP 探测器启动失败：${t.message ?: t.javaClass.simpleName}")
         } finally {
             _hiddenApStarting.value = false
             updateForegroundService()
@@ -82,10 +82,10 @@ internal fun MainViewModel.stopHiddenApImpl() {
     scope.launch {
         val response = activeSession?.sendCommand("STOP_HIDDEN_AP", timeoutMs = 6_000)
         if (response?.optBoolean("ok") == true) {
-            appendLog("Hidden AP Revealer stopped.")
-            addHistory("hidden_ap", "Hidden AP Revealer stopped", HistoryLevel.INFO)
+            appendLog("隐藏 AP 探测器已停止。")
+            addHistory("hidden_ap", "隐藏 AP 探测器已停止", HistoryLevel.INFO)
         } else {
-            appendLog("Hidden AP Revealer stop request sent without confirmation.")
+            appendLog("隐藏 AP 探测器停止请求已发送，未收到确认。")
         }
     }
 }
@@ -196,8 +196,8 @@ internal fun MainViewModel.recordHiddenSsidResolved(event: JSONObject) {
     val channel = event.optInt("channel", _hiddenApChannel.value)
     val rssi = event.optInt("rssi", -127)
     val source = when (event.optInt("subtype", 0)) {
-        0x02 -> "Resolved by reassociation request"
-        else -> "Resolved by association request"
+        0x02 -> "通过重关联请求解析"
+        else -> "通过关联请求解析"
     }
 
     resolvedHiddenSsidByBssid[bssid] = ssid
@@ -232,11 +232,11 @@ internal fun MainViewModel.recordHiddenSsidResolved(event: JSONObject) {
 
 internal fun MainViewModel.forceHiddenApReconnectImpl(observation: HiddenApObservation) {
     if (!_hiddenApRunning.value) {
-        appendLog("Start hidden AP detection before forcing a reconnect.")
+        appendLog("强制重连前请先启动隐藏 AP 探测。")
         return
     }
     if (!_hiddenApDeauthEnabled.value) {
-        appendLog("Enable deauth reconnect in Hidden AP settings first.")
+        appendLog("请先在隐藏 AP 设置中启用 Deauth 重连功能。")
         return
     }
     val activeSession = session ?: return
@@ -255,10 +255,10 @@ internal fun MainViewModel.forceHiddenApReconnectImpl(observation: HiddenApObser
             timeoutMs = 8_000,
         )
         if (response?.optBoolean("ok") == true) {
-            appendLog("Reconnect burst sent to ${observation.bssid}; watching for hidden SSID resolution.")
-            addHistory("hidden_ap", "Forced reconnect for ${observation.bssid}", HistoryLevel.INFO)
+            appendLog("已向 ${observation.bssid} 发送重连突发；正在等待隐藏 SSID 解析。")
+            addHistory("hidden_ap", "已强制 ${observation.bssid} 重新连接", HistoryLevel.INFO)
         } else {
-            appendLog("Failed to force reconnect for ${observation.bssid}.")
+            appendLog("强制 ${observation.bssid} 重新连接失败。")
         }
     }
 }

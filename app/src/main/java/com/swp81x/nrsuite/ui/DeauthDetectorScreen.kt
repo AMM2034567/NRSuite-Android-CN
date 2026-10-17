@@ -194,15 +194,14 @@ fun DeauthDetectorScreen(
     if (confirmStart) {
         AlertDialog(
             onDismissRequest = { confirmStart = false },
-            title = { Text("Start monitoring?") },
+            title = { Text("启动 Deauth 监测？") },
             text = {
                 Text(
                     if (channelMode == DeauthChannelMode.HOPPING) {
-                        "The ESP32 will switch to monitor mode and hop across all channels " +
-                            "every $hopIntervalMs ms."
+                        "ESP32 将切换至混杂监听模式，每隔 $hopIntervalMs 毫秒在所有 2.4 GHz 信道间轮询跳频。"
                     } else {
-                        "The ESP32 will switch to monitor mode on channel $channel " +
-                            "to watch ${selectedTarget?.ssid ?: "the selected target"}."
+                        "ESP32 将切换至信道 $channel 上的混杂监听模式，" +
+                            "专门监测 ${selectedTarget?.ssid ?: "选定目标"} 的 Deauth 活动。"
                     }
                 )
             },
@@ -213,12 +212,12 @@ fun DeauthDetectorScreen(
                         confirmStart = false
                     },
                 ) {
-                    Text("Start")
+                    Text("启动")
                 }
             },
             dismissButton = {
                 TextButton(onClick = { confirmStart = false }) {
-                    Text("Cancel")
+                    Text("取消")
                 }
             },
         )
@@ -242,16 +241,16 @@ private fun DetectorStatusCard(
     ModuleStatusCard(
         icon = Icons.Default.Shield,
         title = when {
-            alert != null -> "Deauth attack detected"
-            !connected -> "Disconnected"
-            running -> "No attack detected"
-            else -> "Ready"
+            alert != null -> "检测到 Deauth 攻击"
+            !connected -> "未连接设备"
+            running -> "未检测到攻击"
+            else -> "就绪"
         },
         subtitle = when {
-            alert != null -> "${alert.ssid} · ch ${alert.channel}"
-            !connected -> "Connect a device before starting the detector."
-            running -> "Monitoring for deauth activity"
-            else -> "Start monitoring to watch for deauth activity"
+            alert != null -> "${alert.ssid} · 信道 ${alert.channel}"
+            !connected -> "启动监测前请先连接设备。"
+            running -> "正在监测空口 Deauth 攻击活动"
+            else -> "启动监测以实时监听 Deauth 异常流量"
         },
         state = state,
     ) {
@@ -267,7 +266,7 @@ private fun DetectorStatusCard(
                     )
                     Spacer(Modifier.width(6.dp))
                     Text(
-                        text = "Source MAC may be spoofed",
+                        text = "源 MAC 地址可能已被伪造",
                         style = MaterialTheme.typography.bodySmall,
                         color = StatusAmber,
                     )
@@ -293,7 +292,7 @@ private fun DetectorStatusCard(
                         contentColor = MaterialTheme.colorScheme.primary,
                     ),
                 ) {
-                    Text("Locate")
+                    Text("测向定位")
                 }
                 Spacer(Modifier.weight(1f))
                 ConfidenceBadge(alert.confidence)
@@ -305,9 +304,9 @@ private fun DetectorStatusCard(
 @Composable
 private fun ConfidenceBadge(confidence: AlertConfidence) {
     val (label, color) = when (confidence) {
-        AlertConfidence.HIGH -> "High confidence" to StatusRed
-        AlertConfidence.MEDIUM -> "Medium confidence" to StatusAmber
-        AlertConfidence.LOW -> "Possible false alarm" to StatusNeutral
+        AlertConfidence.HIGH -> "高置信度" to StatusRed
+        AlertConfidence.MEDIUM -> "中等置信度" to StatusAmber
+        AlertConfidence.LOW -> "疑似误报" to StatusNeutral
     }
     Row(
         modifier = Modifier
@@ -337,18 +336,18 @@ private fun LiveStatsRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         StatCell(
-            label = "Frames/s",
+            label = "帧率 (帧/秒)",
             value = framesPerSecond.toString(),
             valueColor = fpsColor,
             modifier = Modifier.weight(1f),
         )
         StatCell(
-            label = "Total",
+            label = "累计帧数",
             value = totalFrames.toString(),
             modifier = Modifier.weight(1f),
         )
         StatCell(
-            label = "Sources",
+            label = "来源数",
             value = uniqueSourceCount.toString(),
             modifier = Modifier.weight(1f),
         )
@@ -423,18 +422,18 @@ private fun ConfigZone(
                 Spacer(Modifier.width(10.dp))
                 Column(Modifier.weight(1f)) {
                     Text(
-                        text = "Target & channel",
+                        text = "目标与信道",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
                     )
                     Text(
                         text = when {
                             running && channelMode == DeauthChannelMode.HOPPING ->
-                                "Hopping · ch ${currentHopChannel ?: "-"}"
-                            running -> "Monitoring ${selectedTarget?.ssid ?: "target"}"
+                                "跳频模式 · 信道 ${currentHopChannel ?: "-"}"
+                            running -> "正在监测 ${selectedTarget?.ssid ?: "目标"}"
                             channelMode == DeauthChannelMode.TARGETED ->
-                                selectedTarget?.ssid ?: "No target selected"
-                            else -> "Hopping all channels"
+                                selectedTarget?.ssid ?: "未选择目标"
+                            else -> "全信道轮询跳频"
                         },
                         style = MaterialTheme.typography.bodySmall,
                         color = NrOnSurfaceVariant,
@@ -443,7 +442,7 @@ private fun ConfigZone(
                 IconButton(onClick = onToggle) {
                     Icon(
                         imageVector = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                        contentDescription = if (expanded) "Collapse" else "Expand",
+                        contentDescription = if (expanded) "折叠" else "展开",
                     )
                 }
             }
@@ -452,7 +451,7 @@ private fun ConfigZone(
                 Column {
                     Spacer(Modifier.height(10.dp))
                     Text(
-                        text = "Mode",
+                        text = "信道模式",
                         style = MaterialTheme.typography.labelLarge,
                     )
                     Spacer(Modifier.height(6.dp))
@@ -472,7 +471,7 @@ private fun ConfigZone(
                             onClick = onScanClick,
                             enabled = controlsEnabled && !isScanning,
                         ) {
-                            Text(if (isScanning) "Scanning..." else "Scan WiFi for targets")
+                            Text(if (isScanning) "正在扫描..." else "扫描周围 WiFi 目标")
                         }
 
                         if (scanResults.isNotEmpty()) {
@@ -499,7 +498,7 @@ private fun ConfigZone(
 
                     } else {
                         NumberStepper(
-                            label = "Dwell time (ms)",
+                            label = "驻留时间 (毫秒)",
                             valueText = hopIntervalMs.toString(),
                             enabled = controlsEnabled,
                             onDecrease = {
@@ -513,7 +512,7 @@ private fun ConfigZone(
                         if (running) {
                             Spacer(Modifier.height(8.dp))
                             Text(
-                                text = "Currently on ch ${currentHopChannel ?: "-"}",
+                                text = "当前驻留信道: ${currentHopChannel ?: "-"}",
                                 style = MaterialTheme.typography.bodySmall.copy(
                                     fontFamily = FontFamily.Monospace,
                                 ),
@@ -525,7 +524,7 @@ private fun ConfigZone(
                     if (!connected) {
                         Spacer(Modifier.height(8.dp))
                         Text(
-                            text = "Connect a device before starting the detector.",
+                            text = "启动监测前请先连接设备。",
                             style = MaterialTheme.typography.bodySmall,
                             color = StatusRed,
                         )
@@ -564,12 +563,12 @@ private fun DetectionFeedCard(
             ) {
                 Column(Modifier.weight(1f)) {
                     Text(
-                        text = "Detection feed",
+                        text = "检测实时流",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
                     )
                     Text(
-                        text = "${feed.size} shown",
+                        text = "共显示 ${feed.size} 条",
                         style = MaterialTheme.typography.bodySmall,
                         color = NrOnSurfaceVariant,
                     )
@@ -578,7 +577,7 @@ private fun DetectionFeedCard(
                     onClick = onClearFeed,
                     enabled = feed.isNotEmpty(),
                 ) {
-                    Text("Clear")
+                    Text("清空")
                 }
             }
             Spacer(Modifier.height(8.dp))
@@ -588,9 +587,9 @@ private fun DetectionFeedCard(
                         selected = feedFilter == filter,
                         onClick = { onFeedFilterChange(filter) },
                         label = when (filter) {
-                            DeauthFeedFilter.ALL -> "All"
-                            DeauthFeedFilter.BROADCAST -> "Broadcast"
-                            DeauthFeedFilter.TARGETED -> "Directed"
+                            DeauthFeedFilter.ALL -> "全部"
+                            DeauthFeedFilter.BROADCAST -> "广播攻击"
+                            DeauthFeedFilter.TARGETED -> "定向攻击"
                         },
                     )
                 }
@@ -640,9 +639,9 @@ private fun FeedRow(entry: DeauthFeedEntry) {
             )
         }
         val targetAddress = entry.targetMac ?: "FF:FF:FF:FF:FF:FF"
-        val targetKind = if (entry.targetMac == null) "broadcast" else "directed"
+        val targetKind = if (entry.targetMac == null) "广播" else "定向"
         Text(
-            text = "to $targetAddress ($targetKind) · reason ${entry.reasonCode} · " +
+            text = "目标 $targetAddress ($targetKind) · 原因代码 ${entry.reasonCode} · " +
                 "${entry.rssi} dBm · ${rssiToProximity(entry.rssi).label}",
             style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
             color = threatProximityColor(entry.rssi),
@@ -668,7 +667,7 @@ private fun NumberStepper(
             modifier = Modifier.weight(1f),
         )
         IconButton(onClick = onDecrease, enabled = enabled) {
-            Icon(Icons.Default.Remove, contentDescription = "Decrease $label")
+            Icon(Icons.Default.Remove, contentDescription = "减小 $label")
         }
         Text(
             text = valueText,
@@ -676,7 +675,7 @@ private fun NumberStepper(
             modifier = Modifier.padding(horizontal = 8.dp),
         )
         IconButton(onClick = onIncrease, enabled = enabled) {
-            Icon(Icons.Default.Add, contentDescription = "Increase $label")
+            Icon(Icons.Default.Add, contentDescription = "增加 $label")
         }
     }
 }

@@ -129,7 +129,7 @@ fun ClientPresenceScreen(
                     onClick = onTriggerReconnect,
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    Text("Force reconnect burst")
+                    Text("强制重连诱导")
                 }
             }
             Spacer(Modifier.height(10.dp))
@@ -185,16 +185,16 @@ fun ClientPresenceScreen(
     if (confirmStart) {
         AlertDialog(
             onDismissRequest = { confirmStart = false },
-            title = { Text("Start client detection?") },
+            title = { Text("启动客户端检测？") },
             text = {
                 Text(
                     if (mode == ClientPresenceMode.ACTIVE) {
-                        "Active mode sends a short deauth burst to $targetBssid " +
-                            "to force clients to re-announce, then monitors their frames. " +
-                            "Only use this on networks you own or are authorized to test."
+                        "主动模式将向 $targetBssid 发送简短的 Deauth 突发帧，" +
+                            "诱导客户端重新发送认证/关联报文，从而监听其数据帧。" +
+                            "请仅在您拥有或获得授权测试的网络上使用。"
                     } else {
-                        "Passive mode monitors probe, association, reassociation, " +
-                            "and authentication frames without transmitting."
+                        "被动模式将在不发送任何无线电信号的前提下，" +
+                            "纯监听探测请求 (Probe)、关联、重关联及认证报文。"
                     }
                 )
             },
@@ -204,10 +204,10 @@ fun ClientPresenceScreen(
                         confirmStart = false
                         onStart()
                     },
-                ) { Text("Start") }
+                ) { Text("启动") }
             },
             dismissButton = {
-                TextButton(onClick = { confirmStart = false }) { Text("Cancel") }
+                TextButton(onClick = { confirmStart = false }) { Text("取消") }
             },
         )
     }
@@ -230,27 +230,27 @@ private fun ClientPresenceStatusCard(
     ModuleStatusCard(
         icon = Icons.Default.PersonSearch,
         title = when {
-            !connected -> "Disconnected"
-            running -> "Monitoring"
-            else -> "Ready"
+            !connected -> "未连接设备"
+            running -> "正在监测"
+            else -> "就绪"
         },
         subtitle = when {
-            !connected -> "Connect a device before starting client detection."
-            running -> "${mode.name.lowercase().replaceFirstChar { it.uppercase() }} mode · $frameCount frames"
-            else -> "Passive or active client detection"
+            !connected -> "启动客户端检测前请先连接设备。"
+            running -> "${if (mode == ClientPresenceMode.ACTIVE) "主动模式" else "被动模式"} · 捕获 $frameCount 帧"
+            else -> "支持被动监听与主动诱导检测"
         },
         state = state,
     ) {
         if (mode == ClientPresenceMode.ACTIVE && targetBssid.isNotBlank()) {
             Text(
-                text = "Target: $targetBssid",
+                text = "目标: $targetBssid",
                 style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
                 color = NrOnSurfaceVariant,
             )
         }
         if (running && lastTriggerAt != null) {
             Text(
-                text = "Last force trigger: $lastTriggerAt",
+                text = "上次强制诱导: $lastTriggerAt",
                 style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
                 color = NrOnSurfaceVariant,
             )
@@ -298,12 +298,12 @@ private fun ConfigZone(
                 Spacer(Modifier.width(10.dp))
                 Column(Modifier.weight(1f)) {
                     Text(
-                        text = "Client Detector configuration",
+                        text = "客户端检测配置",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
                     )
                     Text(
-                        text = if (running) "Detection running" else "Passive or active mode",
+                        text = if (running) "检测运行中" else "被动监听或主动诱导模式",
                         style = MaterialTheme.typography.bodySmall,
                         color = NrOnSurfaceVariant,
                     )
@@ -311,7 +311,7 @@ private fun ConfigZone(
                 IconButton(onClick = onToggle) {
                     Icon(
                         imageVector = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                        contentDescription = if (expanded) "Collapse" else "Expand",
+                        contentDescription = if (expanded) "折叠" else "展开",
                     )
                 }
             }
@@ -319,19 +319,19 @@ private fun ConfigZone(
             if (expanded) {
                 Column {
                     Spacer(Modifier.height(10.dp))
-                    Text("Mode", style = MaterialTheme.typography.labelLarge)
+                    Text("工作模式", style = MaterialTheme.typography.labelLarge)
                     Spacer(Modifier.height(6.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         NrFilterChip(
                             selected = mode == ClientPresenceMode.PASSIVE,
                             onClick = { onModeChange(ClientPresenceMode.PASSIVE) },
-                            label = "Passive",
+                            label = "被动监听",
                             enabled = controlsEnabled,
                         )
                         NrFilterChip(
                             selected = mode == ClientPresenceMode.ACTIVE,
                             onClick = { onModeChange(ClientPresenceMode.ACTIVE) },
-                            label = "Active (deauth)",
+                            label = "主动诱导 (Deauth)",
                             enabled = controlsEnabled,
                         )
                     }
@@ -339,8 +339,7 @@ private fun ConfigZone(
                     if (mode == ClientPresenceMode.ACTIVE) {
                         Spacer(Modifier.height(10.dp))
                         Text(
-                            text = "Active mode sends a short deauth burst to force clients to reconnect " +
-                                "and reveal themselves. Use only on authorized networks.",
+                            text = "主动模式发送短暂 Deauth 突发帧促使客户端重连并显露其存在。请仅在获得授权的网络上使用。",
                             style = MaterialTheme.typography.bodySmall,
                             color = StatusAmber,
                         )
@@ -349,7 +348,7 @@ private fun ConfigZone(
                             onClick = onScanWifi,
                             enabled = controlsEnabled && !scanning,
                         ) {
-                            Text(if (scanning) "Scanning..." else "Scan WiFi for targets")
+                            Text(if (scanning) "正在扫描..." else "扫描周围 WiFi 目标")
                         }
                         if (networks.isNotEmpty()) {
                             Spacer(Modifier.height(6.dp))
@@ -357,7 +356,7 @@ private fun ConfigZone(
                                 networks.forEach { network ->
                                     val bssid = network.optString("bssid")
                                     NetworkTargetRow(
-                                        ssid = network.optString("ssid").ifBlank { "(hidden)" },
+                                        ssid = network.optString("ssid").ifBlank { "(隐藏)" },
                                         bssid = bssid,
                                         channel = network.optInt("channel", 1),
                                         rssi = network.optInt("rssi", -100),
@@ -371,7 +370,7 @@ private fun ConfigZone(
                                         onClick = {
                                             onSelectTarget(
                                                 NetworkTarget(
-                                                    ssid = network.optString("ssid").ifBlank { "(hidden)" },
+                                                    ssid = network.optString("ssid").ifBlank { "(隐藏)" },
                                                     bssid = bssid,
                                                     channel = network.optInt("channel", 1),
                                                     rssi = network.optInt("rssi", -100),
@@ -389,7 +388,7 @@ private fun ConfigZone(
                         }
                     } else {
                         Spacer(Modifier.height(10.dp))
-                        Text("Channel mode", style = MaterialTheme.typography.labelLarge)
+                        Text("信道模式", style = MaterialTheme.typography.labelLarge)
                         Spacer(Modifier.height(6.dp))
                         ChannelModeToggle(
                             fixed = fixed,
@@ -398,7 +397,7 @@ private fun ConfigZone(
                         )
                         if (fixed) {
                             Spacer(Modifier.height(4.dp))
-                            Text("Channel", style = MaterialTheme.typography.labelLarge)
+                            Text("信道", style = MaterialTheme.typography.labelLarge)
                             Spacer(Modifier.height(4.dp))
                             ChannelStepper(
                                 value = channel,
@@ -414,7 +413,7 @@ private fun ConfigZone(
                     if (!connected) {
                         Spacer(Modifier.height(8.dp))
                         Text(
-                            text = "Connect a device before starting client detection.",
+                            text = "启动客户端检测前请先连接设备。",
                             style = MaterialTheme.typography.bodySmall,
                             color = StatusRed,
                         )
@@ -441,19 +440,19 @@ private fun ClientListCard(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
                     Text(
-                        text = "Detected clients",
+                        text = "已发现客户端",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
                     )
                     Text(
-                        text = if (clients.isEmpty()) "No clients detected yet" else "${clients.size} unique client(s)",
+                        text = if (clients.isEmpty()) "暂未发现客户端" else "共发现 ${clients.size} 台独立客户端",
                         style = MaterialTheme.typography.bodySmall,
                         color = NrOnSurfaceVariant,
                     )
                 }
                 if (clients.isNotEmpty()) {
                     OutlinedButton(onClick = onClear, enabled = !running) {
-                        Text("Clear")
+                        Text("清空")
                     }
                 }
             }
@@ -495,21 +494,21 @@ private fun ClientRow(client: ClientObservation) {
                     modifier = Modifier
                         .weight(1f)
                         .clickable {
-                            clipboard.copyWithToast(context, client.mac, "MAC copied")
+                            clipboard.copyWithToast(context, client.mac, "MAC 地址已复制")
                         },
                 )
                 NetworkStatusBadge(text = client.subtype.replace('_', ' '), color = signalColor)
             }
             Spacer(Modifier.height(4.dp))
             Text(
-                text = "ch ${client.channel} · ${client.rssi} dBm · ${rssiToProximity(client.rssi).label} · " +
-                    "${client.sightings} sighting(s)",
+                text = "信道 ${client.channel} · ${client.rssi} dBm · ${rssiToProximity(client.rssi).label} · " +
+                    "捕获 ${client.sightings} 次",
                 style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
                 color = signalColor,
             )
             if (!client.vendor.isNullOrBlank()) {
                 Text(
-                    text = "Vendor: ${client.vendor}",
+                    text = "厂商: ${client.vendor}",
                     style = MaterialTheme.typography.bodySmall,
                     color = NrOnSurfaceVariant,
                 )
@@ -522,7 +521,7 @@ private fun ClientRow(client: ClientObservation) {
                 )
             }
             Text(
-                text = "Last seen: ${client.lastSeen}",
+                text = "最近活跃: ${client.lastSeen}",
                 style = MaterialTheme.typography.bodySmall,
                 color = NrOnSurfaceVariant,
             )
@@ -548,7 +547,7 @@ private fun NumberStepper(
             modifier = Modifier.weight(1f),
         )
         IconButton(onClick = onDecrease, enabled = enabled) {
-            Icon(Icons.Default.Remove, contentDescription = "Decrease $label")
+            Icon(Icons.Default.Remove, contentDescription = "减小 $label")
         }
         Text(
             text = valueText,
@@ -556,7 +555,7 @@ private fun NumberStepper(
             modifier = Modifier.padding(horizontal = 8.dp),
         )
         IconButton(onClick = onIncrease, enabled = enabled) {
-            Icon(Icons.Default.Add, contentDescription = "Increase $label")
+            Icon(Icons.Default.Add, contentDescription = "增加 $label")
         }
     }
 }

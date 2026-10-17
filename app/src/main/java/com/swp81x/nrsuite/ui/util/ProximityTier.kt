@@ -1,10 +1,10 @@
 package com.swp81x.nrsuite.ui.util
 
 enum class ProximityTier(val label: String) {
-    VERY_CLOSE("Very close"),
-    NEARBY("Nearby"),
-    FAR("Far"),
-    VERY_FAR("Very far"),
+    VERY_CLOSE("极近"),
+    NEARBY("较近"),
+    FAR("较远"),
+    VERY_FAR("极远"),
 }
 
 fun rssiToProximity(rssi: Int): ProximityTier = when {

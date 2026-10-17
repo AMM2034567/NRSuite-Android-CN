@@ -62,13 +62,13 @@ class OuiDatabaseRepository(
             withContext(Dispatchers.IO) {
                 parseCsv(dataFile.readText())
             }
-            check(vendors.isNotEmpty()) { "OUI database contained no entries" }
+            check(vendors.isNotEmpty()) { "OUI 数据库未包含任何有效记录" }
             _status.value = OuiDatabaseStatus.Ready(
                 vendorCount = vendors.size,
                 updatedAt = dataFile.lastModified().toReadableTime(),
             )
         }.onFailure { error ->
-            _status.value = OuiDatabaseStatus.Error(error.message ?: "Could not read OUI database")
+            _status.value = OuiDatabaseStatus.Error(error.message ?: "无法读取 OUI 数据库")
         }
     }
 
@@ -92,7 +92,7 @@ class OuiDatabaseRepository(
                 connection.connect()
                 val responseCode = connection.responseCode
                 if (responseCode !in 200..299) {
-                    error("OUI database server returned HTTP $responseCode")
+                    error("OUI 数据库服务器返回 HTTP $responseCode")
                 }
                 val totalBytes = connection.contentLengthLong
                 val output = ByteArrayOutputStream()
@@ -117,7 +117,7 @@ class OuiDatabaseRepository(
                 dataFile.writeText(text)
                 parseCsv(text)
             }
-            check(vendors.isNotEmpty()) { "OUI database contained no entries" }
+            check(vendors.isNotEmpty()) { "OUI 数据库未包含任何有效记录" }
             // Clear progress before flipping to Ready; the UI switches to the
             // Ready branch and must not rely on a fleeting 100% frame.
             _progress.value = null
@@ -127,7 +127,7 @@ class OuiDatabaseRepository(
             )
         }.onFailure { error ->
             _status.value = OuiDatabaseStatus.Error(
-                error.message ?: "OUI database download failed"
+                error.message ?: "OUI 数据库下载失败"
             )
         }
         _progress.value = null

@@ -66,10 +66,10 @@ fun SavedItemDropdown(
                     )
                     Text(
                         text = when {
-                            !hasItems -> "No saved items"
+                            !hasItems -> "无已保存项"
                             selectedName != null ->
-                                itemSupportingText(selectedName) ?: "$label · ${sortedNames.size} saved"
-                            else -> "$label · ${sortedNames.size} saved"
+                                itemSupportingText(selectedName) ?: "$label · 已保存 ${sortedNames.size} 项"
+                            else -> "$label · 已保存 ${sortedNames.size} 项"
                         },
                         style = MaterialTheme.typography.bodySmall,
                         color = NrOnSurfaceVariant,

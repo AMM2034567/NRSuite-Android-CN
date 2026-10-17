@@ -8,7 +8,7 @@ import androidx.compose.ui.text.AnnotatedString
 fun ClipboardManager.copyWithToast(
     context: Context,
     text: String,
-    message: String = "Copied",
+    message: String = "已复制",
 ) {
     setText(AnnotatedString(text))
     Toast.makeText(context, message, Toast.LENGTH_SHORT).show()

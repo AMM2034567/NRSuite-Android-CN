@@ -188,11 +188,10 @@ fun HiddenApScreen(
     if (confirmStart) {
         AlertDialog(
             onDismissRequest = { confirmStart = false },
-            title = { Text("Start hidden AP detection?") },
+            title = { Text("启动隐藏 AP 探测？") },
             text = {
                 Text(
-                    "A one-time baseline scan runs first, then passive monitoring " +
-                        "of beacon, probe, association, and reassociation frames begins."
+                    "将首先执行一次基线扫描，随后开始被动监控 Beacon、Probe、关联 (Association) 及重关联 (Reassociation) 数据帧。"
                 )
             },
             confirmButton = {
@@ -201,10 +200,10 @@ fun HiddenApScreen(
                         confirmStart = false
                         onStart()
                     },
-                ) { Text("Start") }
+                ) { Text("启动") }
             },
             dismissButton = {
-                TextButton(onClick = { confirmStart = false }) { Text("Cancel") }
+                TextButton(onClick = { confirmStart = false }) { Text("取消") }
             },
         )
     }
@@ -243,23 +242,23 @@ private fun HiddenApStatusCard(
                 Column {
                     Text(
                         text = when {
-                            !connected -> "Disconnected"
-                            starting -> "Scanning nearby..."
-                            running -> "Monitoring"
-                            else -> "Ready"
+                            !connected -> "未连接"
+                            starting -> "正在扫描周围..."
+                            running -> "正在监控"
+                            else -> "就绪"
                         },
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
                     )
                     Text(
                         text = when {
-                            !connected -> "Connect a device before starting hidden AP detection."
-                            starting -> "Running baseline scan before passive detection"
+                            !connected -> "启动隐藏 AP 探测前请先连接设备。"
+                            starting -> "被动探测前正在运行基线扫描"
                             running -> buildString {
-                                append(if (fixed) "Fixed ch $channel" else "Hopping")
-                                currentHopChannel?.let { append(" · now ch $it") }
+                                append(if (fixed) "固定信道 $channel" else "跳频模式")
+                                currentHopChannel?.let { append(" · 当前信道 $it") }
                             }
-                            else -> "Passive hidden AP detection"
+                            else -> "被动隐藏 AP 探测"
                         },
                         style = MaterialTheme.typography.bodySmall,
                         color = NrOnSurfaceVariant,
@@ -302,12 +301,12 @@ private fun HiddenApConfigCard(
                 Spacer(Modifier.width(8.dp))
                 Column(Modifier.weight(1f)) {
                     Text(
-                        text = "Hidden AP Revealer configuration",
+                        text = "隐藏 AP 探测配置",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
                     )
                     Text(
-                        text = "Passive scanning and optional reconnect trigger",
+                        text = "被动扫描与可选的重连诱导触发",
                         style = MaterialTheme.typography.bodySmall,
                         color = NrOnSurfaceVariant,
                     )
@@ -315,7 +314,7 @@ private fun HiddenApConfigCard(
                 IconButton(onClick = onToggle) {
                     Icon(
                         imageVector = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                        contentDescription = if (expanded) "Collapse" else "Expand",
+                        contentDescription = if (expanded) "折叠" else "展开",
                     )
                 }
             }
@@ -331,7 +330,7 @@ private fun HiddenApConfigCard(
                 if (fixed) {
                     Spacer(Modifier.height(10.dp))
                     Text(
-                        text = "Channel",
+                        text = "信道",
                         style = MaterialTheme.typography.bodyMedium,
                     )
                     Spacer(Modifier.height(4.dp))
@@ -352,11 +351,11 @@ private fun HiddenApConfigCard(
                 ) {
                     Column(Modifier.weight(1f)) {
                         Text(
-                            text = "Deauth reconnect trigger",
+                            text = "Deauth 重连诱导",
                             style = MaterialTheme.typography.bodyMedium,
                         )
                         Text(
-                            text = "Allow sending broadcast deauth to a hidden BSSID. Authorized networks only.",
+                            text = "允许向隐藏 BSSID 发送广播 Deauth 包。仅限授权网络使用。",
                             style = MaterialTheme.typography.bodySmall,
                             color = StatusAmber,
                         )
@@ -391,15 +390,15 @@ private fun HiddenApCandidateCard(
             ) {
                 Column(Modifier.weight(1f)) {
                     Text(
-                        text = "Hidden SSID candidates",
+                        text = "隐藏 SSID 候选列表",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
                     )
                     Text(
                         text = if (candidates.isEmpty()) {
-                            "No candidate SSID(s) seen in probe requests yet"
+                            "探测请求中暂未发现候选 SSID"
                         } else {
-                            "${candidates.size} candidate SSID(s) seen in probe requests"
+                            "在探测请求中发现 ${candidates.size} 个候选 SSID"
                         },
                         style = MaterialTheme.typography.bodySmall,
                         color = NrOnSurfaceVariant,
@@ -410,7 +409,7 @@ private fun HiddenApCandidateCard(
                         onClick = onClearCandidates,
                         enabled = !running,
                     ) {
-                        Text("Clear")
+                        Text("清空")
                     }
                 }
             }
@@ -418,7 +417,7 @@ private fun HiddenApCandidateCard(
 
             if (candidates.isEmpty()) {
                 Text(
-                    text = "No probe-request candidates yet.",
+                    text = "暂无 Probe 请求候选。",
                     style = MaterialTheme.typography.bodySmall,
                     color = NrOnSurfaceVariant,
                 )
@@ -459,18 +458,18 @@ private fun HiddenSsidCandidateRow(candidate: HiddenSsidCandidate) {
                 IconButton(
                     onClick = {
                         val text = buildString {
-                            appendLine("Candidate SSID: ${candidate.ssid}")
-                            appendLine("Channel: ${candidate.channel}")
+                            appendLine("候选 SSID: ${candidate.ssid}")
+                            appendLine("信道: ${candidate.channel}")
                             appendLine("RSSI: ${candidate.rssi} dBm")
-                            candidate.client?.let { appendLine("Client: $it") }
-                            append("Sightings: ${candidate.sightings}")
+                            candidate.client?.let { appendLine("关联客户端: $it") }
+                            append("捕获频次: ${candidate.sightings}")
                         }
-                        clipboard.copyWithToast(context, text, "Candidate copied")
+                        clipboard.copyWithToast(context, text, "已复制候选 SSID")
                     },
                 ) {
                     Icon(
                         imageVector = Icons.Default.ContentCopy,
-                        contentDescription = "Copy candidate SSID",
+                        contentDescription = "复制候选 SSID",
                         modifier = Modifier.size(18.dp),
                     )
                 }
@@ -478,19 +477,19 @@ private fun HiddenSsidCandidateRow(candidate: HiddenSsidCandidate) {
             Spacer(Modifier.height(2.dp))
             Text(
                 text = "ch ${candidate.channel} · ${candidate.rssi} dBm · " +
-                    "${rssiToProximity(candidate.rssi).label} · ${candidate.sightings} sighting(s)",
+                    "${rssiToProximity(candidate.rssi).label} · ${candidate.sightings} 次捕获",
                 style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
                 color = threatProximityColor(candidate.rssi),
             )
             candidate.client?.let { client ->
                 Text(
-                    text = "Client: $client",
+                    text = "客户端: $client",
                     style = MaterialTheme.typography.bodySmall,
                     color = NrOnSurfaceVariant,
                 )
             }
             Text(
-                text = "Last seen: ${candidate.lastSeen}",
+                text = "最后捕获: ${candidate.lastSeen}",
                 style = MaterialTheme.typography.bodySmall,
                 color = NrOnSurfaceVariant,
             )
@@ -520,14 +519,14 @@ private fun HiddenApResultsCard(
             ) {
                 Column(Modifier.weight(1f)) {
                     Text(
-                        text = "Detected Hidden APs",
+                        text = "已检测到的隐藏 AP",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
                     )
                     Text(
                         text = when {
-                            observations.isEmpty() -> "Yellow = hidden. Green = SSID revealed."
-                            else -> "${observations.size} hidden AP(s) · $resolvedCount resolved"
+                            observations.isEmpty() -> "黄色 = 隐藏中。绿色 = 已还原 SSID。"
+                            else -> "${observations.size} 个隐藏 AP · 已还原 $resolvedCount 个"
                         },
                         style = MaterialTheme.typography.bodySmall,
                         color = NrOnSurfaceVariant,
@@ -538,7 +537,7 @@ private fun HiddenApResultsCard(
                         onClick = onClearObservations,
                         enabled = !running,
                     ) {
-                        Text("Clear")
+                        Text("清空")
                     }
                 }
             }
@@ -546,7 +545,7 @@ private fun HiddenApResultsCard(
 
             if (observations.isEmpty()) {
                 Text(
-                    text = "No hidden APs detected yet.",
+                    text = "暂未检测到隐藏 AP。",
                     style = MaterialTheme.typography.bodySmall,
                     color = NrOnSurfaceVariant,
                 )
@@ -580,7 +579,7 @@ private fun HiddenApObservationRow(
 ) {
     val resolved = !observation.resolvedSsid.isNullOrBlank()
     val stateColor = if (resolved) StatusGreen else StatusAmber
-    val stateLabel = if (resolved) "Revealed" else "Hidden"
+    val stateLabel = if (resolved) "已还原" else "隐藏"
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -612,20 +611,20 @@ private fun HiddenApObservationRow(
                 IconButton(
                     onClick = {
                         val text = buildString {
-                            appendLine("Hidden AP: ${observation.resolvedSsid ?: "not yet revealed"}")
+                            appendLine("隐藏 AP: ${observation.resolvedSsid ?: "尚未揭示"}")
                             appendLine("BSSID: ${observation.bssid}")
-                            appendLine("Channel: ${observation.channel}")
+                            appendLine("信道: ${observation.channel}")
                             appendLine("RSSI: ${observation.rssi} dBm")
-                            appendLine("Sightings: ${observation.sightings}")
-                            observation.resolutionSource?.let { appendLine("Resolution: $it") }
-                            observation.vendor?.let { appendLine("Vendor: $it") }
+                            appendLine("捕获频次: ${observation.sightings}")
+                            observation.resolutionSource?.let { appendLine("揭示来源: $it") }
+                            observation.vendor?.let { appendLine("设备厂商: $it") }
                         }
-                        clipboard.copyWithToast(context, text, "Hidden AP copied")
+                        clipboard.copyWithToast(context, text, "已复制隐藏 AP 信息")
                     },
                 ) {
                     Icon(
                         imageVector = Icons.Default.ContentCopy,
-                        contentDescription = "Copy hidden AP details",
+                        contentDescription = "复制隐藏 AP 详情",
                         modifier = Modifier.size(18.dp),
                     )
                 }
@@ -633,7 +632,7 @@ private fun HiddenApObservationRow(
 
             Spacer(Modifier.height(6.dp))
             Text(
-                text = observation.resolvedSsid ?: "Not yet revealed",
+                text = observation.resolvedSsid ?: "尚未还原",
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.SemiBold,
             )
@@ -645,19 +644,19 @@ private fun HiddenApObservationRow(
             )
             observation.vendor?.let { vendor ->
                 Text(
-                    text = "Vendor: $vendor",
+                    text = "厂商: $vendor",
                     style = MaterialTheme.typography.bodySmall,
                     color = NrOnSurfaceVariant,
                 )
             }
             Text(
-                text = "${observation.sightings} sighting(s)",
+                text = "${observation.sightings} 次捕获",
                 style = MaterialTheme.typography.bodySmall,
                 color = NrOnSurfaceVariant,
             )
             if (resolved) {
                 Text(
-                    text = observation.resolutionSource ?: "Resolved",
+                    text = observation.resolutionSource ?: "已还原",
                     style = MaterialTheme.typography.bodySmall,
                     color = StatusGreen,
                 )
@@ -667,7 +666,7 @@ private fun HiddenApObservationRow(
                     onClick = { onForceReconnect(observation) },
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    Text("Force reconnect")
+                    Text("强制重连诱导")
                 }
             }
         }

@@ -20,13 +20,13 @@ fun ChannelModeToggle(
         NrFilterChip(
             selected = fixed,
             onClick = { onFixedChange(true) },
-            label = "Fixed",
+            label = "固定信道",
             enabled = enabled,
         )
         NrFilterChip(
             selected = !fixed,
             onClick = { onFixedChange(false) },
-            label = "Hopping",
+            label = "跳频模式",
             enabled = enabled,
         )
     }

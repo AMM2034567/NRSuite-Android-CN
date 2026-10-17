@@ -159,8 +159,8 @@ internal fun LogsScreen(
 
     Column(modifier = modifier.fillMaxSize()) {
         TabRow(selectedTabIndex = selectedTab) {
-            Tab(selected = selectedTab == 0, onClick = { selectedTab = 0 }, text = { Text("Runtime") })
-            Tab(selected = selectedTab == 1, onClick = { selectedTab = 1 }, text = { Text("History (${history.size})") })
+            Tab(selected = selectedTab == 0, onClick = { selectedTab = 0 }, text = { Text("实时运行日志") })
+            Tab(selected = selectedTab == 1, onClick = { selectedTab = 1 }, text = { Text("操作历史 (${history.size})") })
         }
 
         if (selectedTab == 0) {
@@ -172,7 +172,7 @@ internal fun LogsScreen(
                 item {
                     Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            text = "Session log",
+                            text = "会话日志",
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.SemiBold,
                             modifier = Modifier.weight(1f),
@@ -183,7 +183,7 @@ internal fun LogsScreen(
                                 clipboardManager.copyWithToast(context, text)
                             },
                             enabled = logs.isNotEmpty(),
-                        ) { Icon(Icons.Default.ContentCopy, contentDescription = "Copy log") }
+                        ) { Icon(Icons.Default.ContentCopy, contentDescription = "复制日志") }
                         IconButton(
                             onClick = {
                                 val text = logs.joinToString("\n") { "${it.timestamp} [${it.tag}] ${it.message}" }
@@ -191,12 +191,12 @@ internal fun LogsScreen(
                                     type = "text/plain"
                                     putExtra(Intent.EXTRA_TEXT, text)
                                 }
-                                context.startActivity(Intent.createChooser(intent, "Export log"))
+                                context.startActivity(Intent.createChooser(intent, "导出日志"))
                             },
                             enabled = logs.isNotEmpty(),
-                        ) { Icon(Icons.Default.Share, contentDescription = "Export log") }
+                        ) { Icon(Icons.Default.Share, contentDescription = "导出日志") }
                         IconButton(onClick = onClearLogs, enabled = logs.isNotEmpty()) {
-                            Icon(Icons.Default.Delete, contentDescription = "Clear log")
+                            Icon(Icons.Default.Delete, contentDescription = "清空日志")
                         }
                     }
                 }
@@ -207,7 +207,7 @@ internal fun LogsScreen(
                             .horizontalScroll(rememberScrollState()),
                         horizontalArrangement = Arrangement.spacedBy(6.dp),
                     ) {
-                        val levels = listOf(null to "All", LogLevel.ERROR to "Errors", LogLevel.USB to "USB", LogLevel.SUCCESS to "Success")
+                        val levels = listOf(null to "全部", LogLevel.ERROR to "错误", LogLevel.USB to "USB", LogLevel.SUCCESS to "成功")
                         levels.forEach { (level, label) ->
                             NrFilterChip(
                                 selected = selectedLevel == level,
@@ -232,9 +232,9 @@ internal fun LogsScreen(
                                 modifier = Modifier.size(32.dp),
                             )
                             Spacer(Modifier.height(8.dp))
-                            Text("No runtime logs yet", fontWeight = FontWeight.SemiBold)
+                            Text("暂无运行日志", fontWeight = FontWeight.SemiBold)
                             Text(
-                                "Connect a device or run a module to see live log output.",
+                                "连接硬件设备或运行功能模块以查看实时输出日志。",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = NrOnSurfaceVariant,
                             )
@@ -292,7 +292,7 @@ internal fun LogsScreen(
                 item {
                     Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            text = "Session history",
+                            text = "模块操作历史",
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.SemiBold,
                             modifier = Modifier.weight(1f),
@@ -300,17 +300,17 @@ internal fun LogsScreen(
                         IconButton(onClick = {
                             val text = history.joinToString("\n") { "${it.timestamp} [${it.module}] ${it.summary}" }
                             clipboardManager.copyWithToast(context, text)
-                        }, enabled = history.isNotEmpty()) { Icon(Icons.Default.ContentCopy, contentDescription = "Copy history") }
+                        }, enabled = history.isNotEmpty()) { Icon(Icons.Default.ContentCopy, contentDescription = "复制历史记录") }
                         IconButton(onClick = {
                             val text = history.joinToString("\n") { "${it.timestamp} [${it.module}] ${it.summary}" }
                             val intent = Intent(Intent.ACTION_SEND).apply {
                                 type = "text/plain"
                                 putExtra(Intent.EXTRA_TEXT, text)
                             }
-                            context.startActivity(Intent.createChooser(intent, "Export history"))
-                        }, enabled = history.isNotEmpty()) { Icon(Icons.Default.Share, contentDescription = "Export history") }
+                            context.startActivity(Intent.createChooser(intent, "导出历史记录"))
+                        }, enabled = history.isNotEmpty()) { Icon(Icons.Default.Share, contentDescription = "导出历史记录") }
                         IconButton(onClick = onClearHistory, enabled = history.isNotEmpty()) {
-                            Icon(Icons.Default.Delete, contentDescription = "Clear history")
+                            Icon(Icons.Default.Delete, contentDescription = "清空历史记录")
                         }
                     }
                 }
@@ -329,9 +329,9 @@ internal fun LogsScreen(
                                 modifier = Modifier.size(32.dp),
                             )
                             Spacer(Modifier.height(8.dp))
-                            Text("No sessions yet", fontWeight = FontWeight.SemiBold)
+                            Text("暂无操作历史", fontWeight = FontWeight.SemiBold)
                             Text(
-                                "Run a module to record your first session.",
+                                "运行任一功能模块即可在此记录操作历史。",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = NrOnSurfaceVariant,
                             )
@@ -380,8 +380,13 @@ internal fun LogsScreen(
                                         )
                                     }
                                     Spacer(Modifier.width(6.dp))
+                                    val levelBadge = when (entry.level) {
+                                        HistoryLevel.SUCCESS -> "成功"
+                                        HistoryLevel.ERROR -> "错误"
+                                        HistoryLevel.INFO -> "信息"
+                                    }
                                     Text(
-                                        text = entry.level.name,
+                                        text = levelBadge,
                                         fontSize = 10.sp,
                                         color = color,
                                         fontFamily = FontFamily.Monospace,

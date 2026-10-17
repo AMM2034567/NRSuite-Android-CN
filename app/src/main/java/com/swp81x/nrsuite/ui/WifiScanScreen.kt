@@ -68,9 +68,9 @@ fun WifiScanScreen(
         ) {
             Text(
                 text = if (scanning) {
-                    "Scanning all 2.4 GHz channels..."
+                    "正在扫描所有 2.4 GHz 信道..."
                 } else {
-                    "Results arrive as asynchronous scan_ap events and are sorted by RSSI."
+                    "扫描结果通过异步 scan_ap 事件返回，并按信号强度 (RSSI) 排序。"
                 },
                 style = MaterialTheme.typography.bodySmall,
                 color = NrOnSurfaceVariant,
@@ -79,7 +79,7 @@ fun WifiScanScreen(
             Spacer(Modifier.height(10.dp))
 
             Text(
-                text = "Scan results (${networks.size})",
+                text = "扫描结果 (${networks.size})",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
             )
@@ -116,7 +116,7 @@ fun WifiScanScreen(
                     color = MaterialTheme.colorScheme.onPrimary,
                 )
             } else {
-                Icon(Icons.Default.Search, contentDescription = "Scan WiFi")
+                Icon(Icons.Default.Search, contentDescription = "扫描 WiFi")
             }
         }
     }
@@ -148,12 +148,12 @@ private fun ConfigZone(
                 Spacer(Modifier.width(10.dp))
                 Column(Modifier.weight(1f)) {
                     Text(
-                        text = "Active scan",
+                        text = "活跃扫描",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
                     )
                     Text(
-                        text = if (scanning) "Scanning all channels..." else "All 2.4 GHz channels",
+                        text = if (scanning) "正在扫描所有信道..." else "全 2.4 GHz 信道",
                         style = MaterialTheme.typography.bodySmall,
                         color = NrOnSurfaceVariant,
                     )
@@ -161,7 +161,7 @@ private fun ConfigZone(
                 IconButton(onClick = onToggle) {
                     Icon(
                         imageVector = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                        contentDescription = if (expanded) "Collapse" else "Expand",
+                        contentDescription = if (expanded) "折叠" else "展开",
                     )
                 }
             }
@@ -170,7 +170,7 @@ private fun ConfigZone(
                 Column {
                     Spacer(Modifier.height(8.dp))
                     Text(
-                        text = "The ESP32 performs the active scan. Results arrive as asynchronous scan_ap events and are sorted by RSSI.",
+                        text = "ESP32 执行活跃扫描。扫描结果通过异步 scan_ap 事件返回，并按信号强度 (RSSI) 排序。",
                         style = MaterialTheme.typography.bodySmall,
                         color = NrOnSurfaceVariant,
                     )
@@ -202,11 +202,11 @@ private fun EmptyResults(scanning: Boolean) {
             )
             Spacer(Modifier.height(8.dp))
             Text(
-                text = if (scanning) "Waiting for scan results..." else "No scan results yet.",
+                text = if (scanning) "正在等待扫描结果..." else "暂无扫描结果",
                 color = NrOnSurfaceVariant,
             )
             Text(
-                text = "Tap the scan button to start.",
+                text = "点击右下角扫描按钮开始。",
                 style = MaterialTheme.typography.bodySmall,
                 color = NrOnSurfaceVariant,
             )
@@ -216,7 +216,7 @@ private fun EmptyResults(scanning: Boolean) {
 
 @Composable
 private fun NetworkRow(network: JSONObject) {
-    val ssid = network.optString("ssid").ifBlank { "(hidden)" }
+    val ssid = network.optString("ssid").ifBlank { "(隐藏)" }
     val bssid = network.optString("bssid")
     val channel = network.optInt("channel")
     val rssi = network.optInt("rssi")

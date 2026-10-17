@@ -136,7 +136,7 @@ fun BleProfileScreen(
                         scanBusy -> Unit
                         running -> onStop()
                         target == null -> scope.launch {
-                            snackbarHostState.showSnackbar("Select a discovered BLE device first.")
+                            snackbarHostState.showSnackbar("请先选择已发现的 BLE 设备。")
                         }
                         else -> confirmStart = true
                     }
@@ -161,11 +161,11 @@ fun BleProfileScreen(
                     )
                     running -> Icon(
                         imageVector = Icons.Default.Stop,
-                        contentDescription = "Stop BLE profile",
+                        contentDescription = "停止 BLE 属性画像",
                     )
                     else -> Icon(
                         imageVector = Icons.Default.PlayArrow,
-                        contentDescription = "Start BLE profile",
+                        contentDescription = "启动 BLE 属性画像",
                     )
                 }
             }
@@ -182,12 +182,12 @@ fun BleProfileScreen(
     if (confirmStart) {
         AlertDialog(
             onDismissRequest = { confirmStart = false },
-            title = { Text("Start BLE profile?") },
+            title = { Text("启动 BLE 属性画像？") },
             text = {
                 Text(
-                    "This connects to ${target?.name ?: target?.address ?: "the selected device"} " +
-                        "and performs a read-only service and characteristic enumeration. " +
-                        "Use only where authorized."
+                    "将连接至 ${target?.name ?: target?.address ?: "所选设备"} " +
+                        "并执行只读的服务与特征值枚举枚举分析。" +
+                        "请仅在获得授权的测试环境中使用。"
                 )
             },
             confirmButton = {
@@ -196,10 +196,10 @@ fun BleProfileScreen(
                         confirmStart = false
                         onStart()
                     },
-                ) { Text("Start") }
+                ) { Text("启动") }
             },
             dismissButton = {
-                TextButton(onClick = { confirmStart = false }) { Text("Cancel") }
+                TextButton(onClick = { confirmStart = false }) { Text("取消") }
             },
         )
     }
@@ -215,7 +215,7 @@ private fun BleProfileStatusCard(
     val color = when {
         !connected -> StatusNeutral
         running -> StatusAmber
-        target != null && status.startsWith("Profile complete") -> StatusGreen
+        target != null && (status.startsWith("Profile complete") || status.startsWith("画像采集完成")) -> StatusGreen
         else -> StatusAmber
     }
     Card(
@@ -236,10 +236,10 @@ private fun BleProfileStatusCard(
                 Column {
                     Text(
                         text = when {
-                            !connected -> "Disconnected"
-                            running -> "Profiling"
-                            servicesStatus(status) -> "Ready"
-                            else -> "Ready"
+                            !connected -> "未连接设备"
+                            running -> "正在采集画像..."
+                            servicesStatus(status) -> "就绪"
+                            else -> "就绪"
                         },
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
@@ -251,7 +251,7 @@ private fun BleProfileStatusCard(
                     )
                     target?.let {
                         Text(
-                            text = "${it.name ?: "Unnamed device"} · ${it.address}",
+                            text = "${it.name ?: "未命名设备"} · ${it.address}",
                             style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
                             color = NrOnSurfaceVariant,
                         )
@@ -263,7 +263,8 @@ private fun BleProfileStatusCard(
 }
 
 private fun servicesStatus(status: String): Boolean =
-    status.startsWith("Profile complete") || status.startsWith("Target selected")
+    status.startsWith("Profile complete") || status.startsWith("Target selected") ||
+        status.startsWith("画像采集完成") || status.startsWith("已选择目标")
 
 @Composable
 private fun BleProfileTargetCard(
@@ -280,13 +281,13 @@ private fun BleProfileTargetCard(
 ) {
     val scanBusy = scanStarting || scanRunning || scanStopping
     val scanStatusText = when {
-        !connected -> "Connect an NRSuite device to scan."
-        profileRunning -> "Profiling in progress. Stop the profile before scanning again."
-        scanStarting -> "Starting BLE scan..."
-        scanRunning -> "Scanning... ${devices.size} device(s) found. Tap Stop when your target appears."
-        scanStopping -> "Stopping BLE scan..."
-        devices.isEmpty() -> "No discovered BLE devices yet. Start a scan."
-        else -> "${devices.size} discovered device(s). Select one to profile."
+        !connected -> "请先连接 NRSuite 硬件设备以进行扫描。"
+        profileRunning -> "属性画像分析进行中。请先停止画像再进行扫描。"
+        scanStarting -> "正在启动 BLE 扫描..."
+        scanRunning -> "正在扫描... 已发现 ${devices.size} 台设备。目标出现后点击停止扫描。"
+        scanStopping -> "正在停止 BLE 扫描..."
+        devices.isEmpty() -> "暂无发现的 BLE 设备。请启动扫描。"
+        else -> "已发现 ${devices.size} 台设备。请选择目标进行画像。"
     }
     val scanStatusColor = when {
         !connected -> StatusNeutral
@@ -303,12 +304,12 @@ private fun BleProfileTargetCard(
     ) {
         Column(Modifier.padding(14.dp)) {
             Text(
-                text = "Profile target",
+                text = "画像目标设备",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
             )
             Text(
-                text = "Scan for nearby BLE devices, stop, then choose one to profile.",
+                text = "扫描附近 BLE 设备，停止扫描后选择目标进行画像。",
                 style = MaterialTheme.typography.bodySmall,
                 color = NrOnSurfaceVariant,
             )
@@ -326,10 +327,10 @@ private fun BleProfileTargetCard(
             ) {
                 Text(
                     when {
-                        scanStarting -> "Starting BLE scan..."
-                        scanRunning -> "Stop BLE scan"
-                        scanStopping -> "Stopping BLE scan..."
-                        else -> "Scan for nearby BLE"
+                        scanStarting -> "正在启动 BLE 扫描..."
+                        scanRunning -> "停止 BLE 扫描"
+                        scanStopping -> "正在停止 BLE 扫描..."
+                        else -> "扫描附近 BLE"
                     }
                 )
             }
@@ -345,9 +346,9 @@ private fun BleProfileTargetCard(
             if (devices.isEmpty()) {
                 Text(
                     text = if (scanBusy) {
-                        "Waiting for nearby BLE devices..."
+                        "正在等待附近 BLE 设备..."
                     } else {
-                        "Devices discovered by the scanner will appear here."
+                        "扫描器发现的设备将显示在此处。"
                     },
                     style = MaterialTheme.typography.bodySmall,
                     color = if (scanBusy) StatusAmber else NrOnSurfaceVariant,
@@ -381,7 +382,7 @@ private fun BleProfileTargetCard(
                             ) {
                                 Column(Modifier.weight(1f)) {
                                     Text(
-                                        text = device.name ?: "Unnamed device",
+                                        text = device.name ?: "未命名设备",
                                         style = MaterialTheme.typography.bodyMedium,
                                         fontWeight = FontWeight.Medium,
                                     )
@@ -395,7 +396,7 @@ private fun BleProfileTargetCard(
                                     onClick = { onSelectTarget(device) },
                                     enabled = !profileRunning && !scanBusy,
                                 ) {
-                                    Text(if (selectedTarget?.address == device.address) "Selected" else "Select")
+                                    Text(if (selectedTarget?.address == device.address) "已选择" else "选择")
                                 }
                             }
                         }
@@ -425,15 +426,15 @@ private fun BleProfileResultsCard(
             ) {
                 Column(Modifier.weight(1f)) {
                     Text(
-                        text = "Services & characteristics",
+                        text = "服务与特征值",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
                     )
                     Text(
                         text = if (services.isEmpty()) {
-                            "No profile data yet"
+                            "暂无属性画像数据"
                         } else {
-                            "${services.size} service(s), ${services.sumOf { it.characteristics.size }} characteristic(s)"
+                            "${services.size} 个服务, 共 ${services.sumOf { it.characteristics.size }} 个特征值"
                         },
                         style = MaterialTheme.typography.bodySmall,
                         color = NrOnSurfaceVariant,
@@ -444,7 +445,7 @@ private fun BleProfileResultsCard(
                         onClick = onClear,
                         enabled = !running,
                     ) {
-                        Text("Clear")
+                        Text("清空")
                     }
                 }
             }
@@ -476,13 +477,13 @@ private fun BleServiceRow(service: BleServiceProfile) {
     ) {
         Column(Modifier.padding(10.dp)) {
             Text(
-                text = "Service ${service.uuid}",
+                text = "服务 ${service.uuid}",
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.SemiBold,
             )
             if (service.characteristics.isEmpty()) {
                 Text(
-                    text = "No characteristics discovered",
+                    text = "未发现特征值",
                     style = MaterialTheme.typography.bodySmall,
                     color = NrOnSurfaceVariant,
                 )
@@ -501,12 +502,12 @@ private fun BleCharacteristicRow(characteristic: BleCharacteristicProfile) {
     val clipboard = LocalClipboardManager.current
     val context = LocalContext.current
     val props = buildList {
-        if (characteristic.read) add("Read")
-        if (characteristic.write) add("Write")
-        if (characteristic.writeNoResponse) add("Write NR")
-        if (characteristic.notify) add("Notify")
-        if (characteristic.indicate) add("Indicate")
-        if (characteristic.broadcast) add("Broadcast")
+        if (characteristic.read) add("读 (Read)")
+        if (characteristic.write) add("写 (Write)")
+        if (characteristic.writeNoResponse) add("无响应写 (Write NR)")
+        if (characteristic.notify) add("通知 (Notify)")
+        if (characteristic.indicate) add("指示 (Indicate)")
+        if (characteristic.broadcast) add("广播 (Broadcast)")
     }
 
     Row(
@@ -521,7 +522,7 @@ private fun BleCharacteristicRow(characteristic: BleCharacteristicProfile) {
                 style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
             )
             Text(
-                text = if (props.isEmpty()) "No properties" else props.joinToString(" · "),
+                text = if (props.isEmpty()) "无属性" else props.joinToString(" · "),
                 style = MaterialTheme.typography.labelSmall,
                 color = NrOnSurfaceVariant,
             )
@@ -530,15 +531,15 @@ private fun BleCharacteristicRow(characteristic: BleCharacteristicProfile) {
             onClick = {
                 clipboard.copyWithToast(
                     context,
-                    "Characteristic: ${characteristic.uuid}\n" +
-                        "Properties: ${props.joinToString(", ").ifBlank { "none" }}",
-                    "Characteristic copied",
+                    "特征值: ${characteristic.uuid}\n" +
+                        "属性: ${props.joinToString(", ").ifBlank { "无" }}",
+                    "特征值已复制",
                 )
             },
         ) {
             Icon(
                 imageVector = Icons.Default.ContentCopy,
-                contentDescription = "Copy characteristic",
+                contentDescription = "复制特征值",
                 modifier = Modifier.size(16.dp),
             )
         }

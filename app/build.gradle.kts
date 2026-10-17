@@ -20,7 +20,7 @@ android {
     compileSdk {
         version = release(36)
     }
-    ndkVersion = "30.0.16248370"
+    ndkVersion = "28.2.13676358"
 
     defaultConfig {
         applicationId = "com.swp81x.nrsuite"

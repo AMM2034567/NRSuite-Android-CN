@@ -108,9 +108,9 @@ fun WpaCrackerScreen(
         ) {
             StatusIndicator(
                 label = when {
-                    running -> "Cracking..."
-                    result != null -> "Password found"
-                    else -> "Offline WPA/WPA2 cracker"
+                    running -> "正在破解..."
+                    result != null -> "密码已破解"
+                    else -> "WPA/WPA2 离线字典破解"
                 },
                 color = when {
                     running -> StatusAmber
@@ -136,18 +136,18 @@ fun WpaCrackerScreen(
                         Spacer(Modifier.width(10.dp))
                         Column(Modifier.weight(1f)) {
                             Text(
-                                text = "Target handshake",
+                                text = "目标握手包",
                                 fontWeight = FontWeight.SemiBold,
                                 color = NrOnSurface,
                             )
                             Text(
                                 text = when {
                                     selectedSession != null -> {
-                                        "${selectedSession.ssid.ifBlank { "(hidden)" }} · " +
-                                            "${selectedSession.bssid.ifBlank { "unknown" }}"
+                                        "${selectedSession.ssid.ifBlank { "(隐藏 SSID)" }} · " +
+                                            "${selectedSession.bssid.ifBlank { "未知 BSSID" }}"
                                     }
-                                    customSelected -> "Custom PCAP: ${customPcapName ?: "file"}"
-                                    else -> "Select a saved session or choose a custom PCAP"
+                                    customSelected -> "自定义 PCAP: ${customPcapName ?: "文件"}"
+                                    else -> "选择已保存会话或加载自定义 PCAP 抓包文件"
                                 },
                                 style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
                                 color = NrOnSurfaceVariant,
@@ -161,13 +161,13 @@ fun WpaCrackerScreen(
                         OutlinedButton(onClick = onChooseCustomPcap, enabled = !running) {
                             Icon(Icons.Default.Folder, contentDescription = null, modifier = Modifier.size(16.dp))
                             Spacer(Modifier.width(6.dp))
-                            Text(if (customSelected) "Change custom PCAP" else "Choose custom PCAP")
+                            Text(if (customSelected) "更换自定义 PCAP" else "选择自定义 PCAP")
                         }
                         if (customSelected) {
                             OutlinedButton(onClick = onClearCustomPcap, enabled = !running) {
                                 Icon(Icons.Default.Delete, contentDescription = null, modifier = Modifier.size(16.dp))
                                 Spacer(Modifier.width(6.dp))
-                                Text("Clear")
+                                Text("清除")
                             }
                         }
                     }
@@ -184,7 +184,7 @@ fun WpaCrackerScreen(
                             LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
                             Spacer(Modifier.height(4.dp))
                             Text(
-                                text = "Validating EAPOL...",
+                                text = "正在校验 EAPOL 握手包...",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = NrOnSurfaceVariant,
                             )
@@ -199,7 +199,7 @@ fun WpaCrackerScreen(
 
                         if (customSsidOptions.isNotEmpty()) {
                             Text(
-                                text = "Detected SSIDs",
+                                text = "已识别出的 SSID",
                                 style = MaterialTheme.typography.labelMedium,
                                 color = NrOnSurfaceVariant,
                             )
@@ -220,7 +220,7 @@ fun WpaCrackerScreen(
                                 NrFilterChip(
                                     selected = customSsidManualEnabled,
                                     onClick = onUseManualCustomSsid,
-                                    label = "Manual",
+                                    label = "手动输入",
                                     enabled = !running,
                                 )
                             }
@@ -230,8 +230,8 @@ fun WpaCrackerScreen(
                         OutlinedTextField(
                             value = customSsid,
                             onValueChange = onCustomSsidChange,
-                            label = { Text(if (customSsidOptions.isEmpty()) "Target SSID" else "Selected SSID") },
-                            placeholder = { Text("Network name") },
+                            label = { Text(if (customSsidOptions.isEmpty()) "目标 SSID" else "所选 SSID") },
+                            placeholder = { Text("无线网络名称") },
                             singleLine = true,
                             enabled = !running && customSsidManualEnabled,
                             modifier = Modifier.fillMaxWidth(),
@@ -241,7 +241,7 @@ fun WpaCrackerScreen(
                     }
 
                     Text(
-                        text = "Saved sessions",
+                        text = "已存会话",
                         style = MaterialTheme.typography.labelMedium,
                         color = NrOnSurfaceVariant,
                     )
@@ -249,7 +249,7 @@ fun WpaCrackerScreen(
 
                     if (candidates.isEmpty()) {
                         Text(
-                            text = "No saved sessions with a PCAP file. Run Evil Twin and capture a handshake first.",
+                            text = "暂无包含 PCAP 抓包的已存会话。请先运行恶魔双胞胎或抓包模块捕获握手包。",
                             style = MaterialTheme.typography.bodySmall,
                             color = NrOnSurfaceVariant,
                         )
@@ -272,7 +272,7 @@ fun WpaCrackerScreen(
                             ) {
                                 Column(Modifier.padding(10.dp)) {
                                     Text(
-                                        text = session.ssid.ifBlank { "(hidden)" },
+                                        text = session.ssid.ifBlank { "(隐藏 SSID)" },
                                         style = MaterialTheme.typography.bodyMedium,
                                         fontWeight = FontWeight.SemiBold,
                                         color = NrOnSurface,
@@ -283,7 +283,7 @@ fun WpaCrackerScreen(
                                         color = NrOnSurfaceVariant,
                                     )
                                     Text(
-                                        text = session.pcapPath?.substringAfterLast('/') ?: "no pcap",
+                                        text = session.pcapPath?.substringAfterLast('/') ?: "无 PCAP",
                                         style = MaterialTheme.typography.labelSmall.copy(fontFamily = FontFamily.Monospace),
                                         color = NrOnSurfaceVariant,
                                     )
@@ -302,13 +302,13 @@ fun WpaCrackerScreen(
             ) {
                 Column(Modifier.padding(14.dp)) {
                     Text(
-                        text = "Wordlist",
+                        text = "字典文件 (Wordlist)",
                         fontWeight = FontWeight.SemiBold,
                         color = NrOnSurface,
                     )
                     Spacer(Modifier.height(6.dp))
                     Text(
-                        text = wordlistName ?: "No wordlist selected",
+                        text = wordlistName ?: "未选择字典文件",
                         style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
                         color = NrOnSurfaceVariant,
                     )
@@ -317,13 +317,13 @@ fun WpaCrackerScreen(
                         OutlinedButton(onClick = onChooseWordlist, enabled = !running) {
                             Icon(Icons.Default.Folder, contentDescription = null, modifier = Modifier.size(16.dp))
                             Spacer(Modifier.width(6.dp))
-                            Text(if (wordlistName == null) "Choose wordlist" else "Change wordlist")
+                            Text(if (wordlistName == null) "选择字典" else "更换字典")
                         }
                         if (wordlistName != null) {
                             OutlinedButton(onClick = onClearWordlist, enabled = !running) {
                                 Icon(Icons.Default.Delete, contentDescription = null, modifier = Modifier.size(16.dp))
                                 Spacer(Modifier.width(6.dp))
-                                Text("Clear")
+                                Text("清除")
                             }
                         }
                     }
@@ -338,7 +338,7 @@ fun WpaCrackerScreen(
             ) {
                 Column(Modifier.padding(14.dp)) {
                     Text(
-                        text = "Result",
+                        text = "破解结果",
                         fontWeight = FontWeight.SemiBold,
                         color = NrOnSurface,
                     )
@@ -356,7 +356,7 @@ fun WpaCrackerScreen(
                             Spacer(Modifier.height(6.dp))
                         }
                         Text(
-                            text = "Tested $tested candidate(s)  ·  ${"%.1f".format(speed)}/s",
+                            text = "已测试 $tested 个候选密码  ·  ${"%.1f".format(speed)} 次/秒",
                             style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
                             color = NrOnSurfaceVariant,
                         )
@@ -375,11 +375,11 @@ fun WpaCrackerScreen(
                                 modifier = Modifier.weight(1f),
                             )
                             IconButton(onClick = {
-                                clipboard.copyWithToast(context, password, "Password copied")
+                                clipboard.copyWithToast(context, password, "密码已复制")
                             }) {
                                 Icon(
                                     imageVector = Icons.Default.ContentCopy,
-                                    contentDescription = "Copy recovered password",
+                                    contentDescription = "复制破解出的密码",
                                     tint = NrOnSurfaceVariant,
                                 )
                             }
@@ -402,7 +402,7 @@ fun WpaCrackerScreen(
         ) {
             Icon(
                 imageVector = if (running) Icons.Default.Stop else Icons.Default.PlayArrow,
-                contentDescription = if (running) "Stop cracker" else "Start cracker",
+                contentDescription = if (running) "停止破解" else "开始破解",
             )
         }
     }

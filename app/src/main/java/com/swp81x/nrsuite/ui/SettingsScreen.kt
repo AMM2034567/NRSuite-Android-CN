@@ -195,8 +195,8 @@ internal fun SettingsScreen(
         "ESP32-C3" -> "ESP32-C3"
         "ESP32-S3" -> "ESP32-S3"
         "ESP32-S2" -> "ESP32-S2"
-        "ESP32" -> "Classic ESP32 devkit"
-        else -> "Not connected / unknown"
+        "ESP32" -> "标准 ESP32 开发板"
+        else -> "未连接 / 未知"
     }
     var selectedTargetChip by remember { mutableStateOf(chip ?: "ESP32") }
     val targetHasPermission = selectedFlashTarget?.let { usbManager.hasPermission(it.device) } == true
@@ -235,7 +235,7 @@ internal fun SettingsScreen(
         border = BorderStroke(0.5.dp, NrOutline),
         ) {
             Column(Modifier.padding(14.dp)) {
-                Text("NRSuite root directory", fontWeight = FontWeight.SemiBold)
+                Text("NRSuite 工作根目录", fontWeight = FontWeight.SemiBold)
                 Spacer(Modifier.height(4.dp))
                 Text(
                     text = exportDirectoryName,
@@ -244,11 +244,11 @@ internal fun SettingsScreen(
                 )
                 Spacer(Modifier.height(10.dp))
                 Button(onClick = onChooseExportDirectory) {
-                    Text("Choose root folder")
+                    Text("选择根目录")
                 }
                 Spacer(Modifier.height(6.dp))
                 Text(
-                    text = "Captures are stored under Pcap/ inside this directory. Choose it once; the app creates the structure.",
+                    text = "抓包文件将保存在该目录下的 Pcap/ 子目录中。只需设置一次，应用会自动创建目录结构。",
                     style = MaterialTheme.typography.bodySmall,
                     color = NrOnSurfaceVariant,
                 )
@@ -265,41 +265,41 @@ internal fun SettingsScreen(
             Column(Modifier.padding(14.dp)) {
 
                 Text(
-                    text = "Current version: ${currentFirmware ?: "not connected"}",
+                    text = "当前固件版本: ${currentFirmware ?: "未连接"}",
                     style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
                     color = NrOnSurfaceVariant,
                 )
                 Text(
-                    text = "Detected board: $boardName",
+                    text = "识别到的开发板: $boardName",
                     style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
                     color = NrOnSurfaceVariant,
                 )
                 Spacer(Modifier.height(12.dp))
 
                 Text(
-                    text = "1. Target device",
+                    text = "1. 目标烧录设备",
                     fontWeight = FontWeight.SemiBold,
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    text = "Select the board to flash and grant USB permission.",
+                    text = "选择待烧录的开发板并授予 USB 访问权限。",
                     style = MaterialTheme.typography.bodySmall,
                     color = NrOnSurfaceVariant,
                 )
                 Spacer(Modifier.height(6.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = "Flash target",
+                        text = "烧录目标设备",
                         fontWeight = FontWeight.SemiBold,
                         modifier = Modifier.weight(1f),
                     )
                     TextButton(onClick = onRefreshDevices, enabled = !firmwareFlashing) {
-                        Text("Refresh")
+                        Text("刷新")
                     }
                 }
                 if (devices.isEmpty()) {
                     Text(
-                        text = "No supported USB serial device found. Plug in the board and tap Refresh.",
+                        text = "未找到受支持的 USB 串口设备。请插入开发板并点击刷新。",
                         style = MaterialTheme.typography.bodySmall,
                         color = StatusAmber,
                     )
@@ -321,7 +321,7 @@ internal fun SettingsScreen(
                                     fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
                                 )
                                 Text(
-                                    text = if (hasPermission) "Permission granted" else "Permission required",
+                                    text = if (hasPermission) "已授权" else "需要 USB 权限",
                                     style = MaterialTheme.typography.bodySmall,
                                     color = NrOnSurfaceVariant,
                                 )
@@ -339,9 +339,9 @@ internal fun SettingsScreen(
                             ) {
                                 Text(
                                     when {
-                                        selected -> "Selected"
-                                        !hasPermission -> "Grant permission"
-                                        else -> "Select"
+                                        selected -> "已选择"
+                                        !hasPermission -> "授予权限"
+                                        else -> "选择"
                                     }
                                 )
                             }
@@ -351,7 +351,7 @@ internal fun SettingsScreen(
                 Spacer(Modifier.height(12.dp))
 
                 Text(
-                    text = "2. Firmware image",
+                    text = "2. 固件镜像文件",
                     fontWeight = FontWeight.SemiBold,
                 )
                 Spacer(Modifier.height(4.dp))
@@ -359,7 +359,7 @@ internal fun SettingsScreen(
                     text = if (firmwareFileName != null && firmwareFlashSize > 0) {
                         "$firmwareFileName  (${firmwareFlashSize / 1024} KB)"
                     } else {
-                        firmwareFileName ?: "No merged firmware .bin selected"
+                        firmwareFileName ?: "未选择已合并的固件 .bin 文件"
                     },
                     style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
                     color = NrOnSurfaceVariant,
@@ -374,7 +374,7 @@ internal fun SettingsScreen(
                             contentColor = MaterialTheme.colorScheme.onPrimary,
                         ),
                     ) {
-                        Text("Choose firmware .bin")
+                        Text("选择固件 .bin")
                     }
                 } else {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -383,20 +383,20 @@ internal fun SettingsScreen(
                             enabled = targetHasPermission && !firmwareFlashing,
                             colors = ButtonDefaults.outlinedButtonColors(contentColor = accent),
                         ) {
-                            Text("Change")
+                            Text("更换")
                         }
                         TextButton(
                             onClick = onClearFirmware,
                             enabled = !firmwareFlashing,
                         ) {
-                            Text("Clear")
+                            Text("清除")
                         }
                     }
                 }
                 if (!targetHasPermission) {
                     Spacer(Modifier.height(4.dp))
                     Text(
-                        text = "Select a device above to choose firmware.",
+                        text = "请先在上方选择目标设备再选取固件。",
                         style = MaterialTheme.typography.bodySmall,
                         color = StatusAmber,
                     )
@@ -404,12 +404,12 @@ internal fun SettingsScreen(
                 Spacer(Modifier.height(12.dp))
 
                 Text(
-                    text = "3. Review",
+                    text = "3. 参数确认与烧录",
                     fontWeight = FontWeight.SemiBold,
                 )
                 Spacer(Modifier.height(6.dp))
                 Text(
-                    text = "Target chip",
+                    text = "目标芯片架构",
                     fontWeight = FontWeight.SemiBold,
                 )
                 Spacer(Modifier.height(4.dp))
@@ -430,13 +430,13 @@ internal fun SettingsScreen(
                 }
                 Spacer(Modifier.height(6.dp))
                 Text(
-                    text = "Flash offset: 0x0",
+                    text = "烧录偏移地址 (Offset): 0x0",
                     style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
                     color = NrOnSurfaceVariant,
                 )
                 Spacer(Modifier.height(6.dp))
                 TextButton(onClick = { advancedExpanded = !advancedExpanded }) {
-                    Text(if (advancedExpanded) "Hide advanced options" else "Advanced options")
+                    Text(if (advancedExpanded) "收起高级选项" else "展开高级选项")
                 }
                 if (advancedExpanded) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -447,24 +447,21 @@ internal fun SettingsScreen(
                         )
                         Spacer(Modifier.width(8.dp))
                         Text(
-                            text = "Skip auto-reset (already in ROM bootloader)",
+                            text = "跳过自动复位 (已处于 ROM Bootloader 模式)",
                             style = MaterialTheme.typography.bodySmall,
                             color = NrOnSurfaceVariant,
                         )
                     }
                     Spacer(Modifier.height(4.dp))
                     Text(
-                        text = "Use this only if the board is already in ROM bootloader mode. " +
-                            "Otherwise hold BOOT, tap RESET, then enable this option and flash.",
+                        text = "仅当开发板已处于 ROM Bootloader 模式时使用。否则可按住 BOOT 键并点按 RESET 键，再开启此选项进行烧录。",
                         style = MaterialTheme.typography.bodySmall,
                         color = NrOnSurfaceVariant,
                     )
                 }
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    text = "This writes the complete merged .bin at offset 0x0. " +
-                        "The flash blocks being written are erased automatically. " +
-                        "It is not an OTA/incremental update.",
+                    text = "此操作将完整的合并固件 .bin 写入基地址 0x0。待写入的闪存扇区将被自动擦除。此操作非增量 OTA 升级。",
                     style = MaterialTheme.typography.bodySmall,
                     color = StatusAmber,
                 )
@@ -480,17 +477,16 @@ internal fun SettingsScreen(
                         contentColor = MaterialTheme.colorScheme.onPrimary,
                     ),
                 ) {
-                    Text(if (firmwareFlashing) "Flashing..." else "Flash firmware")
+                    Text(if (firmwareFlashing) "正在烧录..." else "开始烧录固件")
                 }
                 if (showFlashConfirm) {
                     AlertDialog(
                         onDismissRequest = { showFlashConfirm = false },
-                        title = { Text("Flash firmware?") },
+                        title = { Text("确认烧录固件？") },
                         text = {
                             Text(
-                                "This will write the selected firmware on " +
-                                    "${selectedFlashTarget?.displayName ?: "the device"} " +
-                                    "and reboot it. Do not unplug during the process.",
+                                "即将向设备 ${selectedFlashTarget?.displayName ?: "选定设备"} 写入选定固件并在烧录完成后自动重启。" +
+                                    "烧录过程中请勿拔出 USB 数据线。",
                                 color = NrOnSurfaceVariant,
                             )
                         },
@@ -504,11 +500,11 @@ internal fun SettingsScreen(
                                     containerColor = StatusAmber,
                                     contentColor = com.swp81x.nrsuite.ui.theme.NrBackground,
                                 ),
-                            ) { Text("Flash now") }
+                            ) { Text("立即烧录") }
                         },
                         dismissButton = {
                             OutlinedButton(onClick = { showFlashConfirm = false }) {
-                                Text("Cancel")
+                                Text("取消")
                             }
                         },
                     )
@@ -521,9 +517,11 @@ internal fun SettingsScreen(
                     )
                     Spacer(Modifier.height(4.dp))
                     Text(
-                        text = firmwareFlashStatus ?: "Preparing...",
+                        text = firmwareFlashStatus ?: "正在准备...",
                         style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
-                        color = if (firmwareFlashStatus?.startsWith("Flash failed") == true) {
+                        color = if (firmwareFlashStatus?.startsWith("Flash failed") == true ||
+                            firmwareFlashStatus?.startsWith("烧录失败") == true
+                        ) {
                             MaterialTheme.colorScheme.error
                         } else {
                             NrOnSurfaceVariant
@@ -554,9 +552,9 @@ internal fun SettingsScreen(
         border = BorderStroke(0.5.dp, NrOutline),
         ) {
             Column(Modifier.padding(14.dp)) {
-                Text("Appearance", fontWeight = FontWeight.SemiBold)
+                Text("外观设置", fontWeight = FontWeight.SemiBold)
                 Text(
-                    text = "Dark technical theme is fixed.",
+                    text = "已锁定深色极客技术主题风格。",
                     style = MaterialTheme.typography.bodySmall,
                     color = NrOnSurfaceVariant,
                 )
@@ -569,9 +567,9 @@ internal fun SettingsScreen(
         border = BorderStroke(0.5.dp, NrOutline),
         ) {
             Column(Modifier.padding(14.dp)) {
-                Text("Developer", fontWeight = FontWeight.SemiBold)
+                Text("开发者", fontWeight = FontWeight.SemiBold)
                 Text(
-                    text = "NRSuite is developed by @7wp81x.",
+                    text = "NRSuite 由 @7wp81x 开发维护。",
                     style = MaterialTheme.typography.bodySmall,
                     color = NrOnSurfaceVariant,
                 )
@@ -583,7 +581,7 @@ internal fun SettingsScreen(
                         )
                     }
                 }) {
-                    Text("Open GitHub")
+                    Text("访问 GitHub 主页")
                 }
             }
         }
@@ -594,9 +592,9 @@ internal fun SettingsScreen(
         border = BorderStroke(0.5.dp, NrOutline),
         ) {
             Column(Modifier.padding(14.dp)) {
-                Text("About", fontWeight = FontWeight.SemiBold)
+                Text("关于 NRSuite", fontWeight = FontWeight.SemiBold)
                 Text(
-                    text = "NRSuite Android app. BLE, WiFi, HID, and storage operations are executed by the ESP32 companion.",
+                    text = "NRSuite Android 客户端。BLE、WiFi、HID 键鼠注入以及底层存储操作由外接 ESP32 硬件协同执行。",
                     style = MaterialTheme.typography.bodySmall,
                     color = NrOnSurfaceVariant,
                 )
@@ -627,11 +625,11 @@ private fun OuiRulesCard(
         shape = RoundedCornerShape(12.dp),
     ) {
         Column(Modifier.padding(14.dp)) {
-            Text("Rogue AP Detector — OUI rules", fontWeight = FontWeight.SemiBold)
+            Text("伪造 AP 监测 — OUI 厂商规则", fontWeight = FontWeight.SemiBold)
             Spacer(Modifier.height(4.dp))
             Text(
-                text = "Whitelist common AP hardware in your area to reduce false alarms. " +
-                    "Blacklist vendor prefixes known for rogue AP tools to flag them harder.",
+                text = "将您所在区域常见的合法 AP 硬件厂商加入白名单以减少误报。" +
+                    "将常用的伪造 AP 黑客硬件工具厂商加入黑名单，以便高灵敏度告警。",
                 style = MaterialTheme.typography.bodySmall,
                 color = NrOnSurfaceVariant,
             )
@@ -639,7 +637,7 @@ private fun OuiRulesCard(
 
             if (ouiRules.isEmpty()) {
                 Text(
-                    text = "No rules yet.",
+                    text = "暂无自定义规则。",
                     style = MaterialTheme.typography.bodySmall,
                     color = NrOnSurfaceVariant,
                 )
@@ -655,7 +653,7 @@ private fun OuiRulesCard(
 
             if (!showAddForm) {
                 OutlinedButton(onClick = { showAddForm = true }) {
-                    Text("Add rule")
+                    Text("添加规则")
                 }
             } else {
                 Column {
@@ -663,7 +661,7 @@ private fun OuiRulesCard(
                         value = ouiInput,
                         onValueChange = { ouiInput = it },
                         modifier = Modifier.fillMaxWidth(),
-                        label = { Text("OUI prefix (AA:BB:CC)") },
+                        label = { Text("OUI 前缀 (例如 AA:BB:CC)") },
                         isError = ouiInput.isNotBlank() && normalizedOui == null,
                         singleLine = true,
                     )
@@ -672,7 +670,7 @@ private fun OuiRulesCard(
                         value = labelInput,
                         onValueChange = { labelInput = it },
                         modifier = Modifier.fillMaxWidth(),
-                        label = { Text("Label") },
+                        label = { Text("备注标签") },
                         singleLine = true,
                     )
                     Spacer(Modifier.height(8.dp))
@@ -680,12 +678,12 @@ private fun OuiRulesCard(
                         NrFilterChip(
                             selected = actionInput == OuiRuleAction.WHITELIST,
                             onClick = { actionInput = OuiRuleAction.WHITELIST },
-                            label = "Whitelist",
+                            label = "白名单",
                         )
                         NrFilterChip(
                             selected = actionInput == OuiRuleAction.BLACKLIST,
                             onClick = { actionInput = OuiRuleAction.BLACKLIST },
-                            label = "Blacklist",
+                            label = "黑名单",
                         )
                     }
                     Spacer(Modifier.height(10.dp))
@@ -701,10 +699,10 @@ private fun OuiRulesCard(
                             },
                             enabled = normalizedOui != null && labelInput.isNotBlank(),
                         ) {
-                            Text("Save")
+                            Text("保存")
                         }
                         TextButton(onClick = { showAddForm = false }) {
-                            Text("Cancel")
+                            Text("取消")
                         }
                     }
                 }
@@ -752,8 +750,8 @@ private fun OuiRuleRow(
         ) {
             Text(
                 text = when (rule.action) {
-                    OuiRuleAction.WHITELIST -> "Whitelist"
-                    OuiRuleAction.BLACKLIST -> "Blacklist"
+                    OuiRuleAction.WHITELIST -> "白名单"
+                    OuiRuleAction.BLACKLIST -> "黑名单"
                 },
                 style = MaterialTheme.typography.labelSmall,
                 color = badgeColor,
@@ -765,7 +763,7 @@ private fun OuiRuleRow(
         IconButton(onClick = { confirmDelete = true }) {
             Icon(
                 imageVector = Icons.Default.Delete,
-                contentDescription = "Delete OUI rule",
+                contentDescription = "删除 OUI 规则",
                 tint = NrOnSurfaceVariant,
             )
         }
@@ -774,8 +772,8 @@ private fun OuiRuleRow(
     if (confirmDelete) {
         AlertDialog(
             onDismissRequest = { confirmDelete = false },
-            title = { Text("Delete rule?") },
-            text = { Text("Remove the rule for ${rule.ouiPrefix}?") },
+            title = { Text("删除规则？") },
+            text = { Text("确定移除 OUI 前缀 ${rule.ouiPrefix} 的规则？") },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -783,12 +781,12 @@ private fun OuiRuleRow(
                         onDelete()
                     },
                 ) {
-                    Text("Delete")
+                    Text("删除")
                 }
             },
             dismissButton = {
                 TextButton(onClick = { confirmDelete = false }) {
-                    Text("Cancel")
+                    Text("取消")
                 }
             },
         )
@@ -808,11 +806,11 @@ private fun OuiDatabaseCard(
         shape = RoundedCornerShape(12.dp),
     ) {
         Column(Modifier.padding(14.dp)) {
-            Text("MAC vendor database", fontWeight = FontWeight.SemiBold)
+            Text("MAC 硬件厂商数据库", fontWeight = FontWeight.SemiBold)
             Spacer(Modifier.height(4.dp))
             Text(
-                text = "Download the IEEE OUI registry for offline vendor/MAC lookup. " +
-                    "No MAC lookup leaves the device.",
+                text = "下载 IEEE 官方 OUI 注册表用于离线厂商与 MAC 地址查询。" +
+                    "所有 MAC 查询完全在本地设备端离线运行，不泄露任何网络数据。",
                 style = MaterialTheme.typography.bodySmall,
                 color = NrOnSurfaceVariant,
             )
@@ -821,7 +819,7 @@ private fun OuiDatabaseCard(
             when (status) {
                 OuiDatabaseStatus.NotDownloaded -> {
                     Text(
-                        text = "Not downloaded.",
+                        text = "数据库未下载。",
                         style = MaterialTheme.typography.bodySmall,
                         color = NrOnSurfaceVariant,
                     )
@@ -834,7 +832,7 @@ private fun OuiDatabaseCard(
                         )
                         Spacer(Modifier.height(4.dp))
                         Text(
-                            text = "Downloading… ${progress.toInt()}%",
+                            text = "正在下载… ${progress.toInt()}%",
                             style = MaterialTheme.typography.bodySmall.copy(
                                 fontFamily = FontFamily.Monospace,
                             ),
@@ -846,7 +844,7 @@ private fun OuiDatabaseCard(
                         )
                         Spacer(Modifier.height(4.dp))
                         Text(
-                            text = "Downloading…",
+                            text = "正在下载…",
                             style = MaterialTheme.typography.bodySmall,
                             color = StatusAmber,
                         )
@@ -854,7 +852,7 @@ private fun OuiDatabaseCard(
                 }
                 is OuiDatabaseStatus.Ready -> {
                     Text(
-                        text = "${status.vendorCount} OUI prefixes · updated ${status.updatedAt}",
+                        text = "已收录 ${status.vendorCount} 条 OUI 记录 · 更新于 ${status.updatedAt}",
                         style = MaterialTheme.typography.bodySmall.copy(
                             fontFamily = FontFamily.Monospace,
                         ),
@@ -875,7 +873,7 @@ private fun OuiDatabaseCard(
                 onClick = onDownload,
                 enabled = status !is OuiDatabaseStatus.Downloading,
             ) {
-                Text(if (status is OuiDatabaseStatus.Ready) "Update database" else "Download database")
+                Text(if (status is OuiDatabaseStatus.Ready) "更新数据库" else "下载数据库")
             }
         }
     }

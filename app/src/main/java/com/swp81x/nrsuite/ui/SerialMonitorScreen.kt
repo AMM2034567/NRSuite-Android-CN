@@ -83,6 +83,14 @@ import com.swp81x.nrsuite.ui.util.copyWithToast
 private val BAUD_RATES = listOf(9600, 19200, 38400, 57600, 115200, 230400, 460800, 921600)
 private val LINE_ENDINGS = listOf("None", "LF", "CR", "CRLF")
 
+private fun formatLineEndingLabel(ending: String): String = when (ending) {
+    "None" -> "无换行"
+    "LF" -> "LF (\\n)"
+    "CR" -> "CR (\\r)"
+    "CRLF" -> "CRLF (\\r\\n)"
+    else -> ending
+}
+
 @Composable
 fun SerialMonitorScreen(
     devices: List<UsbSerialDevice>,
@@ -186,7 +194,7 @@ fun SerialMonitorScreen(
             onLineEndingChange = onLineEndingChange,
             onSend = onSend,
             onHexModeChange = onHexModeChange,
-            onCopy = { clipboard.copyWithToast(context, logTextForCopy, "Serial log copied") },
+            onCopy = { clipboard.copyWithToast(context, logTextForCopy, "已复制串口日志") },
             onClearLog = onClearLog,
             onExport = onExport,
         )
@@ -232,17 +240,17 @@ private fun SerialMonitorConnectionCard(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    StatusIndicator(label = "Open", color = StatusGreen)
+                    StatusIndicator(label = "已打开", color = StatusGreen)
                     Spacer(Modifier.width(8.dp))
                     Text(
-                        text = "${currentSelected?.displayName ?: "Serial device"} @ $baudRate baud",
+                        text = "${currentSelected?.displayName ?: "串口设备"} @ $baudRate 波特率",
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.weight(1f),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
                     IconButton(onClick = onToggle) {
-                        Icon(Icons.Default.ExpandMore, contentDescription = "Expand")
+                        Icon(Icons.Default.ExpandMore, contentDescription = "展开")
                     }
                 }
             } else {
@@ -259,7 +267,7 @@ private fun SerialMonitorConnectionCard(
                     Spacer(Modifier.width(8.dp))
                     Column(Modifier.weight(1f)) {
                         Text(
-                            text = "Serial Monitor",
+                            text = "串口监视器",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold,
                             maxLines = 1,
@@ -267,11 +275,11 @@ private fun SerialMonitorConnectionCard(
                         )
                         Text(
                             text = when {
-                                connecting -> "Opening serial port..."
-                                connected -> "${currentSelected?.displayName ?: "Serial device"} @ $baudRate baud"
-                                currentSelected == null -> "Select a USB serial device"
-                                !hasPermission(currentSelected) -> "USB permission required"
-                                else -> "Ready to open ${currentSelected.displayName}"
+                                connecting -> "正在打开串口..."
+                                connected -> "${currentSelected?.displayName ?: "串口设备"} @ $baudRate 波特率"
+                                currentSelected == null -> "请选择 USB 串口设备"
+                                !hasPermission(currentSelected) -> "需要授予 USB 权限"
+                                else -> "就绪，可打开 ${currentSelected.displayName}"
                             },
                             style = MaterialTheme.typography.bodySmall,
                             color = if (connected) StatusGreen else NrOnSurfaceVariant,
@@ -282,7 +290,7 @@ private fun SerialMonitorConnectionCard(
                     IconButton(onClick = onToggle) {
                         Icon(
                             imageVector = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                            contentDescription = if (expanded) "Collapse" else "Expand",
+                            contentDescription = if (expanded) "收起" else "展开",
                         )
                     }
                 }
@@ -297,8 +305,8 @@ private fun SerialMonitorConnectionCard(
                     ) {
                         DropdownField(
                             modifier = Modifier.weight(1f),
-                            label = "Device",
-                            value = currentSelected?.displayName ?: "Select a device",
+                            label = "目标设备",
+                            value = currentSelected?.displayName ?: "选择设备",
                             enabled = !connected && devices.isNotEmpty(),
                             expanded = deviceMenuExpanded,
                             onToggle = { deviceMenuExpanded = true },
@@ -323,7 +331,7 @@ private fun SerialMonitorConnectionCard(
                         IconButton(onClick = onRefreshDevices) {
                             Icon(
                                 imageVector = Icons.Default.Refresh,
-                                contentDescription = "Refresh USB serial devices",
+                                contentDescription = "刷新 USB 串口设备列表",
                                 tint = NrOnSurfaceVariant,
                                 modifier = Modifier.size(18.dp),
                             )
@@ -342,11 +350,11 @@ private fun SerialMonitorConnectionCard(
                         ) {
                             Text(
                                 text = when {
-                                    connected -> "Disconnect"
-                                    connecting -> "Connecting..."
-                                    currentSelected == null -> "Connect"
-                                    !hasPermission(currentSelected) -> "Unpaired"
-                                    else -> "Connect"
+                                    connected -> "断开连接"
+                                    connecting -> "连接中..."
+                                    currentSelected == null -> "连接"
+                                    !hasPermission(currentSelected) -> "未授权"
+                                    else -> "连接"
                                 },
                             )
                         }
@@ -361,7 +369,7 @@ private fun SerialMonitorConnectionCard(
                     ) {
                         DropdownField(
                             modifier = Modifier.weight(1f),
-                            label = "Baud rate",
+                            label = "波特率",
                             value = baudRate.toString(),
                             enabled = !connected,
                             expanded = baudMenuExpanded,
@@ -383,13 +391,13 @@ private fun SerialMonitorConnectionCard(
                             NrFilterChip(
                                 selected = !hexMode,
                                 onClick = { onHexModeChange(false) },
-                                label = "Text",
+                                label = "文本",
                                 selectedColor = MaterialTheme.colorScheme.primary,
                             )
                             NrFilterChip(
                                 selected = hexMode,
                                 onClick = { onHexModeChange(true) },
-                                label = "Hex",
+                                label = "十六进制 (Hex)",
                                 selectedColor = MaterialTheme.colorScheme.primary,
                             )
                         }
@@ -436,19 +444,19 @@ private fun SerialMonitorLogCard(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = "Serial log",
+                    text = "串口输出日志",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.weight(1f),
                 )
                 IconButton(onClick = onCopy, enabled = logLines.isNotEmpty()) {
-                    Icon(Icons.Default.ContentCopy, contentDescription = "Copy serial log")
+                    Icon(Icons.Default.ContentCopy, contentDescription = "复制串口日志")
                 }
                 IconButton(onClick = onClearLog, enabled = logLines.isNotEmpty()) {
-                    Icon(Icons.Default.DeleteSweep, contentDescription = "Clear serial log")
+                    Icon(Icons.Default.DeleteSweep, contentDescription = "清空串口日志")
                 }
                 IconButton(onClick = onExport, enabled = logLines.isNotEmpty()) {
-                    Icon(Icons.Default.Download, contentDescription = "Export serial log")
+                    Icon(Icons.Default.Download, contentDescription = "导出串口日志")
                 }
             }
 
@@ -461,7 +469,7 @@ private fun SerialMonitorLogCard(
             ) {
                 if (logLines.isEmpty()) {
                     Text(
-                        text = "No serial data yet. Connect a device and open the port.",
+                        text = "暂无串口数据。请先连接设备并打开串口。",
                         style = MaterialTheme.typography.bodySmall,
                         color = NrOnSurfaceVariant,
                     )
@@ -477,7 +485,7 @@ private fun SerialMonitorLogCard(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .horizontalScroll(logHorizontalScroll),
-                                ) {
+                                 ) {
                                     Column {
                                         Text(
                                             text = "[${line.timestamp}]",
@@ -517,13 +525,13 @@ private fun SerialMonitorLogCard(
                     onValueChange = onInputChange,
                     modifier = Modifier.weight(1f),
                     enabled = connected,
-                    placeholder = { Text("Send text") },
+                    placeholder = { Text("发送指令/数据") },
                     singleLine = true,
                 )
                 DropdownField(
-                    modifier = Modifier.width(110.dp),
+                    modifier = Modifier.width(125.dp),
                     label = "",
-                    value = lineEnding,
+                    value = formatLineEndingLabel(lineEnding),
                     enabled = true,
                     expanded = lineEndingExpanded,
                     onToggle = { lineEndingExpanded = true },
@@ -531,7 +539,7 @@ private fun SerialMonitorLogCard(
                 ) {
                     LINE_ENDINGS.forEach { ending ->
                         DropdownMenuItem(
-                            text = { Text(ending) },
+                            text = { Text(formatLineEndingLabel(ending)) },
                             onClick = {
                                 onLineEndingChange(ending)
                                 lineEndingExpanded = false
@@ -543,7 +551,7 @@ private fun SerialMonitorLogCard(
                     onClick = onSend,
                     enabled = connected,
                 ) {
-                    Icon(Icons.Default.Send, contentDescription = "Send serial text")
+                    Icon(Icons.Default.Send, contentDescription = "发送串口数据")
                 }
             }
         }
@@ -594,7 +602,7 @@ private fun DropdownField(
                 }
                 Icon(
                     imageVector = Icons.Default.ArrowDropDown,
-                    contentDescription = "Open $label list",
+                    contentDescription = "展开 $label 列表",
                     tint = if (enabled) MaterialTheme.colorScheme.onSurface else NrOnSurfaceVariant,
                 )
             }

@@ -118,12 +118,12 @@ fun PortalScreen(
                 Tab(
                     selected = selectedTab == 0,
                     onClick = { selectedTab = 0 },
-                    text = { Text("Overview") },
+                    text = { Text("概览") },
                 )
                 Tab(
                     selected = selectedTab == 1,
                     onClick = { selectedTab = 1 },
-                    text = { Text("Logs (${eventLog.size})") },
+                    text = { Text("日志 (${eventLog.size})") },
                 )
             }
 
@@ -188,7 +188,7 @@ fun PortalScreen(
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Text(
-                                text = "Portal event log",
+                                text = "Portal 事件日志",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.SemiBold,
                                 modifier = Modifier.weight(1f),
@@ -198,23 +198,23 @@ fun PortalScreen(
                                     clipboardManager.copyWithToast(
                                         context,
                                         eventLog.joinToString("\n"),
-                                        "Logs copied",
+                                        "日志已复制",
                                     )
                                 },
                                 enabled = eventLog.isNotEmpty(),
                             ) {
-                                Icon(Icons.Default.ContentCopy, contentDescription = "Copy logs")
+                                Icon(Icons.Default.ContentCopy, contentDescription = "复制日志")
                             }
                             IconButton(
                                 onClick = onClearEventLog,
                                 enabled = eventLog.isNotEmpty(),
                             ) {
-                                Icon(Icons.Default.Delete, contentDescription = "Clear logs")
+                                Icon(Icons.Default.Delete, contentDescription = "清空日志")
                             }
                         }
                         if (eventLog.isEmpty()) {
                             Text(
-                                text = "No portal events yet. Page views, client associations, and POST data will appear here.",
+                                text = "暂无 Portal 事件。页面访问、客户端连接及 POST 表单数据将显示在此处。",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = NrOnSurfaceVariant,
                             )
@@ -254,7 +254,7 @@ fun PortalScreen(
             ) {
                 Icon(
                     imageVector = if (running) Icons.Default.Stop else Icons.Default.PlayArrow,
-                    contentDescription = if (running) "Stop portal" else "Start portal",
+                    contentDescription = if (running) "停止 Portal" else "启动 Portal",
                 )
             }
         }
@@ -263,17 +263,17 @@ fun PortalScreen(
     if (confirmStart) {
         AlertDialog(
             onDismissRequest = { confirmStart = false },
-            title = { Text("Start captive portal?") },
+            title = { Text("启动强制认证门户 (Captive Portal)？") },
             text = {
                 Text(
                     "SSID: $ssid\n" +
-                        "Channel: $channel\n" +
+                        "信道: $channel\n" +
                         if (targetBssid.isBlank()) {
-                            "No auto-EAPOL target selected."
+                            "未选择自动 EAPOL 目标。"
                         } else {
-                            "Auto-EAPOL/deauth target: $targetBssid"
+                            "自动 EAPOL/Deauth 目标: $targetBssid"
                         } +
-                        "\n\nOnly deploy this on networks and devices you own or are authorized to test."
+                        "\n\n请仅在您拥有或获得授权测试的网络与设备上部署。"
                 )
             },
             confirmButton = {
@@ -283,12 +283,12 @@ fun PortalScreen(
                         onStart(ssid.trim(), channel, targetBssid.trim())
                     },
                 ) {
-                    Text("Start")
+                    Text("启动")
                 }
             },
             dismissButton = {
                 TextButton(onClick = { confirmStart = false }) {
-                    Text("Cancel")
+                    Text("取消")
                 }
             },
         )
@@ -335,12 +335,12 @@ private fun ConfigZone(
                 Spacer(Modifier.width(10.dp))
                 Column(Modifier.weight(1f)) {
                     Text(
-                        text = "Portal configuration",
+                        text = "Portal 强制门户配置",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
                     )
                     Text(
-                        text = if (running) "Portal running" else "Soft AP + DNS + HTTP server",
+                        text = if (running) "Portal 运行中" else "Soft AP + DNS 劫持 + HTTP 服务",
                         style = MaterialTheme.typography.bodySmall,
                         color = NrOnSurfaceVariant,
                     )
@@ -348,7 +348,7 @@ private fun ConfigZone(
                 IconButton(onClick = onToggle) {
                     Icon(
                         imageVector = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                        contentDescription = if (expanded) "Collapse" else "Expand",
+                        contentDescription = if (expanded) "折叠" else "展开",
                     )
                 }
             }
@@ -366,7 +366,7 @@ private fun ConfigZone(
                     )
                     Spacer(Modifier.height(8.dp))
                     NumberStepper(
-                        label = "Channel (1–13)",
+                        label = "信道 (1–13)",
                         valueText = channel.toString(),
                         enabled = !running,
                         onDecrease = { onChannelChange(channel - 1) },
@@ -388,7 +388,7 @@ private fun ConfigZone(
                     if (!connected) {
                         Spacer(Modifier.height(10.dp))
                         Text(
-                            text = "Connect a device from the Device tab before starting the portal.",
+                            text = "启动 Portal 前请先在“设备”页面连接硬件设备。",
                             style = MaterialTheme.typography.bodySmall,
                             color = StatusAmber,
                         )
@@ -419,7 +419,7 @@ private fun NumberStepper(
         IconButton(onClick = onDecrease, enabled = enabled) {
             Icon(
                 imageVector = Icons.Default.Remove,
-                contentDescription = "Decrease $label",
+                contentDescription = "减小 $label",
             )
         }
         Text(
@@ -430,7 +430,7 @@ private fun NumberStepper(
         IconButton(onClick = onIncrease, enabled = enabled) {
             Icon(
                 imageVector = Icons.Default.Add,
-                contentDescription = "Increase $label",
+                contentDescription = "增加 $label",
             )
         }
     }
@@ -459,14 +459,14 @@ private fun CapturedCredentialsZone(credentials: List<CapturedCredential>) {
                 )
                 Spacer(Modifier.width(8.dp))
                 Text(
-                    text = "Captured credentials (${credentials.size})",
+                    text = "已捕获凭据 (${credentials.size})",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
                 )
             }
             Spacer(Modifier.height(6.dp))
             Text(
-                text = "Latest submission: ${latest.capturedAt}  ·  ${latest.details.size} field(s)",
+                text = "最新提交: ${latest.capturedAt}  ·  ${latest.details.size} 个字段",
                 style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
                 color = NrOnSurfaceVariant,
             )
@@ -486,13 +486,13 @@ private fun CapturedCredentialsZone(credentials: List<CapturedCredential>) {
                     Text(
                         text = value,
                         style = MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily.Monospace),
-                        color = if (label == "Password") StatusGreen else MaterialTheme.colorScheme.onSurface,
+                        color = if (label == "Password" || label == "密码") StatusGreen else MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.weight(1f),
                     )
                     IconButton(onClick = { clipboard.copyWithToast(context, value) }) {
                         Icon(
                             imageVector = Icons.Default.ContentCopy,
-                            contentDescription = "Copy $label",
+                            contentDescription = "复制 $label",
                             tint = NrOnSurfaceVariant,
                         )
                     }
@@ -502,13 +502,13 @@ private fun CapturedCredentialsZone(credentials: List<CapturedCredential>) {
             val extraFields = (latest.details.size - shownFields.size).coerceAtLeast(0)
             if (extraFields > 0) {
                 Text(
-                    text = "+$extraFields more field(s) in Credential Manager · Portal filter.",
+                    text = "还有 +$extraFields 个字段可在“凭据管理”· Portal 筛选中查看。",
                     style = MaterialTheme.typography.bodySmall,
                     color = NrOnSurfaceVariant,
                 )
             } else {
                 Text(
-                    text = "Full submissions are available in Credential Manager · Portal filter.",
+                    text = "完整提交记录可在“凭据管理”· Portal 筛选中查看。",
                     style = MaterialTheme.typography.bodySmall,
                     color = NrOnSurfaceVariant,
                 )
@@ -519,10 +519,10 @@ private fun CapturedCredentialsZone(credentials: List<CapturedCredential>) {
 
 private fun CapturedCredential.knownPortalFields(): List<Pair<String, String>> {
     val known = listOf(
-        "Username" to listOf("username", "user", "login"),
-        "Email" to listOf("email", "mail"),
-        "Password" to listOf("password", "pass"),
-        "Phone" to listOf("phone", "mobile"),
+        "用户名" to listOf("username", "user", "login"),
+        "邮箱" to listOf("email", "mail"),
+        "密码" to listOf("password", "pass"),
+        "手机号" to listOf("phone", "mobile"),
     )
     val fields = linkedMapOf<String, String>()
     known.forEach { (label, keys) ->
@@ -536,7 +536,7 @@ private fun CapturedCredential.knownPortalFields(): List<Pair<String, String>> {
     }
 
     if (fields.isEmpty()) {
-        fields["Value"] = value
+        fields["值"] = value
     }
     return fields.entries.map { it.key to it.value }
 }
@@ -566,17 +566,17 @@ private fun ResultZone(
                 .padding(16.dp),
         ) {
             Text(
-                text = "Portal status",
+                text = "Portal 运行状态",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
             )
             Spacer(Modifier.height(8.dp))
             StatusIndicator(
                 label = when {
-                    !connected -> "No device connected"
-                    running -> "Portal active"
-                    activeSsid.isNotBlank() -> "Stopped"
-                    else -> "Ready"
+                    !connected -> "未连接设备"
+                    running -> "Portal 运行中"
+                    activeSsid.isNotBlank() -> "已停止"
+                    else -> "就绪"
                 },
                 color = when {
                     !connected -> StatusNeutral
@@ -595,7 +595,7 @@ private fun ResultZone(
                 )
                 if (activeChannel > 0) {
                     Text(
-                        text = "Channel: $activeChannel",
+                        text = "信道: $activeChannel",
                         style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
                         color = NrOnSurfaceVariant,
                     )
@@ -604,22 +604,22 @@ private fun ResultZone(
 
             if (running || activeSsid.isNotBlank()) {
                 Spacer(Modifier.height(16.dp))
-                MetricRow("Page views", portalViews.toString())
-                MetricRow("Clients associated", portalClients.toString())
-                MetricRow("Captured form posts", capturedData.toString())
+                MetricRow("页面访问次数", portalViews.toString())
+                MetricRow("关联客户端数", portalClients.toString())
+                MetricRow("已捕获表单数", capturedData.toString())
             }
 
             if (!connected) {
                 Spacer(Modifier.height(24.dp))
                 Text(
-                    text = "Connect an ESP32 to start the captive portal.",
+                    text = "请先连接 ESP32 设备以启动强制门户。",
                     style = MaterialTheme.typography.bodySmall,
                     color = NrOnSurfaceVariant,
                 )
             } else if (!running) {
                 Spacer(Modifier.height(24.dp))
                 Text(
-                    text = "Configure the AP, optionally choose an HTML file, then tap start.",
+                    text = "配置 AP 参数，可选上传自定义 HTML 页面，然后点击启动。",
                     style = MaterialTheme.typography.bodySmall,
                     color = NrOnSurfaceVariant,
                 )

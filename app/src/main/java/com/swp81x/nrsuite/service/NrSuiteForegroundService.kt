@@ -30,7 +30,7 @@ class NrSuiteForegroundService : Service() {
 
         acquireWakeLock()
         createNotificationChannel()
-        val text = intent.getStringExtra(EXTRA_TEXT) ?: "NRSuite operation active"
+        val text = intent.getStringExtra(EXTRA_TEXT) ?: "NRSuite 正在运行"
         startForeground(NOTIFICATION_ID, buildNotification(text))
         return START_NOT_STICKY
     }
@@ -92,10 +92,10 @@ class NrSuiteForegroundService : Service() {
         if (existing == null) {
             val channel = NotificationChannel(
                 CHANNEL_ID,
-                "NRSuite operations",
+                "NRSuite 后台运行服务",
                 NotificationManager.IMPORTANCE_LOW,
             ).apply {
-                description = "Keeps long-running NRSuite radio operations alive."
+                description = "保持 NRSuite 长时间无线电操作在后台运行。"
             }
             manager.createNotificationChannel(channel)
         }

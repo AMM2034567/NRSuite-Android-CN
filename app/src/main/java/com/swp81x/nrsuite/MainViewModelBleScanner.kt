@@ -13,11 +13,11 @@ import org.json.JSONObject
 internal fun MainViewModel.startBleScanImpl(active: Boolean) {
     val activeSession = session
     if (activeSession == null) {
-        appendLog("Connect to a device before starting BLE scan.")
+        appendLog("启动 BLE 扫描前请先连接设备。")
         return
     }
     if (_bleScanStarting.value || _bleScanRunning.value || _bleScanStopping.value) return
-    if (!ensureRadioIdle("BLE Scanner")) return
+    if (!ensureRadioIdle("BLE 扫描器")) return
 
     _bleScanActive.value = active
     _bleScanStarting.value = true
@@ -36,25 +36,25 @@ internal fun MainViewModel.startBleScanImpl(active: Boolean) {
                 timeoutMs = 10_000,
             )
         }.onFailure { e ->
-            appendLog("BLE scan start failed: ${e.message}", level = LogLevel.ERROR)
+            appendLog("启动 BLE 扫描失败：${e.message}", level = LogLevel.ERROR)
         }.getOrNull()
 
         _bleScanStarting.value = false
         if (response?.optBoolean("ok") == true) {
             _bleScanDevices.value = emptyList()
             _bleProfileTarget.value = null
-            _bleProfileStatus.value = "Select a discovered BLE device"
+            _bleProfileStatus.value = "请选择已发现的 BLE 设备"
             _bleProfileServices.value = emptyList()
             _bleScanRunning.value = true
             _bleScanStopping.value = false
             updateForegroundService()
-            appendLog("BLE scan started (${if (active) "active" else "passive"} mode).")
-            addHistory("ble_scanner", "BLE scan started", HistoryLevel.SUCCESS)
+            appendLog("BLE 扫描已启动 (${if (active) "主动" else "被动"}模式)。")
+            addHistory("ble_scanner", "BLE 扫描已启动", HistoryLevel.SUCCESS)
         } else {
             _bleScanRunning.value = false
             _bleScanStopping.value = false
             updateForegroundService()
-            appendLog("Failed to start BLE scan: ${response?.optString("msg") ?: "timeout"}")
+            appendLog("启动 BLE 扫描失败：${response?.optString("msg") ?: "超时"}")
         }
     }
 }
@@ -69,17 +69,17 @@ internal fun MainViewModel.stopBleScanImpl() {
         val response = runCatching {
             activeSession?.sendCommand("BLE_SCAN_STOP", timeoutMs = 6_000)
         }.onFailure { e ->
-            appendLog("BLE scan stop failed: ${e.message}", level = LogLevel.ERROR)
+            appendLog("停止 BLE 扫描失败：${e.message}", level = LogLevel.ERROR)
         }.getOrNull()
 
         _bleScanRunning.value = false
         _bleScanStopping.value = false
         updateForegroundService()
         if (response?.optBoolean("ok") == true) {
-            appendLog("BLE scan stopped.")
-            addHistory("ble_scanner", "BLE scan stopped", HistoryLevel.INFO)
+            appendLog("BLE 扫描已停止。")
+            addHistory("ble_scanner", "BLE 扫描已停止", HistoryLevel.INFO)
         } else {
-            appendLog("BLE scan stop request sent without confirmation.")
+            appendLog("已发送 BLE 扫描停止请求，未收到确认。")
         }
     }
 }

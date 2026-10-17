@@ -16,7 +16,7 @@ data class UsbSerialDevice(
 ) {
     val displayName: String
         get() {
-            val base = device.productName?.takeIf { it.isNotBlank() } ?: "USB Serial"
+            val base = device.productName?.takeIf { it.isNotBlank() } ?: "USB 串口设备"
             val chip = driverChipLabel(driver) ?: return base
             return "$base ($chip)"
         }

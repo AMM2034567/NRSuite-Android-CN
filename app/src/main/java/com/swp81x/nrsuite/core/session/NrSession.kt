@@ -86,7 +86,7 @@ class NrSession(
                 // booting or the first TX window may be missed. If it starts
                 // sending heartbeats/events, wait for that sign of life and
                 // retry the PING once.
-                log("No PING yet; waiting for device activity before retrying")
+                log("尚未收到 PING 响应；正在等待设备活动后重试")
                 if (awaitDeviceActivity(DEVICE_ACTIVITY_TIMEOUT_MS)) {
                     android.util.Log.i("NRSuiteWire", "device activity observed; retrying PING")
                     delay(POST_ACTIVITY_SETTLE_MS)
@@ -96,9 +96,9 @@ class NrSession(
                 }
             }
             if (pong?.optBoolean("ok") != true) {
-                log("No valid PING response after handshake retries")
+                log("握手重试后仍未收到有效的 PING 响应")
                 disconnect()
-                _state.value = ConnectionState.Failed("No valid PING response from device")
+                _state.value = ConnectionState.Failed("设备未返回有效的 PING 响应")
                 return
             }
 
@@ -120,14 +120,14 @@ class NrSession(
                 deviceId = deviceId,
             )
             log(
-                "Connected to ${chip ?: "NRSuite device"}" +
+                "已连接到 ${chip ?: "NRSuite 设备"}" +
                     (deviceId?.let { " ($it)" } ?: "")
             )
         } catch (e: CancellationException) {
             throw e
         } catch (t: Throwable) {
-            val message = t.message ?: "Connection failed"
-            log("Connection failed: $message")
+            val message = t.message ?: "连接失败"
+            log("连接失败：$message")
             disconnect()
             _state.value = ConnectionState.Failed(message)
         }
@@ -238,7 +238,7 @@ class NrSession(
             throw e
         } catch (t: Throwable) {
             if (!closed) {
-                log("Reader stopped: ${t.message ?: t.javaClass.simpleName}")
+                log("读取循环已停止：${t.message ?: t.javaClass.simpleName}")
                 // A USB unplug surfaces as a read/write exception. Treat it as
                 // a clean disconnect instead of a red "Connection problem".
                 _state.value = ConnectionState.Disconnected
@@ -258,7 +258,7 @@ class NrSession(
     private fun handleResponse(frame: Frame) {
         val json = parseJson(frame)
         if (json == null) {
-            log("Invalid JSON response for frame id=${frame.id}")
+            log("帧 ID=${frame.id} 的 JSON 响应无效")
             return
         }
         pendingResponses.remove(frame.id)?.complete(json)

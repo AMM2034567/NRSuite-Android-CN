@@ -104,14 +104,14 @@ fun CredentialManagerScreen(
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             StatusIndicator(
-                label = if (sessions.isEmpty()) "No saved sessions" else "${displayedSessions.size} of ${sessions.size} session(s)",
+                label = if (sessions.isEmpty()) "无已保存会话" else "显示 ${displayedSessions.size} / ${sessions.size} 个会话",
                 color = StatusNeutral,
             )
 
             OutlinedTextField(
                 value = query,
                 onValueChange = { query = it },
-                placeholder = { Text("Search SSID, BSSID, password...") },
+                placeholder = { Text("搜索 SSID、BSSID、密码...") },
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
@@ -125,22 +125,22 @@ fun CredentialManagerScreen(
                 NrFilterChip(
                     selected = sourceFilter == null,
                     onClick = { sourceFilter = null },
-                    label = "All",
+                    label = "全部",
                 )
                 NrFilterChip(
                     selected = sourceFilter == CredentialSource.EVIL_TWIN,
                     onClick = { sourceFilter = CredentialSource.EVIL_TWIN },
-                    label = "Evil Twin",
+                    label = "恶魔双胞胎",
                 )
                 NrFilterChip(
                     selected = sourceFilter == CredentialSource.WPA_CRACKER,
                     onClick = { sourceFilter = CredentialSource.WPA_CRACKER },
-                    label = "WPA Cracker",
+                    label = "WPA 字典破解",
                 )
                 NrFilterChip(
                     selected = sourceFilter == CredentialSource.PORTAL,
                     onClick = { sourceFilter = CredentialSource.PORTAL },
-                    label = "Portal",
+                    label = "强制门户",
                 )
             }
 
@@ -162,7 +162,7 @@ fun CredentialManagerScreen(
                     )
                     Spacer(Modifier.width(8.dp))
                     Text(
-                        text = "Authorized testing only. Passwords are stored app-privately and only correct attempts are saved.",
+                        text = "仅限合规授权测试使用。捕获的密码保存在应用私有目录，仅保留已验证有效的凭据。",
                         style = MaterialTheme.typography.bodySmall,
                         color = NrOnSurfaceVariant,
                     )
@@ -173,7 +173,7 @@ fun CredentialManagerScreen(
                 EmptyCredsState()
             } else if (displayedSessions.isEmpty()) {
                 Text(
-                    text = "No sessions match the current search/filter.",
+                    text = "未找到匹配当前搜索/筛选条件的会话。",
                     style = MaterialTheme.typography.bodySmall,
                     color = NrOnSurfaceVariant,
                     modifier = Modifier.padding(vertical = 24.dp),
@@ -202,18 +202,17 @@ fun CredentialManagerScreen(
             containerColor = NrSurfaceVariant,
             contentColor = NrOnSurfaceVariant,
         ) {
-            Icon(Icons.Default.Delete, contentDescription = "Clear all saved sessions")
+            Icon(Icons.Default.Delete, contentDescription = "清空全部已保存会话")
         }
     }
 
     deleteTarget?.let { target ->
         AlertDialog(
             onDismissRequest = { deleteTarget = null },
-            title = { Text("Delete session") },
+            title = { Text("删除会话") },
             text = {
                 Text(
-                    "Delete the saved Evil Twin session for " +
-                        "${target.ssid.ifBlank { "target" }}? Its PCAP file will be deleted too.",
+                    "确定删除网络 ${target.ssid.ifBlank { "未命名目标" }} 的已存会话？关联的 PCAP 抓包文件也将一并被删除。",
                     color = NrOnSurfaceVariant,
                 )
             },
@@ -222,12 +221,12 @@ fun CredentialManagerScreen(
                     onDeleteSession(target.id)
                     deleteTarget = null
                 }) {
-                    Text("Delete")
+                    Text("删除")
                 }
             },
             dismissButton = {
                 TextButton(onClick = { deleteTarget = null }) {
-                    Text("Cancel")
+                    Text("取消")
                 }
             },
         )
@@ -236,10 +235,10 @@ fun CredentialManagerScreen(
     if (confirmClearAll) {
         AlertDialog(
             onDismissRequest = { confirmClearAll = false },
-            title = { Text("Clear all sessions") },
+            title = { Text("清空所有会话") },
             text = {
                 Text(
-                    "Delete all saved credential sessions and their PCAP files?",
+                    "确定删除所有已保存的凭据会话及其关联的 PCAP 抓包文件？此操作不可恢复。",
                     color = NrOnSurfaceVariant,
                 )
             },
@@ -248,12 +247,12 @@ fun CredentialManagerScreen(
                     onClearAll()
                     confirmClearAll = false
                 }) {
-                    Text("Clear all")
+                    Text("全部清空")
                 }
             },
             dismissButton = {
                 TextButton(onClick = { confirmClearAll = false }) {
-                    Text("Cancel")
+                    Text("取消")
                 }
             },
         )
@@ -262,7 +261,7 @@ fun CredentialManagerScreen(
     detailSession?.let { session ->
         AlertDialog(
             onDismissRequest = { detailSession = null },
-            title = { Text("Portal submissions") },
+            title = { Text("Portal 门户提交记录") },
             text = {
                 Column(
                     modifier = Modifier
@@ -271,7 +270,7 @@ fun CredentialManagerScreen(
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
                     Text(
-                        text = session.ssid.ifBlank { "(hidden)" },
+                        text = session.ssid.ifBlank { "(隐藏 SSID)" },
                         fontWeight = FontWeight.SemiBold,
                         color = NrOnSurface,
                     )
@@ -297,7 +296,7 @@ fun CredentialManagerScreen(
                                     }) {
                                         Icon(
                                             imageVector = Icons.Default.ContentCopy,
-                                            contentDescription = "Copy submission",
+                                            contentDescription = "复制提交数据",
                                             tint = NrOnSurfaceVariant,
                                         )
                                     }
@@ -323,7 +322,7 @@ fun CredentialManagerScreen(
             },
             confirmButton = {
                 TextButton(onClick = { detailSession = null }) {
-                    Text("Close")
+                    Text("关闭")
                 }
             },
         )
@@ -346,13 +345,13 @@ private fun EmptyCredsState() {
             modifier = Modifier.size(48.dp),
         )
         Text(
-            text = "No saved credential sessions",
+            text = "暂无已保存的凭据会话",
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
             color = NrOnSurface,
         )
         Text(
-            text = "Run Evil Twin or the offline cracker to save a recovered password.",
+            text = "运行恶魔双胞胎或离线字典破解器，即可在此保存恢复出的密码。",
             style = MaterialTheme.typography.bodySmall,
             color = NrOnSurfaceVariant,
         )
@@ -387,13 +386,13 @@ private fun CredentialSessionCard(
                 Spacer(Modifier.width(8.dp))
                 Column(Modifier.weight(1f)) {
                     Text(
-                        text = session.ssid.ifBlank { "(hidden)" },
+                        text = session.ssid.ifBlank { "(隐藏 SSID)" },
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
                         color = NrOnSurface,
                     )
                     Text(
-                        text = session.bssid.ifBlank { "unknown BSSID" },
+                        text = session.bssid.ifBlank { "未知 BSSID" },
                         style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
                         color = NrOnSurfaceVariant,
                     )
@@ -407,7 +406,7 @@ private fun CredentialSessionCard(
                 IconButton(onClick = onDelete) {
                     Icon(
                         imageVector = Icons.Default.Delete,
-                        contentDescription = "Delete session",
+                        contentDescription = "删除会话",
                         tint = NrOnSurfaceVariant,
                     )
                 }
@@ -417,10 +416,10 @@ private fun CredentialSessionCard(
 
             Text(
                 text = buildString {
-                    append("Started: ")
+                    append("开始时间: ")
                     append(session.startedAt.replace('T', ' '))
                     session.endedAt?.let {
-                        append("  ·  Ended: ")
+                        append("  ·  结束时间: ")
                         append(it.replace('T', ' '))
                     }
                 },
@@ -432,7 +431,7 @@ private fun CredentialSessionCard(
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = if (pcapAvailable) "PCAP saved" else "No PCAP",
+                    text = if (pcapAvailable) "已保存 PCAP" else "无 PCAP",
                     style = MaterialTheme.typography.labelSmall,
                     color = if (pcapAvailable) StatusGreen else StatusNeutral,
                     fontWeight = FontWeight.SemiBold,
@@ -450,14 +449,14 @@ private fun CredentialSessionCard(
             if (session.source == CredentialSource.PORTAL) {
                 Spacer(Modifier.height(10.dp))
                 Text(
-                    text = "${session.credentials.size} captured submission(s)",
+                    text = "${session.credentials.size} 条捕获记录",
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.SemiBold,
                     color = NrOnSurface,
                 )
                 session.credentials.lastOrNull()?.let { latest ->
                     Text(
-                        text = "Latest: ${latest.capturedAt}  ·  ${latest.details.size} field(s)",
+                        text = "最新记录: ${latest.capturedAt}  ·  ${latest.details.size} 个字段",
                         style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
                         color = NrOnSurfaceVariant,
                     )
@@ -465,13 +464,13 @@ private fun CredentialSessionCard(
                 if (session.credentials.isNotEmpty()) {
                     Spacer(Modifier.height(8.dp))
                     OutlinedButton(onClick = { onViewSubmissions(session) }) {
-                        Text("View submissions")
+                        Text("查看提交详情")
                     }
                 }
             } else if (session.credentials.isEmpty()) {
                 Spacer(Modifier.height(10.dp))
                 Text(
-                    text = "No correct password captured.",
+                    text = "未捕获到正确密码。",
                     style = MaterialTheme.typography.bodySmall,
                     color = NrOnSurfaceVariant,
                 )
@@ -493,7 +492,7 @@ private fun CredentialSessionCard(
                             IconButton(onClick = { onCopyPassword(credential.value) }) {
                                 Icon(
                                     imageVector = Icons.Default.ContentCopy,
-                                    contentDescription = "Copy password",
+                                    contentDescription = "复制密码",
                                     tint = NrOnSurfaceVariant,
                                 )
                             }
@@ -510,7 +509,7 @@ private fun CredentialSessionCard(
                 ) {
                     Icon(Icons.Default.Share, contentDescription = null, modifier = Modifier.size(16.dp))
                     Spacer(Modifier.width(6.dp))
-                    Text("Share PCAP")
+                    Text("分享 PCAP")
                 }
             }
         }
@@ -518,10 +517,10 @@ private fun CredentialSessionCard(
 }
 
 private fun sourceLabel(source: CredentialSource): String = when (source) {
-    CredentialSource.EVIL_TWIN -> "Evil Twin"
-    CredentialSource.WPA_CRACKER -> "WPA Cracker"
-    CredentialSource.PORTAL -> "Portal"
-    CredentialSource.IMPORTED -> "Imported"
+    CredentialSource.EVIL_TWIN -> "恶魔双胞胎 (Evil Twin)"
+    CredentialSource.WPA_CRACKER -> "WPA 字典破解"
+    CredentialSource.PORTAL -> "强制门户 (Portal)"
+    CredentialSource.IMPORTED -> "外部导入"
 }
 
 private fun sharePcap(context: android.content.Context, path: String) {
@@ -538,6 +537,6 @@ private fun sharePcap(context: android.content.Context, path: String) {
             putExtra(Intent.EXTRA_STREAM, uri)
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
-        context.startActivity(Intent.createChooser(intent, "Share Evil Twin PCAP"))
+        context.startActivity(Intent.createChooser(intent, "分享 PCAP 抓包文件"))
     }
 }

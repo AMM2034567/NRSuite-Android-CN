@@ -38,7 +38,7 @@ fun ChannelStepper(
         ) {
             Icon(
                 imageVector = Icons.Default.Remove,
-                contentDescription = "Decrease channel",
+                contentDescription = "减小信道",
             )
         }
         Text(
@@ -55,7 +55,7 @@ fun ChannelStepper(
         ) {
             Icon(
                 imageVector = Icons.Default.Add,
-                contentDescription = "Increase channel",
+                contentDescription = "增加信道",
             )
         }
     }

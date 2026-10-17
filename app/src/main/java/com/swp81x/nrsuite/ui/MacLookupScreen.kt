@@ -64,10 +64,10 @@ fun MacLookupScreen(
             shape = RoundedCornerShape(12.dp),
         ) {
             Column(Modifier.padding(14.dp)) {
-                Text("MAC / OUI lookup", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                Text("MAC / OUI 厂商查询", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    text = "Look up the OUI prefix and vendor for a MAC address using the offline database.",
+                    text = "基于本地离线数据库，查询 MAC 地址对应的 OUI 前缀及硬件厂商信息。",
                     style = MaterialTheme.typography.bodySmall,
                     color = NrOnSurfaceVariant,
                 )
@@ -76,7 +76,7 @@ fun MacLookupScreen(
                     value = input,
                     onValueChange = { input = it.uppercase() },
                     modifier = Modifier.fillMaxWidth(),
-                    label = { Text("MAC address") },
+                    label = { Text("MAC 地址") },
                     placeholder = { Text("AA:BB:CC:DD:EE:FF") },
                     isError = input.isNotBlank() && !valid,
                     singleLine = true,
@@ -87,11 +87,11 @@ fun MacLookupScreen(
                         onClick = { onLookup(input.trim()) },
                         enabled = valid,
                     ) {
-                        Text("Look up")
+                        Text("查询")
                     }
                     if (result != null) {
                         OutlinedButton(onClick = onClear) {
-                            Text("Clear")
+                            Text("清除")
                         }
                     }
                 }
@@ -113,23 +113,23 @@ private fun MacLookupResultCard(result: MacLookupResult) {
         shape = RoundedCornerShape(12.dp),
     ) {
         Column(Modifier.padding(14.dp)) {
-            Text("Result", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+            Text("查询结果", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
             Spacer(Modifier.height(8.dp))
 
-            InfoLine("MAC", result.normalizedMac)
-            InfoLine("OUI prefix", result.ouiPrefix ?: "—")
+            InfoLine("MAC 地址", result.normalizedMac)
+            InfoLine("OUI 前缀", result.ouiPrefix ?: "—")
             InfoLine(
-                label = "Vendor",
-                value = result.vendor ?: if (result.databaseReady) "Unknown / not in database" else "Database not downloaded",
+                label = "设备厂商",
+                value = result.vendor ?: if (result.databaseReady) "未知 / 数据库未收录" else "数据库未下载",
                 valueColor = if (result.vendor != null) MaterialTheme.colorScheme.primary else StatusAmber,
             )
 
             Spacer(Modifier.height(8.dp))
             Text(
                 text = buildString {
-                    append(if (result.locallyAdministered) "Locally administered / randomized" else "Globally administered")
-                    if (result.multicast) append(" · multicast")
-                    if (result.broadcast) append(" · broadcast")
+                    append(if (result.locallyAdministered) "本地管理地址 / 随机 MAC" else "全球唯一分配地址")
+                    if (result.multicast) append(" · 组播 (Multicast)")
+                    if (result.broadcast) append(" · 广播 (Broadcast)")
                 },
                 style = MaterialTheme.typography.bodySmall,
                 color = if (result.locallyAdministered) StatusAmber else StatusNeutral,

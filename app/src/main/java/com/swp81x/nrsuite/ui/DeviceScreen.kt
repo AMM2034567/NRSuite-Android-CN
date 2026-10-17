@@ -180,12 +180,12 @@ internal fun DeviceScreen(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = "Attached USB devices",
+                    text = "已接入的 USB 设备",
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.weight(1f),
                 )
                 TextButton(onClick = onRefresh) {
-                    Text("Refresh")
+                    Text("刷新")
                 }
             }
         }
@@ -193,7 +193,7 @@ internal fun DeviceScreen(
         if (devices.isEmpty()) {
             item {
                 Text(
-                    text = "No supported USB serial devices found. Plug in an ESP32 via OTG and tap Refresh.",
+                    text = "未找到受支持的 USB 串口设备。请通过 OTG 线连接 ESP32 并点击刷新。",
                     color = NrOnSurfaceVariant,
                 )
             }
@@ -227,12 +227,12 @@ internal fun DeviceScreen(
             ) {
                 Column(Modifier.padding(14.dp)) {
                     Text(
-                        text = "Firmware",
+                        text = "固件管理",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
                     )
                     Text(
-                        text = "Use the in-app Firmware Flasher to write a complete merged .bin over USB. The current firmware version is reported by the device STATUS command.",
+                        text = "使用应用内的“固件烧录器”可通过 USB 写入完整的合并固件 (.bin)。当前固件版本由设备 STATUS 握手指令回报。",
                         style = MaterialTheme.typography.bodySmall,
                         color = NrOnSurfaceVariant,
                     )
@@ -255,36 +255,36 @@ internal fun DeviceConnectionCard(
     ) {
         Column(Modifier.padding(14.dp)) {
             Text(
-                text = "Connection",
+                text = "连接状态",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
             )
             Spacer(Modifier.height(8.dp))
             val (label, color) = if (disconnecting) {
-                "Disconnecting..." to StatusAmber
+                "正在断开..." to StatusAmber
             } else {
                 when (state) {
-                    ConnectionState.Disconnected -> "Disconnected" to StatusNeutral
-                    ConnectionState.Connecting -> "Connecting..." to StatusAmber
-                    is ConnectionState.Connected -> "Connected" to StatusGreen
-                    is ConnectionState.Failed -> "Error: ${state.message}" to StatusRed
+                    ConnectionState.Disconnected -> "未连接" to StatusNeutral
+                    ConnectionState.Connecting -> "正在连接..." to StatusAmber
+                    is ConnectionState.Connected -> "已连接" to StatusGreen
+                    is ConnectionState.Failed -> "连接失败: ${state.message}" to StatusRed
                 }
             }
             StatusIndicator(label = label, color = color)
             if (state is ConnectionState.Connected) {
                 Spacer(Modifier.height(6.dp))
                 Text(
-                    text = "Chip: ${state.chip ?: "unknown"}",
+                    text = "芯片型号: ${state.chip ?: "未知"}",
                     style = MaterialTheme.typography.bodySmall,
                     color = NrOnSurfaceVariant,
                 )
                 Text(
-                    text = "Firmware: ${state.firmwareVersion ?: "unknown"}",
+                    text = "固件版本: ${state.firmwareVersion ?: "未知"}",
                     style = MaterialTheme.typography.bodySmall,
                     color = NrOnSurfaceVariant,
                 )
                 Text(
-                    text = "Device ID: ${state.deviceId ?: "unknown"}",
+                    text = "设备 ID: ${state.deviceId ?: "未知"}",
                     style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
                     color = NrOnSurfaceVariant,
                 )
@@ -294,21 +294,21 @@ internal fun DeviceConnectionCard(
                     is ConnectionState.Connected -> {
                         Spacer(Modifier.height(10.dp))
                         OutlinedButton(onClick = onDisconnect) {
-                            Text("Disconnect")
+                            Text("断开连接")
                         }
                     }
 
                     ConnectionState.Connecting -> {
                         Spacer(Modifier.height(10.dp))
                         OutlinedButton(onClick = onDisconnect) {
-                            Text("Cancel")
+                            Text("取消")
                         }
                     }
 
                     is ConnectionState.Failed -> {
                         Spacer(Modifier.height(10.dp))
                         OutlinedButton(onClick = onDisconnect) {
-                            Text("Clear")
+                            Text("清除")
                         }
                     }
 
@@ -350,13 +350,13 @@ internal fun DeviceRow(
                     fontWeight = FontWeight.Medium,
                 )
                 val statusText = when {
-                    disconnecting -> "Disconnecting..."
-                    state is ConnectionState.Connected -> "Connected"
-                    state is ConnectionState.Connecting -> "Connecting..."
-                    pendingPermission -> "Permission requested"
-                    state is ConnectionState.Failed -> "Connection failed"
-                    hasPermission -> "Permission granted"
-                    else -> "Permission required"
+                    disconnecting -> "正在断开..."
+                    state is ConnectionState.Connected -> "已连接"
+                    state is ConnectionState.Connecting -> "正在连接..."
+                    pendingPermission -> "已请求 USB 权限"
+                    state is ConnectionState.Failed -> "连接失败"
+                    hasPermission -> "已授权"
+                    else -> "需要 USB 权限"
                 }
                 val statusColor = when {
                     disconnecting -> StatusAmber
@@ -392,13 +392,13 @@ internal fun DeviceRow(
                             contentColor = com.swp81x.nrsuite.ui.theme.NrBackground,
                         ),
                     ) {
-                        Text("Disconnecting...")
+                        Text("正在断开...")
                     }
                 }
 
                 state is ConnectionState.Connected -> {
                     OutlinedButton(onClick = onDisconnect) {
-                        Text("Disconnect")
+                        Text("断开连接")
                     }
                 }
 
@@ -411,7 +411,7 @@ internal fun DeviceRow(
                             contentColor = com.swp81x.nrsuite.ui.theme.NrBackground,
                         ),
                     ) {
-                        Text("Connecting...")
+                        Text("正在连接...")
                     }
                 }
 
@@ -424,7 +424,7 @@ internal fun DeviceRow(
                             contentColor = MaterialTheme.colorScheme.onPrimary,
                         ),
                     ) {
-                        Text("Connect")
+                        Text("连接")
                     }
                 }
 
@@ -437,7 +437,7 @@ internal fun DeviceRow(
                             contentColor = com.swp81x.nrsuite.ui.theme.NrBackground,
                         ),
                     ) {
-                        Text("Connect")
+                        Text("连接")
                     }
                 }
             }
@@ -454,17 +454,17 @@ internal fun HardwareInfoCard(state: ConnectionState.Connected) {
     ) {
         Column(Modifier.padding(14.dp)) {
             Text(
-                text = "Hardware info",
+                text = "硬件规格信息",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
             )
             Spacer(Modifier.height(6.dp))
             Text(
-                text = "Chip: ${state.chip ?: "unknown"}",
+                text = "芯片架构: ${state.chip ?: "未知"}",
                 style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
             )
             Text(
-                text = "Transport: USB serial / CDC",
+                text = "通信协议: USB 串口 / CDC-ACM",
                 style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
             )
         }

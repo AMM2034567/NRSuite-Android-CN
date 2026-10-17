@@ -148,9 +148,9 @@ import com.swp81x.nrsuite.ui.theme.LogBgError
 
 
 internal enum class AppTab(val label: String) {
-    HOME("Home"),
-    MODULES("Modules"),
-    LOGS("Logs"),
+    HOME("首页"),
+    MODULES("功能模块"),
+    LOGS("运行日志"),
 }
 
 internal data class CategorySpec(
@@ -166,108 +166,108 @@ internal val modules = listOf(
 
     ModuleCardSpec(
         id = "wifi",
-        title = "WiFi Scan",
-        description = "Active 2.4 GHz scan with SSID, BSSID, channel, RSSI, and security.",
+        title = "WiFi 扫描",
+        description = "2.4 GHz 活跃扫描，获取 SSID、BSSID、信道、RSSI 及加密方式。",
         icon = Icons.Default.Wifi,
-        category = "WiFi Recon",
+        category = "WiFi 侦察",
         radio = "2.4GHz",
         available = true,
     ),
 
     ModuleCardSpec(
         id = "sniff",
-        title = "Packet Sniffer",
-        description = "Capture 802.11 frames and export PCAP.",
+        title = "数据包嗅探器",
+        description = "捕获 802.11 无线数据帧并导出 PCAP。",
         icon = Icons.Default.FilterCenterFocus,
-        category = "WiFi Recon",
+        category = "WiFi 侦察",
         radio = "2.4GHz",
         available = true,
     ),
 
     ModuleCardSpec(
         id = "hidden_ap",
-        title = "Hidden AP Revealer",
-        description = "Reveal hidden SSIDs from beacon and client traffic.",
+        title = "隐藏 AP 探测器",
+        description = "通过 Beacon 及客户端流量发现隐藏 SSID。",
         icon = Icons.Default.VisibilityOff,
-        category = "WiFi Recon",
+        category = "WiFi 侦察",
         radio = "2.4GHz",
         available = true,
     ),
 
     ModuleCardSpec(
         id = "beacon",
-        title = "Beacon",
-        description = "Broadcast custom or hidden SSIDs.",
+        title = "Beacon 广播",
+        description = "伪造广播自定义或隐藏 SSID。",
         icon = Icons.Default.SettingsInputAntenna,
-        category = "WiFi Attacks",
+        category = "WiFi 攻击",
         radio = "2.4GHz",
         available = true,
     ),
 
     ModuleCardSpec(
         id = "deauth",
-        title = "Deauth",
-        description = "Send a targeted deauth burst to a BSSID.",
+        title = "Deauth 攻击",
+        description = "向指定 BSSID 发送定向解除认证攻击包。",
         icon = Icons.Default.WifiOff,
-        category = "WiFi Attacks",
+        category = "WiFi 攻击",
         radio = "2.4GHz",
         available = true,
     ),
 
     ModuleCardSpec(
         id = "portal",
-        title = "Captive Portal",
-        description = "Start an AP and serve a custom HTML page.",
+        title = "强制认证门户",
+        description = "开启钓鱼 AP 并托管自定义 HTML 页面。",
         icon = Icons.Default.Language,
-        category = "WiFi Attacks",
+        category = "WiFi 攻击",
         radio = "2.4GHz",
         available = true,
     ),
 
     ModuleCardSpec(
         id = "evil_twin",
-        title = "Evil Twin",
-        description = "Portal + deauth + EAPOL capture workflow.",
+        title = "Evil Twin (邪恶双胞胎)",
+        description = "认证门户 + Deauth 踢网 + EAPOL 握手包抓取工作流。",
         icon = Icons.Default.ContentCopy,
-        category = "WiFi Attacks",
+        category = "WiFi 攻击",
         radio = "2.4GHz",
         available = true,
     ),
 
     ModuleCardSpec(
         id = "deauth_detector",
-        title = "Deauth Detector",
-        description = "Passively detect deauth and disassoc frames around you.",
+        title = "Deauth 检测器",
+        description = "被动检测周围的 Deauth 与 Disassoc 异常解绑帧。",
         icon = Icons.Default.WifiFind,
-        category = "WiFi Defense",
+        category = "WiFi 防御",
         radio = "2.4GHz",
         available = true,
     ),
 
     ModuleCardSpec(
         id = "rogue_ap",
-        title = "Rogue AP Detector",
-        description = "Compare visible APs against a trusted baseline and OUI rules.",
+        title = "伪造 AP 检测器",
+        description = "将可见 AP 与受信任基线及 OUI 规则进行比对。",
         icon = Icons.Default.Router,
-        category = "WiFi Defense",
+        category = "WiFi 防御",
         radio = "2.4GHz",
         available = true,
     ),
 
     ModuleCardSpec(
         id = "client_presence",
-        title = "Client Detector",
-        description = "Passively detect client management frames, with optional active reconnection triggering.",
+        title = "客户端探测器",
+        description = "被动探测客户端管理帧，支持主动诱导重新连接。",
         icon = Icons.Default.PersonSearch,
-        category = "WiFi Defense",
+        category = "WiFi 防御",
         radio = "2.4GHz",
         available = true,
     ),
 
     ModuleCardSpec(
         id = "ble_scanner",
-        title = "BLE Scanner",
-        description = "Discover nearby BLE devices, services, and manufacturer data.",
+        title = "BLE 扫描器",
+        description = "扫描发现周围低功耗蓝牙设备、服务及厂商数据。",
         icon = Icons.Default.Bluetooth,
         category = "BLE",
         radio = "BLE",
@@ -276,8 +276,8 @@ internal val modules = listOf(
 
     ModuleCardSpec(
         id = "ble_profile",
-        title = "BLE GATT Profile",
-        description = "Read-only service and characteristic enumeration for a BLE device.",
+        title = "BLE GATT 服务特征",
+        description = "枚举分析指定 BLE 设备的 GATT 服务与特征值（只读）。",
         icon = Icons.Default.DeveloperBoard,
         category = "BLE",
         radio = "BLE",
@@ -286,8 +286,8 @@ internal val modules = listOf(
 
     ModuleCardSpec(
         id = "tracker_detector",
-        title = "Tracker Detector",
-        description = "Detect Find My / AirTag-style BLE tracker advertisements.",
+        title = "追踪器检测",
+        description = "检测类似 Find My / AirTag 的 BLE 追踪器广播。",
         icon = Icons.Default.Radar,
         category = "BLE",
         radio = "BLE",
@@ -296,8 +296,8 @@ internal val modules = listOf(
 
     ModuleCardSpec(
         id = "mesh",
-        title = "Mesh",
-        description = "Provision, monitor, and control the ESP-NOW mesh.",
+        title = "Mesh 组网",
+        description = "配置、监控并控制 ESP-NOW Mesh 网络。",
         icon = Icons.Default.SettingsInputAntenna,
         category = "Mesh",
         radio = "2.4GHz",
@@ -306,37 +306,37 @@ internal val modules = listOf(
 
     ModuleCardSpec(
         id = "mac_lookup",
-        title = "MAC Lookup",
-        description = "Offline OUI and vendor lookup for any MAC address.",
+        title = "MAC 查询",
+        description = "离线查询任意 MAC 地址的 OUI 及所属厂商。",
         icon = Icons.Default.Search,
-        category = "Tools",
+        category = "工具",
         radio = "2.4GHz",
         available = true,
     ),
 
     ModuleCardSpec(
         id = "credential_manager",
-        title = "Credential Manager",
-        description = "Review Evil Twin captures, offline crack results, and saved credentials.",
+        title = "凭据管理器",
+        description = "查看 Evil Twin 抓取、离线破解结果及已存凭据。",
         icon = Icons.Default.Lock,
-        category = "Credentials",
+        category = "凭据",
         available = true,
     ),
 
     ModuleCardSpec(
         id = "wpa_cracker",
-        title = "WPA/WPA2 Cracker",
-        description = "Offline handshake verification against a wordlist.",
+        title = "WPA/WPA2 破解器",
+        description = "使用字典离线验证并破解握手包密码。",
         icon = Icons.Default.Key,
-        category = "Credentials",
+        category = "凭据",
         radio = "2.4GHz",
         available = true,
     ),
 
     ModuleCardSpec(
         id = "ducky",
-        title = "Ducky Editor",
-        description = "Create, import, and export DuckyScript payloads.",
+        title = "Ducky 编辑器",
+        description = "创建、导入及导出 DuckyScript 攻击脚本。",
         icon = Icons.Default.Code,
         category = "HID",
         radio = "USB",
@@ -346,7 +346,7 @@ internal val modules = listOf(
     ModuleCardSpec(
         id = "badusb",
         title = "BadUSB",
-        description = "Native USB HID payloads.",
+        description = "原生 USB HID 键盘载荷注入。",
         icon = Icons.Default.Keyboard,
         category = "HID",
         radio = "USB",
@@ -356,7 +356,7 @@ internal val modules = listOf(
     ModuleCardSpec(
         id = "ble",
         title = "BLE HID",
-        description = "BadBLE payloads and realtime keyboard input.",
+        description = "BadBLE 载荷注入与实时键盘模拟。",
         icon = Icons.Default.Bluetooth,
         category = "HID",
         radio = "BLE",
@@ -365,65 +365,65 @@ internal val modules = listOf(
 
     ModuleCardSpec(
         id = "storage",
-        title = "Mass Storage",
-        description = "Browse and manage files on the device.",
+        title = "存储管理",
+        description = "浏览并管理设备板载存储文件。",
         icon = Icons.Default.Folder,
-        category = "Storage",
+        category = "存储",
         radio = "USB",
         available = true,
     ),
 
     ModuleCardSpec(
         id = "firmware",
-        title = "Firmware Flasher",
-        description = "Flash a complete merged firmware image over the USB ROM bootloader.",
+        title = "固件烧录器",
+        description = "通过 USB ROM Bootloader 烧录完整固件镜像。",
         icon = Icons.Default.Memory,
-        category = "Firmware",
+        category = "固件",
         radio = "USB",
         available = true,
     ),
 
     ModuleCardSpec(
         id = "serial_monitor",
-        title = "Serial Monitor",
-        description = "Raw USB serial monitor for any ESP32 or USB-UART firmware.",
+        title = "串口监视器",
+        description = "适用于 ESP32 及 USB-UART 设备的原始串口监视与调试。",
         icon = Icons.Default.DeveloperBoard,
-        category = "Firmware",
+        category = "固件",
         radio = "USB",
         available = true,
     ),
 
     ModuleCardSpec(
         id = "ir",
-        title = "IR",
-        description = "Infrared transmit/receive module (planned).",
+        title = "红外 (IR)",
+        description = "红外发射/接收模块（规划中）。",
         icon = Icons.Default.SettingsRemote,
-        category = "IR",
+        category = "红外",
         radio = "IR",
         available = false,
-        statusLabel = "Unavailable",
+        statusLabel = "暂不可用",
     ),
 
     ModuleCardSpec(
         id = "rf",
-        title = "RF",
-        description = "Sub-GHz radio frequency module (planned).",
+        title = "射频 (RF)",
+        description = "Sub-GHz 射频无线通信模块（规划中）。",
         icon = Icons.Default.Radio,
-        category = "RF",
+        category = "射频",
         radio = "Sub-1GHz",
         available = false,
-        statusLabel = "Unavailable",
+        statusLabel = "暂不可用",
     ),
 
     ModuleCardSpec(
         id = "rfid",
         title = "RFID",
-        description = "RFID/NFC read and emulation module (planned).",
+        description = "RFID/NFC 读取与卡片模拟模块（规划中）。",
         icon = Icons.Default.Nfc,
         category = "RFID",
         radio = "13.56MHz",
         available = false,
-        statusLabel = "Unavailable",
+        statusLabel = "暂不可用",
     ),
 )
 

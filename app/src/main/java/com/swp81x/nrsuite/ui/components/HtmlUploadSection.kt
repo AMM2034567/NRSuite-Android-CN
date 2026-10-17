@@ -33,15 +33,15 @@ fun HtmlUploadSection(
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
-            text = "Custom HTML",
+            text = "自定义 HTML",
             style = MaterialTheme.typography.labelLarge,
         )
         Spacer(Modifier.height(4.dp))
 
         val displayName = when {
             selectedName != null -> selectedName
-            required -> "No HTML file selected — required"
-            else -> "No file selected — device placeholder page"
+            required -> "未选择 HTML 文件 — 必填"
+            else -> "未选择文件 — 使用设备默认占位页"
         }
         Text(
             text = displayName,
@@ -62,7 +62,7 @@ fun HtmlUploadSection(
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    text = "Uploading HTML... $progress%",
+                    text = "正在上传 HTML... $progress%",
                     style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
                     color = NrOnSurfaceVariant,
                 )
@@ -70,7 +70,7 @@ fun HtmlUploadSection(
             selectedName != null && completed -> {
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    text = "✓ HTML ready  ·  $selectedName",
+                    text = "✓ HTML 已就绪  ·  $selectedName",
                     style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
                     color = StatusGreen,
                 )
@@ -83,13 +83,13 @@ fun HtmlUploadSection(
                 onClick = onChoose,
                 enabled = enabled && !uploading,
             ) {
-                Text(if (selectedName == null) "Choose HTML" else "Change HTML")
+                Text(if (selectedName == null) "选择 HTML" else "更换 HTML")
             }
             OutlinedButton(
                 onClick = onClear,
                 enabled = enabled && !uploading && selectedName != null,
             ) {
-                Text("Clear")
+                Text("清除")
             }
         }
     }

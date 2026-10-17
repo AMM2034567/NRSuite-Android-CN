@@ -25,15 +25,15 @@ class UsbSerialFlasherTransport(
         if (isOpen) return
         val usbDevice = driver.device
         if (!usbManager.hasPermission(usbDevice)) {
-            throw IOException("USB permission has not been granted for ${usbDevice.deviceName}")
+            throw IOException("尚未获取 ${usbDevice.deviceName} 的 USB 权限")
         }
 
         val openedConnection = usbManager.openDevice(usbDevice)
-            ?: throw IOException("Could not open USB device ${usbDevice.deviceName}")
+            ?: throw IOException("无法打开 USB 设备 ${usbDevice.deviceName}")
         val openedPort = driver.ports.firstOrNull()
             ?: run {
                 openedConnection.close()
-                throw IOException("No serial port found on ${usbDevice.deviceName}")
+                throw IOException("在 ${usbDevice.deviceName} 上未找到串口")
             }
 
         try {
@@ -47,7 +47,7 @@ class UsbSerialFlasherTransport(
         } catch (t: Throwable) {
             runCatching { openedPort.close() }
             runCatching { openedConnection.close() }
-            throw if (t is IOException) t else IOException("Could not configure serial port", t)
+            throw if (t is IOException) t else IOException("无法配置串口参数", t)
         }
 
         connection = openedConnection
@@ -55,12 +55,12 @@ class UsbSerialFlasherTransport(
     }
 
     override fun read(buffer: ByteArray, timeoutMs: Int): Int {
-        val activePort = port ?: throw IOException("Serial port is not open")
+        val activePort = port ?: throw IOException("串口尚未打开")
         return activePort.read(buffer, timeoutMs)
     }
 
     override fun write(data: ByteArray, timeoutMs: Int) {
-        val activePort = port ?: throw IOException("Serial port is not open")
+        val activePort = port ?: throw IOException("串口尚未打开")
         activePort.write(data, timeoutMs)
     }
 

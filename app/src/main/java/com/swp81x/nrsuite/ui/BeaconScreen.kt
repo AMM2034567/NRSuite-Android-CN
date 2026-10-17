@@ -165,7 +165,7 @@ fun BeaconScreen(
             ) {
                 Icon(
                     imageVector = if (running) Icons.Default.Stop else Icons.Default.PlayArrow,
-                    contentDescription = if (running) "Stop beacon broadcast" else "Start beacon broadcast",
+                    contentDescription = if (running) "停止 Beacon 广播" else "开始 Beacon 广播",
                 )
             }
         }
@@ -174,9 +174,9 @@ fun BeaconScreen(
     pendingDeleteList?.let { name ->
         AlertDialog(
             onDismissRequest = { pendingDeleteList = null },
-            title = { Text("Delete saved SSID list?") },
+            title = { Text("删除已存 SSID 列表？") },
             text = {
-                Text("Delete \"$name\"? This cannot be undone.")
+                Text("确定删除“$name”？此操作无法撤销。")
             },
             confirmButton = {
                 TextButton(
@@ -186,12 +186,12 @@ fun BeaconScreen(
                         pendingDeleteList = null
                     },
                 ) {
-                    Text("Delete")
+                    Text("删除")
                 }
             },
             dismissButton = {
                 TextButton(onClick = { pendingDeleteList = null }) {
-                    Text("Cancel")
+                    Text("取消")
                 }
             },
         )
@@ -200,12 +200,12 @@ fun BeaconScreen(
     if (showSaveDialog) {
         AlertDialog(
             onDismissRequest = { showSaveDialog = false },
-            title = { Text("Save SSID list") },
+            title = { Text("保存 SSID 列表") },
             text = {
                 OutlinedTextField(
                     value = newListName,
                     onValueChange = { newListName = it },
-                    label = { Text("List name") },
+                    label = { Text("列表名称") },
                     singleLine = true,
                 )
             },
@@ -219,12 +219,12 @@ fun BeaconScreen(
                         showSaveDialog = false
                     },
                 ) {
-                    Text("Save")
+                    Text("保存")
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showSaveDialog = false }) {
-                    Text("Cancel")
+                    Text("取消")
                 }
             },
         )
@@ -233,11 +233,10 @@ fun BeaconScreen(
     if (confirmStart) {
         AlertDialog(
             onDismissRequest = { confirmStart = false },
-            title = { Text("Start beacon broadcast?") },
+            title = { Text("启动 Beacon 广播？") },
             text = {
                 Text(
-                    "This will broadcast ${parsedSsids.size} SSID(s) on channel $channel until stopped. " +
-                        "Only use this on spectrum you own or are authorized to test."
+                    "将在信道 $channel 上广播 ${parsedSsids.size} 个 SSID 直至手动停止。请仅在您拥有或获得授权测试的无线频段中使用。"
                 )
             },
             confirmButton = {
@@ -248,12 +247,12 @@ fun BeaconScreen(
                     },
                     enabled = parsedSsids.isNotEmpty(),
                 ) {
-                    Text("Start")
+                    Text("启动")
                 }
             },
             dismissButton = {
                 TextButton(onClick = { confirmStart = false }) {
-                    Text("Cancel")
+                    Text("取消")
                 }
             },
         )
@@ -305,12 +304,12 @@ private fun ConfigZone(
                 Spacer(Modifier.width(10.dp))
                 Column(Modifier.weight(1f)) {
                     Text(
-                        text = "Beacon configuration",
+                        text = "Beacon 广播配置",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
                     )
                     Text(
-                        text = if (running) "Broadcast running" else "Custom SSIDs, fixed channel",
+                        text = if (running) "正在广播" else "自定义 SSID，固定信道",
                         style = MaterialTheme.typography.bodySmall,
                         color = NrOnSurfaceVariant,
                     )
@@ -318,7 +317,7 @@ private fun ConfigZone(
                 IconButton(onClick = onToggle) {
                     Icon(
                         imageVector = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                        contentDescription = if (expanded) "Collapse" else "Expand",
+                        contentDescription = if (expanded) "折叠" else "展开",
                     )
                 }
             }
@@ -331,18 +330,18 @@ private fun ConfigZone(
                         onValueChange = onSsidsChange,
                         modifier = Modifier.fillMaxWidth(),
                         enabled = !running,
-                        label = { Text("SSIDs (one per line)") },
-                        placeholder = { Text("Free WiFi\\nCoffeeShop") },
+                        label = { Text("SSID 列表（每行一个）") },
+                        placeholder = { Text("例如：\\n免费 WiFi\\n测试热点") },
                         minLines = 3,
                         maxLines = 6,
                         supportingText = {
-                            Text("$parsedCount/32 SSIDs will be broadcast.")
+                            Text("将广播 $parsedCount/32 个 SSID。")
                         },
                     )
 
                     Spacer(Modifier.height(8.dp))
                     SavedItemDropdown(
-                        label = "Saved SSID lists",
+                        label = "已存 SSID 列表",
                         selectedName = selectedListName,
                         names = savedLists.keys.toList(),
                         enabled = !running,
@@ -358,24 +357,24 @@ private fun ConfigZone(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         OutlinedButton(onClick = onSaveList, enabled = !running && parsedCount > 0) {
-                            Text("Save")
+                            Text("保存")
                         }
                         OutlinedButton(onClick = onImportFile, enabled = !running) {
                             Icon(
                                 imageVector = Icons.Default.FileUpload,
-                                contentDescription = "Import SSID file",
+                                contentDescription = "导入 SSID 文本文件",
                             )
                         }
                         if (selectedListName != null) {
                             OutlinedButton(onClick = { onDeleteRequest(selectedListName) }, enabled = !running) {
-                                Text("Delete")
+                                Text("删除")
                             }
                         }
                     }
 
                     Spacer(Modifier.height(10.dp))
                     NumberStepper(
-                        label = "Channel",
+                        label = "信道",
                         value = channel,
                         valueText = channel.toString(),
                         enabled = !running,
@@ -385,7 +384,7 @@ private fun ConfigZone(
 
                     Spacer(Modifier.height(6.dp))
                     NumberStepper(
-                        label = "Interval",
+                        label = "广播间隔",
                         value = intervalMs,
                         valueText = "$intervalMs ms",
                         enabled = !running,
@@ -395,13 +394,13 @@ private fun ConfigZone(
 
                     Spacer(Modifier.height(10.dp))
                     SwitchRow(
-                        label = "Hidden SSIDs",
+                        label = "隐藏 SSID",
                         checked = hidden,
                         enabled = !running,
                         onCheckedChange = onHiddenChange,
                     )
                     SwitchRow(
-                        label = "Stable BSSIDs",
+                        label = "固定 BSSID (非随机)",
                         checked = !randomBssid,
                         enabled = !running,
                         onCheckedChange = { onRandomBssidChange(!it) },
@@ -410,7 +409,7 @@ private fun ConfigZone(
                     if (!connected) {
                         Spacer(Modifier.height(10.dp))
                         Text(
-                            text = "Connect a device from the Device tab before starting a broadcast.",
+                            text = "启动广播前请先连接设备。",
                             style = MaterialTheme.typography.bodySmall,
                             color = StatusAmber,
                         )
@@ -442,7 +441,7 @@ private fun NumberStepper(
         IconButton(onClick = onDecrease, enabled = enabled) {
             Icon(
                 imageVector = Icons.Default.Remove,
-                contentDescription = "Decrease $label",
+                contentDescription = "减小 $label",
             )
         }
         Text(
@@ -453,7 +452,7 @@ private fun NumberStepper(
         IconButton(onClick = onIncrease, enabled = enabled) {
             Icon(
                 imageVector = Icons.Default.Add,
-                contentDescription = "Increase $label",
+                contentDescription = "增加 $label",
             )
         }
     }
@@ -504,17 +503,17 @@ private fun ResultZone(
                 .padding(16.dp),
         ) {
             Text(
-                text = "Broadcast status",
+                text = "广播状态",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
             )
             Spacer(Modifier.height(8.dp))
             StatusIndicator(
                 label = when {
-                    !connected -> "No device connected"
-                    running -> "Broadcasting"
-                    sentFrames > 0 -> "Stopped"
-                    else -> "Ready"
+                    !connected -> "未连接设备"
+                    running -> "正在广播"
+                    sentFrames > 0 -> "已停止"
+                    else -> "就绪"
                 },
                 color = when {
                     !connected -> StatusNeutral
@@ -526,7 +525,7 @@ private fun ResultZone(
 
             Spacer(Modifier.height(16.dp))
             Text(
-                text = "Frames sent",
+                text = "已发送帧数",
                 style = MaterialTheme.typography.labelLarge,
                 color = NrOnSurfaceVariant,
             )
@@ -538,7 +537,7 @@ private fun ResultZone(
 
             Spacer(Modifier.height(16.dp))
             Text(
-                text = "Active SSIDs",
+                text = "活跃 SSID 数",
                 style = MaterialTheme.typography.labelLarge,
                 color = NrOnSurfaceVariant,
             )
@@ -550,7 +549,7 @@ private fun ResultZone(
             if (activeChannel > 0) {
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    text = "Channel: $activeChannel",
+                    text = "信道: $activeChannel",
                     style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
                     color = NrOnSurfaceVariant,
                 )
@@ -559,14 +558,14 @@ private fun ResultZone(
             if (!connected) {
                 Spacer(Modifier.height(24.dp))
                 Text(
-                    text = "Connect an ESP32 to configure and start beacon broadcast.",
+                    text = "请先连接 ESP32 设备以配置并启动 Beacon 广播。",
                     style = MaterialTheme.typography.bodySmall,
                     color = NrOnSurfaceVariant,
                 )
             } else if (!running && sentFrames == 0) {
                 Spacer(Modifier.height(24.dp))
                 Text(
-                    text = "Enter one or more SSIDs, then tap the play button.",
+                    text = "输入一个或多个 SSID，然后点击右下角开始按钮。",
                     style = MaterialTheme.typography.bodySmall,
                     color = NrOnSurfaceVariant,
                 )

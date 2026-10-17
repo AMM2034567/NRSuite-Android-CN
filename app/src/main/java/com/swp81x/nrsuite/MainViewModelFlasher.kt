@@ -30,7 +30,7 @@ internal fun MainViewModel.setFirmwareFlashFileImpl(uri: Uri, name: String?) {
         ?: "firmware.bin"
     _firmwareFlashName.value = resolvedName
     _firmwareFlashSize.value = queryDocumentSizeImpl(uri)
-    appendLog("Firmware image selected: ${_firmwareFlashName.value}")
+    appendLog("已选择固件镜像：${_firmwareFlashName.value}")
 }
 
 internal fun MainViewModel.queryDocumentDisplayNameImpl(uri: Uri): String? {
@@ -82,18 +82,18 @@ internal fun MainViewModel.clearFirmwareFlashFileImpl() {
 internal fun MainViewModel.selectFirmwareTargetImpl(device: UsbDevice) {
     if (!usbManager.hasPermission(device)) {
         _firmwareTargetDevice.value = null
-        appendLog("USB permission is required before selecting a flash target.")
+        appendLog("选择烧录目标前需要先获取 USB 权限。")
         return
     }
 
     val entry = _devices.value.firstOrNull { it.device.deviceId == device.deviceId }
         ?: UsbSerialDeviceCatalog.find(usbManager, device)
     if (entry == null) {
-        appendLog("No supported USB serial driver for ${device.deviceName}.")
+        appendLog("没有适用于 ${device.deviceName} 的支持 USB 串口驱动。")
         return
     }
     _firmwareTargetDevice.value = entry
-    appendLog("Firmware flash target: ${entry.displayName}")
+    appendLog("固件烧录目标：${entry.displayName}")
 }
 
 internal fun MainViewModel.startFirmwareFlashImpl(
@@ -103,24 +103,24 @@ internal fun MainViewModel.startFirmwareFlashImpl(
 ) {
     val uri = _firmwareFlashUri.value
     if (uri == null) {
-        appendLog("Choose a merged firmware .bin before flashing.")
+        appendLog("烧录前请先选择合并后的固件 .bin 文件。")
         return
     }
     if (_firmwareFlashing.value) return
 
     val entry = _firmwareTargetDevice.value
     if (entry == null) {
-        appendLog("Select a flash target device before flashing.")
+        appendLog("烧录前请先选择目标设备。")
         return
     }
     if (!usbManager.hasPermission(entry.device)) {
-        appendLog("USB permission is required for the selected flash target.")
+        appendLog("所选烧录目标需要 USB 权限。")
         return
     }
 
     _firmwareFlashing.value = true
     _firmwareFlashProgress.value = 0
-    _firmwareFlashStatus.value = "Reading firmware image..."
+    _firmwareFlashStatus.value = "正在读取固件镜像..."
 
     scope.launch {
         try {
@@ -130,10 +130,10 @@ internal fun MainViewModel.startFirmwareFlashImpl(
                     ?.use { it.readBytes() }
             }
             if (bytes == null || bytes.isEmpty()) {
-                throw IOException("Could not read the selected firmware image.")
+                throw IOException("无法读取所选固件镜像。")
             }
 
-            _firmwareFlashStatus.value = "Stopping active modules..."
+            _firmwareFlashStatus.value = "正在停止活跃模块..."
             val targetFingerprint = deviceFingerprintImpl(entry.device)
             if (targetFingerprint == activeDeviceFingerprint) {
                 stopActiveOperations()
@@ -155,9 +155,9 @@ internal fun MainViewModel.startFirmwareFlashImpl(
             )
 
             _firmwareFlashStatus.value = if (skipReset) {
-                "Connecting to ROM bootloader..."
+                "正在连接 ROM Bootloader..."
             } else {
-                "Resetting into ROM bootloader..."
+                "正在复位进入 ROM Bootloader..."
             }
 
             withContext(Dispatchers.IO) {
@@ -171,27 +171,27 @@ internal fun MainViewModel.startFirmwareFlashImpl(
                     val written = (bytes.size.toLong() * percent / 100L).toInt()
                     _firmwareFlashProgress.value = percent
                     _firmwareFlashStatus.value = if (percent >= 100) {
-                        "Firmware written — rebooting device..."
+                        "固件写入完毕 — 正在重启设备..."
                     } else {
-                        "Writing... $percent%  (${written / 1024} / ${bytes.size / 1024} KB)"
+                        "正在写入... $percent%  (${written / 1024} / ${bytes.size / 1024} KB)"
                     }
                 }
             }
 
             _firmwareFlashProgress.value = 100
-            _firmwareFlashStatus.value = "Flash complete. The device is rebooting; reconnect after it disappears."
-            appendLog("Firmware flash complete (${bytes.size} bytes at 0x0).", level = LogLevel.SUCCESS)
-            addHistory("firmware", "Flashed ${bytes.size} bytes at 0x0", HistoryLevel.SUCCESS)
+            _firmwareFlashStatus.value = "烧录完成。设备正在重启；待其重新识别后请重新连接。"
+            appendLog("固件烧录完成（0x0 处共 ${bytes.size} 字节）。", level = LogLevel.SUCCESS)
+            addHistory("firmware", "已在 0x0 处烧录 ${bytes.size} 字节", HistoryLevel.SUCCESS)
             delay(2_000)
             refreshDevices()
         } catch (t: Throwable) {
             _firmwareFlashProgress.value = 0
-            _firmwareFlashStatus.value = "Flash failed: ${t.message ?: t.javaClass.simpleName}"
+            _firmwareFlashStatus.value = "烧录失败：${t.message ?: t.javaClass.simpleName}"
             appendLog(
-                "Firmware flash failed: ${t.message ?: t.javaClass.simpleName}",
+                "固件烧录失败：${t.message ?: t.javaClass.simpleName}",
                 level = LogLevel.ERROR,
             )
-            addHistory("firmware", "Firmware flash failed", HistoryLevel.ERROR)
+            addHistory("firmware", "固件烧录失败", HistoryLevel.ERROR)
         } finally {
             _firmwareFlashing.value = false
             updateForegroundService()

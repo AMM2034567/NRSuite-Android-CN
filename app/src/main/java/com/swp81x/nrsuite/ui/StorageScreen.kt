@@ -85,7 +85,7 @@ fun StorageScreen(
             if (!connected) {
                 item {
                     Text(
-                        text = "Connect an ESP32 to browse the device filesystem.",
+                        text = "请连接 ESP32 设备以浏览设备端文件系统。",
                         color = NrOnSurfaceVariant,
                         modifier = Modifier.padding(4.dp),
                     )
@@ -112,15 +112,15 @@ fun StorageScreen(
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary,
         ) {
-            Icon(Icons.Default.Refresh, contentDescription = "Refresh storage")
+            Icon(Icons.Default.Refresh, contentDescription = "刷新存储列表")
         }
     }
 
     deleteTarget?.let { target ->
         AlertDialog(
             onDismissRequest = { deleteTarget = null },
-            title = { Text("Delete file?") },
-            text = { Text("Delete '$target' from the device filesystem?") },
+            title = { Text("删除文件？") },
+            text = { Text("确定从设备文件系统中删除 \"$target\"？") },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -128,12 +128,12 @@ fun StorageScreen(
                         onDelete(target)
                     },
                 ) {
-                    Text("Delete")
+                    Text("删除")
                 }
             },
             dismissButton = {
                 TextButton(onClick = { deleteTarget = null }) {
-                    Text("Cancel")
+                    Text("取消")
                 }
             },
         )
@@ -142,11 +142,11 @@ fun StorageScreen(
     if (confirmMassStorage) {
         AlertDialog(
             onDismissRequest = { confirmMassStorage = false },
-            title = { Text("Enter USB mass storage mode?") },
+            title = { Text("进入 USB 大容量存储模式？") },
             text = {
                 Text(
-                    "The ESP32 will re-enumerate as a USB drive and the bridge connection will disappear. " +
-                        "You will need to reset or re-plug the device to return to the app."
+                    "ESP32 将重新枚举为 USB 驱动器，当前的通信桥接连接将被断开。" +
+                        "如需返回应用管理，您需要手动重置或重新插拔该设备。"
                 )
             },
             confirmButton = {
@@ -156,12 +156,12 @@ fun StorageScreen(
                         onStartMassStorage()
                     },
                 ) {
-                    Text("Continue")
+                    Text("继续")
                 }
             },
             dismissButton = {
                 TextButton(onClick = { confirmMassStorage = false }) {
-                    Text("Cancel")
+                    Text("取消")
                 }
             },
         )
@@ -196,29 +196,29 @@ private fun StorageSummaryCard(
                 Spacer(Modifier.width(10.dp))
                 Column(Modifier.weight(1f)) {
                     Text(
-                        text = "Device storage",
+                        text = "设备板载存储",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
                     )
                     Text(
                         text = when {
-                            !connected -> "Not connected"
-                            loading -> "Loading..."
-                            else -> "$fileCount file(s)"
+                            !connected -> "未连接"
+                            loading -> "加载中..."
+                            else -> "共 $fileCount 个文件"
                         },
                         style = MaterialTheme.typography.bodySmall,
                         color = NrOnSurfaceVariant,
                     )
                 }
                 OutlinedButton(onClick = onRefresh, enabled = connected && !loading) {
-                    Text("Refresh")
+                    Text("刷新")
                 }
             }
 
             Spacer(Modifier.height(12.dp))
-            MetricRow("Total", formatBytes(totalBytes))
-            MetricRow("Used", formatBytes(usedBytes))
-            MetricRow("Free", formatBytes(freeBytes))
+            MetricRow("总容量", formatBytes(totalBytes))
+            MetricRow("已用空间", formatBytes(usedBytes))
+            MetricRow("剩余空间", formatBytes(freeBytes))
 
             Spacer(Modifier.height(12.dp))
             Button(
@@ -227,7 +227,7 @@ private fun StorageSummaryCard(
             ) {
                 Icon(Icons.Default.Usb, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
-                Text("Start USB mass storage")
+                Text("启动 USB 大容量存储 (MSC)")
             }
         }
     }
@@ -272,7 +272,7 @@ private fun StorageFileRow(
             IconButton(onClick = onDelete) {
                 Icon(
                     imageVector = Icons.Default.Delete,
-                    contentDescription = "Delete ${file.name}",
+                    contentDescription = "删除 ${file.name}",
                     tint = MaterialTheme.colorScheme.error,
                 )
             }
@@ -302,12 +302,12 @@ private fun EmptyStorageState(loading: Boolean) {
             )
             Spacer(Modifier.height(8.dp))
             Text(
-                text = if (loading) "Loading files..." else "No files on device storage.",
+                text = if (loading) "正在读取文件..." else "设备存储中暂无文件。",
                 color = NrOnSurfaceVariant,
             )
             if (!loading) {
                 Text(
-                    text = "Tap refresh to reload the listing.",
+                    text = "点击刷新按钮重新获取文件列表。",
                     style = MaterialTheme.typography.bodySmall,
                     color = NrOnSurfaceVariant,
                 )

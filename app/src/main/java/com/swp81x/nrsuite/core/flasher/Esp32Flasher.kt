@@ -40,8 +40,8 @@ class Esp32Flasher(
         onStage: (String) -> Unit = {},
         onProgress: (Int) -> Unit = {},
     ) {
-        require(firmware.isNotEmpty()) { "Firmware image is empty" }
-        require(offset >= 0) { "Flash offset must be >= 0" }
+        require(firmware.isNotEmpty()) { "固件镜像为空" }
+        require(offset >= 0) { "Flash 偏移量必须 >= 0" }
 
         transport.open()
         try {
@@ -60,7 +60,7 @@ class Esp32Flasher(
                 // first (e.g. to confirm a clean region before a verify
                 // step); unlike the old full-chip erase, its duration scales
                 // with the firmware size being written, not total flash size.
-                onStage("Erasing flash...")
+                onStage("正在擦除 Flash...")
                 eraseRegion(offset, firmware.size, onStage)
 
                 // A long erase is still possible for big images on slow
@@ -69,10 +69,10 @@ class Esp32Flasher(
                 // re-sync instead of assuming the link survived — this fails
                 // fast with a clear error if the connection dropped, rather
                 // than hanging silently on the first post-erase command.
-                onStage("Reconnecting after erase...")
+                onStage("擦除后正在重新同步...")
                 sync()
             }
-            onStage("Writing firmware...")
+            onStage("正在写入固件...")
             flashBegin(firmware.size, offset)
 
             var written = 0
@@ -150,8 +150,7 @@ class Esp32Flasher(
             }
         }
         throw IOException(
-            "Could not synchronize with the ROM bootloader. " +
-                "Hold BOOT, tap RESET, then retry. (${lastError?.message ?: "no response"})",
+            "无法与 ROM Bootloader 同步。请按住 BOOT 键，轻按 RESET 键后重试。(${lastError?.message ?: "无响应"})",
         )
     }
 
@@ -183,7 +182,7 @@ class Esp32Flasher(
                 while (!Thread.currentThread().isInterrupted) {
                     Thread.sleep(5_000)
                     elapsedSeconds += 5
-                    onStage("Erasing flash... (${elapsedSeconds}s elapsed)")
+                    onStage("正在擦除 Flash... (已耗时 ${elapsedSeconds} 秒)")
                 }
             } catch (_: InterruptedException) {
                 // Erase finished or failed; stop ticking.
@@ -247,7 +246,7 @@ class Esp32Flasher(
                 Thread.sleep(100)
             }
         }
-        throw IOException("Flash block $sequence failed: ${lastError?.message ?: "unknown error"}")
+        throw IOException("写入 Flash 数据块 $sequence 失败：${lastError?.message ?: "未知错误"}")
     }
 
     private fun flashFinish(reboot: Boolean) {

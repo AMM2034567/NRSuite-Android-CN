@@ -92,18 +92,18 @@ fun TrackerDetectorScreen(
             ) {
                 Column(Modifier.padding(14.dp)) {
                     Text(
-                        text = "Tracker detection",
+                        text = "防追踪检测 (Tracker Detection)",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
                     )
                     Text(
-                        text = "Flags Find My / AirTag-style BLE advertisement payloads seen during BLE scan.",
+                        text = "在 BLE 广播扫描期间标记 Apple Find My / AirTag 类追踪器广播特征负载。",
                         style = MaterialTheme.typography.bodySmall,
                         color = NrOnSurfaceVariant,
                     )
                     Spacer(Modifier.height(8.dp))
                     Text(
-                        text = "Use only on devices and environments you are authorized to assess.",
+                        text = "请仅在您获得授权评估的设备与环境中进行检测。",
                         style = MaterialTheme.typography.bodySmall,
                         color = StatusAmber,
                     )
@@ -134,7 +134,7 @@ fun TrackerDetectorScreen(
             ) {
                 Icon(
                     imageVector = if (scanning) Icons.Default.Stop else Icons.Default.PlayArrow,
-                    contentDescription = if (scanning) "Stop tracker detection" else "Start tracker detection",
+                    contentDescription = if (scanning) "停止防追踪检测" else "启动防追踪检测",
                 )
             }
         }
@@ -143,11 +143,11 @@ fun TrackerDetectorScreen(
     if (confirmStart) {
         AlertDialog(
             onDismissRequest = { confirmStart = false },
-            title = { Text("Start tracker detection?") },
+            title = { Text("启动防追踪检测？") },
             text = {
                 Text(
-                    "This starts an active BLE scan and watches for Find My / AirTag-style " +
-                        "advertisement payloads. Use only where authorized."
+                    "将启动 BLE 主动扫描并监听 Apple Find My / AirTag 类追踪器的广播负载。" +
+                        "请仅在获得授权的合规场景下使用。"
                 )
             },
             confirmButton = {
@@ -156,10 +156,10 @@ fun TrackerDetectorScreen(
                         confirmStart = false
                         onStart()
                     },
-                ) { Text("Start") }
+                ) { Text("启动") }
             },
             dismissButton = {
-                TextButton(onClick = { confirmStart = false }) { Text("Cancel") }
+                TextButton(onClick = { confirmStart = false }) { Text("取消") }
             },
         )
     }
@@ -194,18 +194,18 @@ private fun TrackerStatusCard(
                 Column {
                     Text(
                         text = when {
-                            !connected -> "Disconnected"
-                            scanning -> "Monitoring"
-                            else -> "Ready"
+                            !connected -> "未连接设备"
+                            scanning -> "正在监测"
+                            else -> "就绪"
                         },
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
                     )
                     Text(
                         text = when {
-                            !connected -> "Connect a device to begin"
-                            scanning -> "Watching BLE advertisements · $trackerCount candidate(s)"
-                            else -> "Start BLE scan to monitor for trackers"
+                            !connected -> "请先连接设备以开始检测"
+                            scanning -> "正在监听 BLE 广播 · 已发现 $trackerCount 个可疑目标"
+                            else -> "启动 BLE 扫描以监测周围追踪器"
                         },
                         style = MaterialTheme.typography.bodySmall,
                         color = NrOnSurfaceVariant,
@@ -235,15 +235,15 @@ private fun TrackerResultsCard(
             ) {
                 Column(Modifier.weight(1f)) {
                     Text(
-                        text = "Tracker candidates",
+                        text = "可疑追踪器候选",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
                     )
                     Text(
                         text = if (trackers.isEmpty()) {
-                            "No tracker signatures detected"
+                            "未检测到追踪器特征"
                         } else {
-                            "${trackers.size} candidate(s) detected"
+                            "检测到 ${trackers.size} 个可疑候选目标"
                         },
                         style = MaterialTheme.typography.bodySmall,
                         color = NrOnSurfaceVariant,
@@ -254,7 +254,7 @@ private fun TrackerResultsCard(
                         onClick = onClear,
                         enabled = !scanning,
                     ) {
-                        Text("Clear")
+                        Text("清空")
                     }
                 }
             }
@@ -262,7 +262,7 @@ private fun TrackerResultsCard(
             if (trackers.size >= MAX_TRACKER_OBSERVATIONS) {
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    text = "$MAX_TRACKER_OBSERVATIONS tracker observations — oldest entries are being replaced.",
+                    text = "已达 $MAX_TRACKER_OBSERVATIONS 条上限 — 最早的记录将被替换。",
                     style = MaterialTheme.typography.bodySmall,
                     color = StatusAmber,
                 )
@@ -303,7 +303,7 @@ private fun TrackerRow(tracker: TrackerObservation) {
                         .padding(end = 8.dp),
                 ) {
                     Text(
-                        text = tracker.trackerType ?: "Tracker candidate",
+                        text = tracker.trackerType ?: "可疑追踪器",
                         style = MaterialTheme.typography.labelSmall,
                         color = StatusAmber,
                     )
@@ -312,27 +312,27 @@ private fun TrackerRow(tracker: TrackerObservation) {
                 IconButton(
                     onClick = {
                         val text = buildString {
-                            appendLine("Tracker candidate: ${tracker.name ?: "unnamed"}")
-                            appendLine("Type: ${tracker.trackerType ?: "unknown"}")
-                            appendLine("Address: ${tracker.address}")
+                            appendLine("可疑追踪器: ${tracker.name ?: "未命名"}")
+                            appendLine("类型: ${tracker.trackerType ?: "未知"}")
+                            appendLine("地址: ${tracker.address}")
                             appendLine("RSSI: ${tracker.rssi} dBm")
-                            tracker.manufacturerData?.let { appendLine("Manufacturer: $it") }
-                            appendLine("First seen: ${tracker.firstSeen}")
-                            appendLine("Last seen: ${tracker.lastSeen}")
-                            append("Sightings: ${tracker.sightings}")
+                            tracker.manufacturerData?.let { appendLine("厂商数据: $it") }
+                            appendLine("首次发现: ${tracker.firstSeen}")
+                            appendLine("最近活跃: ${tracker.lastSeen}")
+                            append("发现次数: ${tracker.sightings}")
                         }
-                        clipboard.copyWithToast(context, text, "Tracker copied")
+                        clipboard.copyWithToast(context, text, "追踪器信息已复制")
                     },
                 ) {
                     Icon(
                         imageVector = Icons.Default.ContentCopy,
-                        contentDescription = "Copy tracker details",
+                        contentDescription = "复制追踪器详情",
                         modifier = Modifier.size(18.dp),
                     )
                 }
             }
             Text(
-                text = tracker.name ?: "Unnamed tracker candidate",
+                text = tracker.name ?: "未命名追踪器候选",
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.SemiBold,
             )
@@ -343,19 +343,19 @@ private fun TrackerRow(tracker: TrackerObservation) {
             )
             Text(
                 text = "${tracker.rssi} dBm · ${rssiToProximity(tracker.rssi).label} · " +
-                    "${tracker.sightings} sighting(s)",
+                    "捕获 ${tracker.sightings} 次",
                 style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
                 color = StatusRed,
             )
             tracker.manufacturerData?.let { payload ->
                 Text(
-                    text = "Payload: ${payload.take(40)}",
+                    text = "负载数据: ${payload.take(40)}",
                     style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
                     color = NrOnSurfaceVariant,
                 )
             }
             Text(
-                text = "First: ${tracker.firstSeen} · Last: ${tracker.lastSeen}",
+                text = "首次: ${tracker.firstSeen} · 最近: ${tracker.lastSeen}",
                 style = MaterialTheme.typography.bodySmall,
                 color = NrOnSurfaceVariant,
             )

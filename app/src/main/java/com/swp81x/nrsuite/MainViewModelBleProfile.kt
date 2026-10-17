@@ -13,29 +13,29 @@ import org.json.JSONObject
 internal fun MainViewModel.selectBleProfileTargetImpl(device: BleDeviceObservation?) {
     _bleProfileTarget.value = device
     _bleProfileStatus.value = if (device != null) {
-        "Target selected: ${device.name ?: device.address}"
+        "已选择目标: ${device.name ?: device.address}"
     } else {
         _bleProfileServices.value = emptyList()
-        "Select a discovered BLE device"
+        "请选择已发现的 BLE 设备"
     }
 }
 
 internal fun MainViewModel.startBleProfileImpl() {
     val activeSession = session
     if (activeSession == null) {
-        appendLog("Connect to a device before starting BLE profile.")
+        appendLog("启动 BLE 画像采集前请先连接设备。")
         return
     }
     val target = _bleProfileTarget.value
     if (target == null) {
-        appendLog("Select a discovered BLE device before profiling.")
+        appendLog("画像采集前请先选择已发现的 BLE 设备。")
         return
     }
     if (_bleProfileRunning.value) return
-    if (!ensureRadioIdle("BLE GATT Profile")) return
+    if (!ensureRadioIdle("BLE GATT 画像")) return
 
     _bleProfileServices.value = emptyList()
-    _bleProfileStatus.value = "Starting profile..."
+    _bleProfileStatus.value = "正在启动画像采集..."
     _bleProfileRunning.value = true
     updateForegroundService()
 
@@ -49,21 +49,21 @@ internal fun MainViewModel.startBleProfileImpl() {
             timeoutMs = 10_000,
         )
         if (response?.optBoolean("ok") == true) {
-            _bleProfileStatus.value = "Connecting..."
-            appendLog("BLE profile started for ${target.name ?: target.address}.")
-            addHistory("ble_profile", "BLE profile started: ${target.name ?: target.address}", HistoryLevel.INFO)
+            _bleProfileStatus.value = "正在连接..."
+            appendLog("已对 ${target.name ?: target.address} 启动 BLE 画像采集。")
+            addHistory("ble_profile", "BLE 画像采集已启动: ${target.name ?: target.address}", HistoryLevel.INFO)
         } else {
             _bleProfileRunning.value = false
-            _bleProfileStatus.value = response?.optString("msg") ?: "Failed to start"
+            _bleProfileStatus.value = response?.optString("msg") ?: "启动失败"
             updateForegroundService()
-            appendLog("Failed to start BLE profile: ${response?.optString("msg") ?: "timeout"}")
+            appendLog("启动 BLE 画像采集失败: ${response?.optString("msg") ?: "超时"}")
         }
     }
 }
 
 internal fun MainViewModel.stopBleProfileImpl() {
     if (!_bleProfileRunning.value) return
-    _bleProfileStatus.value = "Stopping..."
+    _bleProfileStatus.value = "正在停止..."
     updateForegroundService()
 
     val activeSession = session
@@ -74,14 +74,14 @@ internal fun MainViewModel.stopBleProfileImpl() {
 
         _bleProfileRunning.value = false
         _bleProfileStatus.value = if (response?.optBoolean("ok") == true) {
-            "Profile stopped"
+            "画像采集已停止"
         } else {
-            "Stop request sent without confirmation"
+            "已发送停止请求，但未收到确认"
         }
         updateForegroundService()
         appendLog(
-            if (response?.optBoolean("ok") == true) "BLE profile stopped."
-            else "BLE profile stop request sent without confirmation."
+            if (response?.optBoolean("ok") == true) "BLE 画像采集已停止。"
+            else "BLE 画像采集停止请求已发送，但未收到确认。"
         )
     }
 }
@@ -89,17 +89,17 @@ internal fun MainViewModel.stopBleProfileImpl() {
 internal fun MainViewModel.clearBleProfileImpl() {
     _bleProfileServices.value = emptyList()
     _bleProfileStatus.value = _bleProfileTarget.value?.let {
-        "Target selected: ${it.name ?: it.address}"
-    } ?: "Select a discovered BLE device"
+        "已选择目标: ${it.name ?: it.address}"
+    } ?: "请选择已发现的 BLE 设备"
 }
 
 internal fun MainViewModel.recordBleProfileEvent(event: JSONObject) {
     val status = event.optString("status").ifBlank { "unknown" }
     _bleProfileStatus.value = when (status) {
-        "connecting" -> "Connecting..."
-        "connected" -> "Connected; enumerating services..."
-        "done" -> "Profile complete"
-        "failed" -> event.optString("msg").ifBlank { "Profile failed" }
+        "connecting" -> "正在连接..."
+        "connected" -> "已连接；正在枚举服务..."
+        "done" -> "画像采集完成"
+        "failed" -> event.optString("msg").ifBlank { "画像采集失败" }
         else -> status
     }
     if (status == "done" || status == "failed") {
@@ -107,7 +107,7 @@ internal fun MainViewModel.recordBleProfileEvent(event: JSONObject) {
         updateForegroundService()
         addHistory(
             "ble_profile",
-            if (status == "done") "BLE profile complete" else "BLE profile failed",
+            if (status == "done") "BLE 画像采集完成" else "BLE 画像采集失败",
             if (status == "done") HistoryLevel.SUCCESS else HistoryLevel.ERROR,
         )
     }

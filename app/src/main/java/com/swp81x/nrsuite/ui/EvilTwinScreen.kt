@@ -118,8 +118,8 @@ fun EvilTwinScreen(
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
         TabRow(selectedTabIndex = selectedTab) {
-            Tab(selected = selectedTab == 0, onClick = { selectedTab = 0 }, text = { Text("Overview") })
-            Tab(selected = selectedTab == 1, onClick = { selectedTab = 1 }, text = { Text("Logs (${eventLog.size})") })
+            Tab(selected = selectedTab == 0, onClick = { selectedTab = 0 }, text = { Text("概览") })
+            Tab(selected = selectedTab == 1, onClick = { selectedTab = 1 }, text = { Text("日志 (${eventLog.size})") })
         }
 
         if (selectedTab == 0) {
@@ -130,21 +130,21 @@ fun EvilTwinScreen(
         ) {
             Column(Modifier.padding(14.dp)) {
                 Text(
-                    text = "Evil Twin",
+                    text = "恶魔双胞胎 (Evil Twin)",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
                 )
                 Text(
-                    text = "Portal + deauth + EAPOL capture workflow",
+                    text = "钓鱼门户 + Deauth 干扰 + EAPOL 握手包捕获工作流",
                     style = MaterialTheme.typography.bodySmall,
                     color = NrOnSurfaceVariant,
                 )
                 Spacer(Modifier.height(8.dp))
                 StatusIndicator(
                     label = when {
-                        !connected -> "No device connected"
-                        running -> "Evil Twin running"
-                        else -> "Ready"
+                        !connected -> "未连接设备"
+                        running -> "恶魔双胞胎运行中"
+                        else -> "就绪"
                     },
                     color = when {
                         !connected -> StatusNeutral
@@ -180,9 +180,9 @@ fun EvilTwinScreen(
                     )
                     Spacer(Modifier.width(10.dp))
                     Column(Modifier.weight(1f)) {
-                        Text("Target network", fontWeight = FontWeight.SemiBold)
+                        Text("目标网络", fontWeight = FontWeight.SemiBold)
                         Text(
-                            text = targetBssid.ifBlank { "Scan and select an access point" },
+                            text = targetBssid.ifBlank { "请扫描并选择热点 AP" },
                             style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
                             color = NrOnSurfaceVariant,
                         )
@@ -190,7 +190,7 @@ fun EvilTwinScreen(
                     IconButton(onClick = { targetExpanded = !targetExpanded }) {
                         Icon(
                             imageVector = if (targetExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                            contentDescription = if (targetExpanded) "Collapse target selection" else "Expand target selection",
+                            contentDescription = if (targetExpanded) "折叠目标选择" else "展开目标选择",
                         )
                     }
                 }
@@ -199,12 +199,12 @@ fun EvilTwinScreen(
                         onClick = onScanWifi,
                         enabled = connected && !scanning,
                     ) {
-                        Text(if (scanning) "Scanning..." else "Scan WiFi for targets")
+                        Text(if (scanning) "正在扫描..." else "扫描周围 WiFi 目标")
                     }
                     if (networks.isEmpty() && !scanning) {
                         Spacer(Modifier.height(6.dp))
                         Text(
-                            text = "Tap \"Scan WiFi for targets\" to find nearby access points.",
+                            text = "点击“扫描周围 WiFi 目标”以发现附近的热点。",
                             style = MaterialTheme.typography.bodySmall,
                             color = NrOnSurfaceVariant,
                         )
@@ -217,14 +217,14 @@ fun EvilTwinScreen(
                                 .background(
                                     color = NrSurfaceVariant,
                                     shape = RoundedCornerShape(10.dp),
-                                )
+                                 )
                                 .padding(6.dp),
                             verticalArrangement = Arrangement.spacedBy(4.dp),
                         ) {
                             networks.forEach { network ->
                                 val bssidValue = network.optString("bssid")
                                 NetworkTargetRow(
-                                    ssid = network.optString("ssid").ifBlank { "(hidden)" },
+                                    ssid = network.optString("ssid").ifBlank { "(隐藏)" },
                                     bssid = bssidValue,
                                     channel = network.optInt("channel", 1),
                                     rssi = network.optInt("rssi", -100),
@@ -270,25 +270,25 @@ fun EvilTwinScreen(
             Column(Modifier.padding(14.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = "Captured passwords (${results.size})",
+                        text = "已捕获密码 (${results.size})",
                         fontWeight = FontWeight.SemiBold,
                         modifier = Modifier.weight(1f),
                     )
                     IconButton(
                         onClick = {
-                            clipboard.copyWithToast(context, results.joinToString("\n") { it.password }, "Passwords copied")
+                            clipboard.copyWithToast(context, results.joinToString("\n") { it.password }, "密码已复制")
                         },
                         enabled = results.isNotEmpty(),
                     ) {
-                        Icon(Icons.Default.ContentCopy, contentDescription = "Copy passwords")
+                        Icon(Icons.Default.ContentCopy, contentDescription = "复制所有密码")
                     }
                     IconButton(onClick = onClearPasswords, enabled = results.isNotEmpty()) {
-                        Icon(Icons.Default.Delete, contentDescription = "Clear passwords")
+                        Icon(Icons.Default.Delete, contentDescription = "清空密码")
                     }
                 }
                 if (results.isEmpty()) {
                     Text(
-                        text = "No password captured yet.",
+                        text = "暂未捕获到密码。",
                         style = MaterialTheme.typography.bodySmall,
                         color = NrOnSurfaceVariant,
                     )
@@ -319,11 +319,11 @@ fun EvilTwinScreen(
                                 modifier = Modifier.weight(1f),
                             )
                             IconButton(
-                                onClick = { clipboard.copyWithToast(context, result.password, "Password copied") },
+                                onClick = { clipboard.copyWithToast(context, result.password, "密码已复制") },
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.ContentCopy,
-                                    contentDescription = "Copy password",
+                                    contentDescription = "复制密码",
                                     tint = NrOnSurfaceVariant,
                                 )
                             }
@@ -333,15 +333,15 @@ fun EvilTwinScreen(
                 Spacer(Modifier.height(6.dp))
                 val verificationText = when {
                     results.any { it.status == EvilTwinResult.Status.CORRECT } ->
-                        "A submitted password matched the captured WPA2 handshake."
+                        "已提交密码与捕获的 WPA2 握手包匹配成功。"
                     results.any { it.status == EvilTwinResult.Status.INCORRECT } ->
-                        "Submitted passwords were checked against the captured WPA2 handshake."
+                        "已根据捕获的 WPA2 握手包对提交的密码进行了校验。"
                     results.any { it.status == EvilTwinResult.Status.PENDING } ->
-                        "Waiting for a complete M1 + M2 handshake with matching BSSID/STA before verification."
+                        "等待捕获匹配 BSSID/STA 的完整 M1 + M2 握手包后再进行校验。"
                     results.any { it.status == EvilTwinResult.Status.INVALID_LENGTH } ->
-                        "One or more submitted passwords are outside the WPA2 passphrase length range (8-63 characters)."
+                        "提交的一个或多个密码长度不符合 WPA2 规范 (8–63 字符)。"
                     else ->
-                        "WPA2 verification runs automatically after a password is submitted and matching M1 + M2 material is captured."
+                        "当用户提交密码且捕获到匹配的 M1 + M2 握手包时，系统将自动进行 WPA2 校验。"
                 }
                 Text(
                     text = verificationText,
@@ -365,25 +365,25 @@ fun EvilTwinScreen(
             Column(Modifier.padding(14.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = "Evil Twin logs (${eventLog.size})",
+                        text = "恶魔双胞胎日志 (${eventLog.size})",
                         fontWeight = FontWeight.SemiBold,
                         modifier = Modifier.weight(1f),
                     )
                     IconButton(
                         onClick = {
-                            clipboard.copyWithToast(context, eventLog.joinToString("\n"), "Logs copied")
+                            clipboard.copyWithToast(context, eventLog.joinToString("\n"), "日志已复制")
                         },
                         enabled = eventLog.isNotEmpty(),
                     ) {
-                        Icon(Icons.Default.ContentCopy, contentDescription = "Copy logs")
+                        Icon(Icons.Default.ContentCopy, contentDescription = "复制日志")
                     }
                     IconButton(onClick = onClearEventLog, enabled = eventLog.isNotEmpty()) {
-                        Icon(Icons.Default.Delete, contentDescription = "Clear logs")
+                        Icon(Icons.Default.Delete, contentDescription = "清空日志")
                     }
                 }
                 if (eventLog.isEmpty()) {
                     Text(
-                        text = "Portal page views, client associations, and POST data will appear here.",
+                        text = "门户页面访问、客户端连接及 POST 提交数据将显示在此处。",
                         style = MaterialTheme.typography.bodySmall,
                         color = NrOnSurfaceVariant,
                     )
@@ -404,15 +404,15 @@ fun EvilTwinScreen(
         if (confirmStart) {
             AlertDialog(
                 onDismissRequest = { confirmStart = false },
-                title = { Text("Start Evil Twin?") },
+                title = { Text("启动恶魔双胞胎 (Evil Twin)？") },
                 text = {
                     Text(
-                        "This starts an AP, optionally deauths the selected target, " +
-                            "and captures EAPOL/password attempts.\n\n" +
+                        "将启动仿冒热点 AP，并向选定目标发送 Deauth 解除认证干扰，" +
+                            "同时捕获客户端提交的密码与 EAPOL 握手包。\n\n" +
                             "SSID: $ssid\n" +
-                            "Channel: $channel\n" +
-                            "Target: ${targetBssid.ifBlank { "none selected" }}\n\n" +
-                            "Only use this on networks you own or are authorized to test.",
+                            "信道: $channel\n" +
+                            "目标: ${targetBssid.ifBlank { "未选择" }}\n\n" +
+                            "请仅在您拥有或获得授权测试的网络上使用。",
                     )
                 },
                 confirmButton = {
@@ -421,10 +421,10 @@ fun EvilTwinScreen(
                             confirmStart = false
                             onStart(ssid.trim(), channel, targetBssid.trim())
                         },
-                    ) { Text("Start") }
+                    ) { Text("启动") }
                 },
                 dismissButton = {
-                    TextButton(onClick = { confirmStart = false }) { Text("Cancel") }
+                    TextButton(onClick = { confirmStart = false }) { Text("取消") }
                 },
             )
         }
@@ -432,18 +432,18 @@ fun EvilTwinScreen(
         if (confirmStop) {
             AlertDialog(
                 onDismissRequest = { confirmStop = false },
-                title = { Text("Stop Evil Twin?") },
-                text = { Text("This stops the portal, deauth workflow, and EAPOL capture.") },
+                title = { Text("停止恶魔双胞胎？") },
+                text = { Text("将停止认证门户、Deauth 解除认证工作流以及 EAPOL 捕获。") },
                 confirmButton = {
                     TextButton(
                         onClick = {
                             confirmStop = false
                             onStop()
                         },
-                    ) { Text("Stop") }
+                    ) { Text("停止") }
                 },
                 dismissButton = {
-                    TextButton(onClick = { confirmStop = false }) { Text("Cancel") }
+                    TextButton(onClick = { confirmStop = false }) { Text("取消") }
                 },
             )
         }
@@ -458,17 +458,17 @@ fun EvilTwinScreen(
                         running -> confirmStop = true
                         targetBssid.isBlank() -> Toast.makeText(
                             context,
-                            "Select a target network first.",
+                            "请先选择目标网络。",
                             Toast.LENGTH_SHORT,
                         ).show()
                         selectedHtmlName == null -> Toast.makeText(
                             context,
-                            "Choose an HTML file first.",
+                            "请先选择 HTML 文件。",
                             Toast.LENGTH_SHORT,
                         ).show()
                         htmlUploading -> Toast.makeText(
                             context,
-                            "Wait for the HTML upload to finish.",
+                            "请等待 HTML 上传完成。",
                             Toast.LENGTH_SHORT,
                         ).show()
                         else -> confirmStart = true
@@ -482,7 +482,7 @@ fun EvilTwinScreen(
             ) {
                 Icon(
                     imageVector = if (running) Icons.Default.Stop else Icons.Default.PlayArrow,
-                    contentDescription = if (running) "Stop Evil Twin" else "Start Evil Twin",
+                    contentDescription = if (running) "停止恶魔双胞胎" else "启动恶魔双胞胎",
                 )
             }
         }

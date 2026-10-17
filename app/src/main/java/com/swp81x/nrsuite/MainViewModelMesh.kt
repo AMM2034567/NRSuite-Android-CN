@@ -23,7 +23,7 @@ private const val MESH_SENSOR_SWEEP_MS = 5_000L
 
 internal fun MainViewModel.refreshMeshStatusImpl() {
     val activeSession = session ?: run {
-        appendLog("Connect to a device before reading mesh status.")
+        appendLog("读取 Mesh 状态前请先连接设备。")
         return
     }
 
@@ -32,7 +32,7 @@ internal fun MainViewModel.refreshMeshStatusImpl() {
         if (response?.optBoolean("ok") == true) {
             updateMeshStatusFromJsonImpl(response)
         } else {
-            appendLog("Mesh status request failed: ${response?.optString("msg") ?: "timeout"}")
+            appendLog("Mesh 状态请求失败：${response?.optString("msg") ?: "超时"}")
         }
     }
 }
@@ -81,7 +81,7 @@ internal fun MainViewModel.setMeshChannelImpl(value: Int) {
 internal fun MainViewModel.changeMeshChannelImpl(channel: Int) {
     val safeChannel = channel.coerceIn(1, 13)
     val activeSession = session ?: run {
-        val message = "Connect to a device before changing the mesh channel."
+        val message = "更改 Mesh 信道前请先连接设备。"
         _meshLastError.value = message
         appendLog(message, tag = "mesh")
         return
@@ -98,12 +98,12 @@ internal fun MainViewModel.changeMeshChannelImpl(channel: Int) {
             )
             if (response?.optBoolean("ok") == true) {
                 _meshChannel.value = safeChannel
-                _meshSetupMessage.value = "Mesh channel change requested."
-                appendLog("Mesh channel change requested: $safeChannel", tag = "mesh")
+                _meshSetupMessage.value = "已请求更改 Mesh 信道。"
+                appendLog("已请求更改 Mesh 信道：$safeChannel", tag = "mesh")
             } else {
-                val message = response?.optString("msg") ?: "timeout"
+                val message = response?.optString("msg") ?: "超时"
                 _meshLastError.value = message
-                appendLog("Mesh channel change failed: $message", tag = "mesh")
+                appendLog("更改 Mesh 信道失败：$message", tag = "mesh")
             }
         } finally {
             _meshActionInProgress.value = false
@@ -117,22 +117,22 @@ internal fun MainViewModel.forgetMeshPassphraseImpl() {
     _meshPassphrase.value = ""
     _meshKeyId.value = ""
     _meshPassphraseMatch.value = null
-    _meshSetupMessage.value = "Saved mesh credentials removed from this app."
+    _meshSetupMessage.value = "已从本应用中移除保存的 Mesh 凭据。"
     _meshCheckingPassphrase.value = false
-    appendLog("Saved mesh credentials forgotten on this app.", tag = "mesh")
+    appendLog("本应用已清除保存的 Mesh 凭据。", tag = "mesh")
 }
 
 internal fun MainViewModel.verifyMeshPassphraseImpl(passphrase: String) {
     val cleanPassphrase = passphrase.trim()
     if (cleanPassphrase.length < MIN_MESH_PASSPHRASE_LENGTH) {
-        val message = "Mesh passphrase must be at least $MIN_MESH_PASSPHRASE_LENGTH characters."
+        val message = "Mesh 通信密码至少需要 $MIN_MESH_PASSPHRASE_LENGTH 个字符。"
         _meshSetupMessage.value = message
         _meshLastError.value = message
         return
     }
 
     val activeSession = session ?: run {
-        val message = "Connect to a device before checking mesh membership."
+        val message = "检查 Mesh 成员身份前请先连接设备。"
         _meshSetupMessage.value = message
         _meshLastError.value = message
         return
@@ -140,12 +140,12 @@ internal fun MainViewModel.verifyMeshPassphraseImpl(passphrase: String) {
 
     if (!_meshInitialized.value) {
         _meshPassphraseMatch.value = null
-        _meshSetupMessage.value = "This device is not provisioned yet."
+        _meshSetupMessage.value = "该设备尚未配网配置。"
         return
     }
 
     val keys = runCatching { MeshCrypto.deriveKeys(cleanPassphrase) }.getOrElse { error ->
-        val message = "Mesh key derivation failed: ${error.message}"
+        val message = "Mesh 密钥派生失败：${error.message}"
         _meshSetupMessage.value = message
         _meshLastError.value = message
         return
@@ -165,8 +165,8 @@ internal fun MainViewModel.verifyMeshPassphraseImpl(passphrase: String) {
                 timeoutMs = MESH_COMMAND_TIMEOUT_MS,
             )
             if (challenge?.optBoolean("ok") != true) {
-                val message = challenge?.optString("msg") ?: "challenge timeout"
-                _meshSetupMessage.value = "Could not check passphrase: $message"
+                val message = challenge?.optString("msg") ?: "质询超时"
+                _meshSetupMessage.value = "无法校验密码：$message"
                 _meshLastError.value = message
                 return@launch
             }
@@ -176,9 +176,9 @@ internal fun MainViewModel.verifyMeshPassphraseImpl(passphrase: String) {
             val match = returnedHmac != null && MessageDigest.isEqual(expectedHmac, returnedHmac)
             _meshPassphraseMatch.value = match
             _meshSetupMessage.value = if (match) {
-                "This device is already provisioned with this passphrase."
+                "该设备已使用此密码完成配网。"
             } else {
-                "This device is provisioned with a different passphrase."
+                "该设备使用了其他密码进行配网。"
             }
         } finally {
             _meshCheckingPassphrase.value = false
@@ -190,19 +190,19 @@ internal fun MainViewModel.provisionMeshImpl(passphrase: String, keyId: String?,
     val cleanPassphrase = passphrase.trim()
     val safeChannel = channel.coerceIn(1, 13)
     if (cleanPassphrase.length < MIN_MESH_PASSPHRASE_LENGTH) {
-        val message = "Mesh passphrase must be at least $MIN_MESH_PASSPHRASE_LENGTH characters."
+        val message = "Mesh 通信密码至少需要 $MIN_MESH_PASSPHRASE_LENGTH 个字符。"
         _meshLastError.value = message
         appendLog(message, tag = "mesh")
         return
     }
 
     val activeSession = session ?: run {
-        appendLog("Connect to a device before provisioning mesh keys.", tag = "mesh")
+        appendLog("配网 Mesh 密钥前请先连接设备。", tag = "mesh")
         return
     }
 
     val keys = runCatching { MeshCrypto.deriveKeys(cleanPassphrase) }.getOrElse { error ->
-        appendLog("Mesh key derivation failed: ${error.message}", tag = "mesh")
+        appendLog("Mesh 密钥派生失败：${error.message}", tag = "mesh")
         return
     }
 
@@ -237,16 +237,16 @@ internal fun MainViewModel.provisionMeshImpl(passphrase: String, keyId: String?,
                 persistProvisionedCredentialsImpl(stored)
                 persistGlobalCredentialsImpl(stored)
                 _meshPassphraseMatch.value = true
-                _meshSetupMessage.value = "Mesh setup complete. Saved credentials will be used for future activation."
-                appendLog("Mesh derived keys provisioned; raw passphrase was never sent.", tag = "mesh")
-                addHistory("mesh", "Mesh keys provisioned", HistoryLevel.SUCCESS)
+                _meshSetupMessage.value = "Mesh 配置完成。已保存的凭据将用于后续激活。"
+                appendLog("Mesh 派生密钥已配网注入；原始密码从未在链路上传输。", tag = "mesh")
+                addHistory("mesh", "Mesh 密钥已配网注入", HistoryLevel.SUCCESS)
                 refreshMeshFeaturesImpl()
                 refreshMeshStatusImpl()
             } else {
-                val message = response?.optString("msg") ?: "timeout"
+                val message = response?.optString("msg") ?: "超时"
                 _meshLastError.value = message
-                _meshSetupMessage.value = "Mesh provisioning failed: $message"
-                appendLog("Mesh provisioning failed: $message", tag = "mesh")
+                _meshSetupMessage.value = "Mesh 配网失败：$message"
+                appendLog("Mesh 配网失败：$message", tag = "mesh")
             }
         } finally {
             _meshProvisioning.value = false
@@ -259,7 +259,7 @@ internal fun MainViewModel.provisionMeshWithSavedCredentialsImpl() {
         refreshMeshGlobalCredentialsImpl()
         meshGlobalCredentials
     } ?: run {
-        val message = "No saved mesh credentials on this app. Enter the passphrase once to set up a mesh."
+        val message = "本应用中暂无已保存的 Mesh 凭据。请输入一次密码以建立 Mesh。"
         _meshSetupMessage.value = message
         _meshLastError.value = message
         appendLog(message, tag = "mesh")
@@ -267,7 +267,7 @@ internal fun MainViewModel.provisionMeshWithSavedCredentialsImpl() {
     }
 
     val activeSession = session ?: run {
-        val message = "Connect to a device before provisioning mesh keys."
+        val message = "配网 Mesh 密钥前请先连接设备。"
         _meshSetupMessage.value = message
         _meshLastError.value = message
         appendLog(message, tag = "mesh")
@@ -295,16 +295,16 @@ internal fun MainViewModel.provisionMeshWithSavedCredentialsImpl() {
                 _meshChannel.value = credentials.channel.coerceIn(1, 13)
                 persistProvisionedCredentialsImpl(credentials)
                 _meshPassphraseMatch.value = true
-                _meshSetupMessage.value = "Device set up using the saved mesh credentials."
-                appendLog("Mesh keys provisioned from saved app credentials.", tag = "mesh")
-                addHistory("mesh", "Mesh keys provisioned from saved credentials", HistoryLevel.SUCCESS)
+                _meshSetupMessage.value = "已使用保存的 Mesh 凭据完成设备配置。"
+                appendLog("已从应用保存的凭据中配网注入 Mesh 密钥。", tag = "mesh")
+                addHistory("mesh", "已通过保存的凭据配网 Mesh 密钥", HistoryLevel.SUCCESS)
                 refreshMeshFeaturesImpl()
                 refreshMeshStatusImpl()
             } else {
-                val message = response?.optString("msg") ?: "timeout"
+                val message = response?.optString("msg") ?: "超时"
                 _meshLastError.value = message
-                _meshSetupMessage.value = "Mesh provisioning failed: $message"
-                appendLog("Mesh provisioning failed: $message", tag = "mesh")
+                _meshSetupMessage.value = "Mesh 配网失败：$message"
+                appendLog("Mesh 配网失败：$message", tag = "mesh")
             }
         } finally {
             _meshProvisioning.value = false
@@ -315,24 +315,24 @@ internal fun MainViewModel.provisionMeshWithSavedCredentialsImpl() {
 internal fun MainViewModel.authenticateAndActivateMeshImpl(passphrase: String) {
     val cleanPassphrase = passphrase.trim()
     if (cleanPassphrase.length < MIN_MESH_PASSPHRASE_LENGTH) {
-        val message = "Enter the mesh passphrase before authenticating."
+        val message = "认证前请输入 Mesh 通信密码。"
         _meshLastError.value = message
         appendLog(message, tag = "mesh")
         return
     }
 
     val keys = runCatching { MeshCrypto.deriveKeys(cleanPassphrase) }.getOrElse { error ->
-        appendLog("Mesh key derivation failed: ${error.message}", tag = "mesh")
+        appendLog("Mesh 密钥派生失败：${error.message}", tag = "mesh")
         return
     }
 
     _meshPassphrase.value = cleanPassphrase
-    authenticateAndActivateWithAuthKey(keys.authKey, "passphrase")
+    authenticateAndActivateWithAuthKey(keys.authKey, "通信密码")
 }
 
 internal fun MainViewModel.authenticateAndActivateStoredMeshImpl() {
     val credentials = meshStoredCredentials ?: run {
-        val message = "No saved credentials for this node. Enter the mesh passphrase again."
+        val message = "此节点暂无保存的凭据。请重新输入 Mesh 通信密码。"
         _meshLastError.value = message
         _meshSetupMessage.value = message
         appendLog(message, tag = "mesh")
@@ -342,7 +342,7 @@ internal fun MainViewModel.authenticateAndActivateStoredMeshImpl() {
 
     authenticateAndActivateWithAuthKey(
         authKey = credentials.authKey,
-        sourceLabel = credentials.keyId ?: "saved credentials",
+        sourceLabel = credentials.keyId ?: "保存的凭据",
     )
 }
 
@@ -351,7 +351,7 @@ private fun MainViewModel.authenticateAndActivateWithAuthKey(
     sourceLabel: String,
 ) {
     val activeSession = session ?: run {
-        val message = "Connect to a device before authenticating mesh membership."
+        val message = "认证 Mesh 成员身份前请先连接设备。"
         _meshLastError.value = message
         _meshSetupMessage.value = message
         appendLog(message, tag = "mesh")
@@ -371,10 +371,10 @@ private fun MainViewModel.authenticateAndActivateWithAuthKey(
             timeoutMs = MESH_COMMAND_TIMEOUT_MS,
         )
         if (challenge?.optBoolean("ok") != true) {
-            val message = challenge?.optString("msg") ?: "challenge timeout"
+            val message = challenge?.optString("msg") ?: "质询超时"
             _meshLastError.value = message
-            _meshSetupMessage.value = "Mesh authentication challenge failed: $message"
-            appendLog("Mesh authentication challenge failed: $message", tag = "mesh")
+            _meshSetupMessage.value = "Mesh 认证质询失败：$message"
+            appendLog("Mesh 认证质询失败：$message", tag = "mesh")
             return@launch
         }
 
@@ -388,19 +388,19 @@ private fun MainViewModel.authenticateAndActivateWithAuthKey(
 
         if (returnedHmac == null || !MessageDigest.isEqual(expectedHmac, returnedHmac)) {
             _meshPassphraseMatch.value = false
-            val message = "Mesh authentication failed: node HMAC did not match the stored credentials."
+            val message = "Mesh 认证失败：节点 HMAC 与存储的凭据不一致。"
             _meshLastError.value = message
-            _meshSetupMessage.value = "Saved credentials do not match this node. Re-enter the mesh passphrase."
+            _meshSetupMessage.value = "保存的凭据与此节点不匹配。请重新输入 Mesh 通信密码。"
             appendLog(message, tag = "mesh")
-            if (sourceLabel != "passphrase") {
+            if (sourceLabel != "通信密码") {
                 removeStoredCredentialsForNodeImpl()
             }
             return@launch
         }
 
         _meshPassphraseMatch.value = true
-        _meshSetupMessage.value = "Identity verified using $sourceLabel."
-        appendLog("Mesh identity verified for ${nodeId.ifBlank { "device" }}.", tag = "mesh")
+        _meshSetupMessage.value = "已使用 $sourceLabel 完成身份验证。"
+        appendLog("已验证 ${nodeId.ifBlank { "设备" }} 的 Mesh 身份。", tag = "mesh")
 
         val activation = activeSession.sendCommand(
             "MESH_ACTIVATE",
@@ -409,13 +409,13 @@ private fun MainViewModel.authenticateAndActivateWithAuthKey(
         if (activation?.optBoolean("ok") == true) {
             _meshActive.value = true
             _meshRole.value = activation.optString("role", "candidate")
-            appendLog("Mesh activation requested; waiting for election.", tag = "mesh")
-            addHistory("mesh", "Mesh activation requested", HistoryLevel.SUCCESS)
+            appendLog("已请求激活 Mesh；等待节点选举。", tag = "mesh")
+            addHistory("mesh", "已请求激活 Mesh", HistoryLevel.SUCCESS)
         } else {
-            val message = activation?.optString("msg") ?: "timeout"
+            val message = activation?.optString("msg") ?: "超时"
             _meshLastError.value = message
-            _meshSetupMessage.value = "Mesh activation failed: $message"
-            appendLog("Mesh activation failed: $message", tag = "mesh")
+            _meshSetupMessage.value = "Mesh 激活失败：$message"
+            appendLog("Mesh 激活失败：$message", tag = "mesh")
         }
         } finally {
             _meshActionInProgress.value = false
@@ -430,10 +430,10 @@ internal fun MainViewModel.deactivateMeshImpl() {
         try {
             val response = activeSession?.sendCommand("MESH_DEACTIVATE", timeoutMs = 5_000)
             if (response?.optBoolean("ok") == true) {
-                appendLog("Mesh deactivated; stored keys remain provisioned.", tag = "mesh")
+                appendLog("Mesh 已停用；已保存的密钥配置仍保持保留。", tag = "mesh")
                 resetMeshRuntimeStateImpl()
             } else {
-                appendLog("Mesh deactivate request failed or timed out.", tag = "mesh")
+                appendLog("停用 Mesh 请求失败或超时。", tag = "mesh")
                 refreshMeshStatusImpl()
             }
         } finally {
@@ -450,12 +450,12 @@ internal fun MainViewModel.clearMeshKeysImpl() {
             _meshInitialized.value = false
             _meshPassphraseMatch.value = null
             removeStoredCredentialsForNodeImpl()
-            _meshSetupMessage.value = "Mesh keys cleared. This device is no longer provisioned."
-            appendLog("Mesh keys cleared from the device.", tag = "mesh")
-            addHistory("mesh", "Mesh keys cleared", HistoryLevel.SUCCESS)
+            _meshSetupMessage.value = "Mesh 密钥已清除。此设备已取消配网。"
+            appendLog("设备上的 Mesh 密钥已清除。", tag = "mesh")
+            addHistory("mesh", "Mesh 密钥已清除", HistoryLevel.SUCCESS)
             refreshMeshFeaturesImpl()
         } else {
-            appendLog("Mesh key clear request failed or timed out.", tag = "mesh")
+            appendLog("清除 Mesh 密钥请求失败或超时。", tag = "mesh")
         }
         resetMeshRuntimeStateImpl()
     }
@@ -466,7 +466,7 @@ internal fun MainViewModel.handleMeshEventImpl(event: JSONObject) {
         "mesh_status" -> {
             updateMeshStatusFromJsonImpl(event)
             event.optString("reason").takeIf { it.isNotBlank() }?.let { reason ->
-                appendLog("Mesh status: ${event.optString("role", "disabled")} ($reason).", tag = "mesh")
+                appendLog("Mesh 状态：${event.optString("role", "已禁用")} ($reason)。", tag = "mesh")
             }
         }
 
@@ -478,12 +478,12 @@ internal fun MainViewModel.handleMeshEventImpl(event: JSONObject) {
             _meshActive.value = role == "master" || role == "client" || role == "candidate"
             _meshSessionId.value = sessionId
             if (ok) {
-                appendLog("Mesh activation complete: role=$role" +
-                    (sessionId?.let { ", session=$it" } ?: ""), tag = "mesh")
+                appendLog("Mesh 激活完成：角色=$role" +
+                    (sessionId?.let { "，会话=$it" } ?: ""), tag = "mesh")
             } else {
                 val message = event.optString("reason", "election conflict")
                 _meshLastError.value = message
-                appendLog("Mesh activation failed: $message", tag = "mesh")
+                appendLog("Mesh 激活失败：$message", tag = "mesh")
             }
         }
 
@@ -538,7 +538,7 @@ internal fun MainViewModel.handleMeshEventImpl(event: JSONObject) {
                     lastHealthAtMs = existing?.lastHealthAtMs ?: 0L,
                 )).sortedByDescending { it.lastSeenAtMs }
             }
-            appendLog("Mesh node joined: $nodeId", tag = "mesh")
+            appendLog("Mesh 节点已加入：$nodeId", tag = "mesh")
         }
 
         "mesh_node_left" -> {
@@ -550,7 +550,7 @@ internal fun MainViewModel.handleMeshEventImpl(event: JSONObject) {
                     if (node.nodeId == nodeId) node.copy(online = false) else node
                 }
             }
-            appendLog("Mesh node left: $nodeId ($reason)", tag = "mesh")
+            appendLog("Mesh 节点已离开：$nodeId ($reason)", tag = "mesh")
             refreshMeshStatusImpl()
         }
 
@@ -604,7 +604,7 @@ internal fun MainViewModel.handleMeshEventImpl(event: JSONObject) {
         "mesh_error" -> {
             val message = "${event.optString("code", "mesh_error")}: ${event.optString("msg")}"
             _meshLastError.value = message
-            appendLog("Mesh error: $message", tag = "mesh")
+            appendLog("Mesh 错误：$message", tag = "mesh")
         }
     }
 }

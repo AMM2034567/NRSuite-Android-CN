@@ -15,7 +15,7 @@ import org.json.JSONObject
 internal fun MainViewModel.startDeauthDetectorImpl() {
     val activeSession = session
     if (activeSession == null) {
-        appendLog("Connect to a device before starting the deauth detector.")
+        appendLog("启动 Deauth 检测器前请先连接设备。")
         return
     }
     if (_deauthDetectorRunning.value) return
@@ -23,10 +23,10 @@ internal fun MainViewModel.startDeauthDetectorImpl() {
     val mode = _deauthDetectorChannelMode.value
     val target = _deauthDetectorSelectedTarget.value
     if (mode == DeauthChannelMode.TARGETED && target == null) {
-        _actionError.value = "Select a target AP before starting targeted deauth detection."
+        _actionError.value = "启动定向 Deauth 检测前请先选择目标 AP。"
         return
     }
-    if (!ensureRadioIdle("Deauth Detector")) return
+    if (!ensureRadioIdle("Deauth 检测器")) return
 
     val channel = _deauthDetectorChannel.value.coerceIn(1, 14)
     val hopIntervalMs = _deauthDetectorHopIntervalMs.value.coerceIn(100, 2_000)
@@ -67,27 +67,27 @@ internal fun MainViewModel.startDeauthDetectorImpl() {
         }
 
         val startDescription = if (mode == DeauthChannelMode.HOPPING) {
-            "all channels every $hopIntervalMs ms"
+            "全信道跳频 (间隔 ${hopIntervalMs}ms)"
         } else {
-            "channel $channel (target ${target?.ssid ?: "selected AP"})"
+            "信道 $channel (目标 ${target?.ssid ?: "已选 AP"})"
         }
-        appendLog("Starting deauth detector on $startDescription...")
+        appendLog("正在启动 Deauth 检测器 ($startDescription)...")
 
         val response = activeSession.sendCommand("DEAUTH_DETECT_START", args, timeoutMs = 10_000)
         if (response?.optBoolean("ok") == true) {
             _deauthDetectorCurrentHopChannel.value =
                 if (mode == DeauthChannelMode.HOPPING) response.optInt("channel", 1) else null
-            appendLog("Deauth detector started.")
+            appendLog("Deauth 检测器已启动。")
             addHistory(
                 "deauth_detector",
-                "Deauth detector started ($startDescription)",
+                "Deauth 检测器已启动 ($startDescription)",
                 HistoryLevel.SUCCESS,
             )
         } else {
             _deauthDetectorRunning.value = false
             _deauthDetectorFramesPerSecond.value = 0
             updateForegroundService()
-            appendLog("Failed to start deauth detector: ${response?.optString("msg") ?: "timeout"}")
+            appendLog("启动 Deauth 检测器失败: ${response?.optString("msg") ?: "超时"}")
         }
     }
 }
@@ -115,14 +115,14 @@ internal fun MainViewModel.stopDeauthDetectorImpl() {
         val response = activeSession?.sendCommand("DEAUTH_DETECT_STOP", timeoutMs = 6_000)
         if (response?.optBoolean("ok") == true) {
             val detected = response.optInt("detected", _deauthDetectorTotalFrames.value)
-            appendLog("Deauth detector stopped: detected=$detected frame(s).")
+            appendLog("Deauth 检测器已停止: 检测到 $detected 个数据帧。")
             addHistory(
                 "deauth_detector",
-                "Deauth detector stopped; detected=$detected",
+                "Deauth 检测器已停止；检测到 $detected 个数据帧",
                 HistoryLevel.SUCCESS,
             )
         } else {
-            appendLog("Deauth detector stop request sent, but the device did not confirm.")
+            appendLog("已发送 Deauth 检测器停止请求，但设备未确认。")
         }
     }
 }
@@ -280,8 +280,13 @@ internal fun MainViewModel.recordDeauthDetectorFrame(event: JSONObject) {
         _deauthDetectorActiveAlert.value = null
     }
 
+    val confidenceZh = when (confidence) {
+        AlertConfidence.HIGH -> "高"
+        AlertConfidence.MEDIUM -> "中"
+        AlertConfidence.LOW -> "低"
+    }
     appendLog(
-        "Deauth detected: $sourceMac -> ${targetMac ?: "broadcast"} " +
-            "on ch $channel ($rssi dBm, reason $reasonCode, ${confidence.name.lowercase()} confidence)"
+        "检测到 Deauth 帧: $sourceMac -> ${targetMac ?: "广播"} " +
+            "信道 $channel ($rssi dBm, 原因代码 $reasonCode, 置信度: $confidenceZh)"
     )
 }

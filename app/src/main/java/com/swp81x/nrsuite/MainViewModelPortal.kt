@@ -37,7 +37,7 @@ internal fun MainViewModel.setEvilTwinHtmlFileImpl(uri: Uri, name: String?) {
     _evilTwinHtmlUploading.value = false
     _evilTwinHtmlUploadProgress.value = 0
     _evilTwinHtmlComplete.value = false
-    appendLog("Evil Twin HTML selected: ${_evilTwinHtmlName.value}")
+    appendLog("已选择恶魔双胞胎 HTML：${_evilTwinHtmlName.value}")
 }
 
 internal fun MainViewModel.clearEvilTwinHtmlFileImpl() {
@@ -46,16 +46,16 @@ internal fun MainViewModel.clearEvilTwinHtmlFileImpl() {
     _evilTwinHtmlUploading.value = false
     _evilTwinHtmlUploadProgress.value = 0
     _evilTwinHtmlComplete.value = false
-    appendLog("Evil Twin HTML cleared.")
+    appendLog("已清除恶魔双胞胎 HTML。")
 }
 
 internal fun MainViewModel.setPortalHtmlFileImpl(uri: Uri, name: String?) {
     _portalHtmlUri.value = uri
-    _portalHtmlName.value = name ?: uri.lastPathSegment ?: "HTML file"
+    _portalHtmlName.value = name ?: uri.lastPathSegment ?: "HTML 文件"
     _portalHtmlUploading.value = false
     _portalHtmlUploadProgress.value = 0
     _portalHtmlComplete.value = false
-    appendLog("Portal HTML selected: ${_portalHtmlName.value}")
+    appendLog("已选择认证门户 HTML：${_portalHtmlName.value}")
 }
 
 internal fun MainViewModel.clearPortalHtmlFileImpl() {
@@ -64,7 +64,7 @@ internal fun MainViewModel.clearPortalHtmlFileImpl() {
     _portalHtmlUploading.value = false
     _portalHtmlUploadProgress.value = 0
     _portalHtmlComplete.value = false
-    appendLog("Portal HTML cleared; device will use its placeholder page.")
+    appendLog("已清除认证门户 HTML；设备将使用内置占位页面。")
 }
 
 internal fun MainViewModel.startPortalImpl(ssid: String, channel: Int, targetBssid: String) {
@@ -73,7 +73,7 @@ internal fun MainViewModel.startPortalImpl(ssid: String, channel: Int, targetBss
 
 internal fun MainViewModel.startEvilTwinImpl(ssid: String, channel: Int, targetBssid: String) {
     if (_evilTwinHtmlUri.value == null) {
-        appendLog("Select a custom HTML file before starting Evil Twin.", level = LogLevel.ERROR)
+        appendLog("启动恶魔双胞胎前请先选择自定义 HTML 文件。", level = LogLevel.ERROR)
         return
     }
     startPortalInternalImpl(ssid, channel, targetBssid, _evilTwinHtmlUri.value, "evil_twin")
@@ -82,17 +82,17 @@ internal fun MainViewModel.startEvilTwinImpl(ssid: String, channel: Int, targetB
 internal fun MainViewModel.startPortalInternalImpl(ssid: String, channel: Int, targetBssid: String, htmlUri: Uri?, mode: String) {
     val activeSession = session
     if (activeSession == null) {
-        appendLog("Connect to a device before starting the portal.")
+        appendLog("启动认证门户前请先连接设备。")
         return
     }
     if (_portalRunning.value) return
-    if (!ensureRadioIdle(if (mode == "evil_twin") "Evil Twin" else "Captive Portal")) return
+    if (!ensureRadioIdle(if (mode == "evil_twin") "恶魔双胞胎" else "认证门户")) return
     _portalMode.value = mode
 
     val cleanSsid = ssid.trim().ifBlank { "Free WiFi" }
     val cleanBssid = targetBssid.trim().uppercase()
     if (cleanBssid.isNotBlank() && !MainViewModel.MAC_PATTERN.matches(cleanBssid)) {
-        appendLog("Invalid target BSSID: $cleanBssid")
+        appendLog("目标 BSSID 无效：$cleanBssid")
         return
     }
 
@@ -123,10 +123,10 @@ internal fun MainViewModel.startPortalInternalImpl(ssid: String, channel: Int, t
             put("channel", channel.coerceIn(1, 13))
             put("bssid", cleanBssid.ifBlank { "" })
         }
-        appendLog("Starting captive portal '$cleanSsid' on channel ${channel.coerceIn(1, 13)}...")
+        appendLog("正在信道 ${channel.coerceIn(1, 13)} 上启动认证门户 '$cleanSsid'...")
         val response = activeSession.sendCommand("START_PORTAL", args, timeoutMs = 15_000)
         if (response?.optBoolean("ok") != true) {
-            appendLog("Failed to start portal: ${response?.optString("msg") ?: "timeout"}")
+            appendLog("启动认证门户失败：${response?.optString("msg") ?: "超时"}")
             return@launch
         }
 
@@ -188,9 +188,9 @@ internal fun MainViewModel.startPortalInternalImpl(ssid: String, channel: Int, t
                     )
                 }
                 if (portalPcapWriter != null) {
-                    appendLog("Evil Twin capture: ${captureFile.absolutePath}")
+                    appendLog("恶魔双胞胎抓包文件：${captureFile.absolutePath}")
                 } else {
-                    appendLog("Could not create Evil Twin PCAP capture file.")
+                    appendLog("无法创建恶魔双胞胎 PCAP 抓包文件。")
                 }
             }
 
@@ -213,7 +213,7 @@ internal fun MainViewModel.startPortalInternalImpl(ssid: String, channel: Int, t
                                 verifyEvilTwinPasswordsImpl()
                             }
                         }.onFailure { error ->
-                            appendLog("Evil Twin capture parse/write error: ${error.message}")
+                            appendLog("恶魔双胞胎抓包解析/写入错误：${error.message}")
                         }
                     }
                 } catch (_: Throwable) {
@@ -232,17 +232,17 @@ internal fun MainViewModel.startPortalInternalImpl(ssid: String, channel: Int, t
                 }.getOrNull()
             }
             if (bytes == null) {
-                appendLog("Could not read the selected HTML file.")
+                appendLog("无法读取所选的 HTML 文件。")
             } else if (bytes.isEmpty()) {
-                appendLog("Selected HTML file is empty; using device placeholder.")
+                appendLog("所选 HTML 文件为空；将使用设备内置占位页面。")
             } else if (!uploadPortalHtmlImpl(activeSession, bytes)) {
-                appendLog("Portal HTML upload failed; device may be serving its placeholder page.")
+                appendLog("认证门户 HTML 上传失败；设备可能正在提供内置占位页面。")
             }
         }
 
         startPortalStatusPollingImpl(activeSession)
-        appendLog("Portal is running.")
-        addHistory("portal", "Portal started: $cleanSsid", HistoryLevel.SUCCESS)
+        appendLog("认证门户正在运行。")
+        addHistory("portal", "认证门户已启动：$cleanSsid", HistoryLevel.SUCCESS)
     }
 }
 
@@ -278,7 +278,7 @@ internal suspend fun MainViewModel.uploadPortalHtmlImpl(session: NrSession, byte
 internal suspend fun MainViewModel.uploadPortalHtmlInternalImpl(session: NrSession, bytes: ByteArray): Boolean {
     val maxHtmlSize = 24 * 1024
     if (bytes.size > maxHtmlSize) {
-        appendLog("HTML upload rejected: ${bytes.size} bytes exceeds firmware limit of $maxHtmlSize bytes.")
+        appendLog("HTML 上传被拒绝：${bytes.size} 字节超出固件上限 $maxHtmlSize 字节。")
         return false
     }
 
@@ -286,9 +286,9 @@ internal suspend fun MainViewModel.uploadPortalHtmlInternalImpl(session: NrSessi
         ?.features
         ?.contains("portal_html_offset") == true
     appendLog(
-        "Uploading HTML: ${bytes.size} bytes in " +
-            "${(bytes.size + HTML_RAW_CHUNK_SIZE - 1) / HTML_RAW_CHUNK_SIZE} chunk(s) " +
-            "(mode=${if (supportsOffset) "offset" else "legacy-append"})."
+        "正在上传 HTML：共 ${bytes.size} 字节，分 " +
+            "${(bytes.size + HTML_RAW_CHUNK_SIZE - 1) / HTML_RAW_CHUNK_SIZE} 个分块 " +
+            "（模式=${if (supportsOffset) "偏移量" else "传统追加"}）。"
     )
 
     val reset = session.sendCommand(
@@ -297,7 +297,7 @@ internal suspend fun MainViewModel.uploadPortalHtmlInternalImpl(session: NrSessi
         timeoutMs = 10_000,
     )
     if (reset?.optBoolean("ok") != true) {
-        appendLog("Device rejected RESET_HTML (size=${bytes.size}).")
+        appendLog("设备拒绝 RESET_HTML（大小=${bytes.size}）。")
         return false
     }
 
@@ -325,13 +325,13 @@ internal suspend fun MainViewModel.uploadPortalHtmlInternalImpl(session: NrSessi
                 break
             }
             appendLog(
-                "HTML chunk $chunkIndex offset $offset attempt $attempt failed: " +
-                    (response ?: "timeout")
+                "HTML 分块 $chunkIndex 偏移量 $offset 第 $attempt 次尝试失败：" +
+                    (response ?: "超时")
             )
             delay(400)
         }
         if (!success) {
-            appendLog("HTML upload aborted at chunk $chunkIndex (offset $offset).")
+            appendLog("HTML 上传在分块 $chunkIndex 处中止（偏移量 $offset）。")
             return false
         }
 
@@ -339,7 +339,7 @@ internal suspend fun MainViewModel.uploadPortalHtmlInternalImpl(session: NrSessi
         chunkIndex++
         _portalHtmlSize.value = offset
         htmlUploadProgressFlowImpl().value = ((offset * 100) / bytes.size).coerceIn(0, 100)
-        if (isLast) appendLog("HTML final chunk sent (${bytes.size} bytes at offset $end).")
+        if (isLast) appendLog("HTML 最终分块已发送（偏移量 $end 处共 ${bytes.size} 字节）。")
         delay(80)
     }
 
@@ -356,21 +356,21 @@ internal suspend fun MainViewModel.uploadPortalHtmlInternalImpl(session: NrSessi
     val deviceExpected = status?.optInt("html_expected", bytes.size) ?: bytes.size
     if (!complete) {
         appendLog(
-            "HTML upload did not complete on device " +
-                "(device reports size=$deviceSize, expected=$deviceExpected)."
+            "设备上的 HTML 上传未完成 " +
+                "（设备报告大小=$deviceSize，预期=$deviceExpected）。"
         )
         return false
     }
     if (deviceSize < bytes.size) {
-        appendLog("HTML size mismatch: sent ${bytes.size} bytes, device reports $deviceSize.")
+        appendLog("HTML 大小不匹配：已发送 ${bytes.size} 字节，设备报告 $deviceSize。")
         return false
     }
     if (deviceSize > bytes.size + HTML_TAIL_ALLOWANCE) {
-        appendLog("HTML buffer looks corrupted: sent ${bytes.size} bytes, device reports $deviceSize.")
+        appendLog("HTML 缓冲区可能损坏：已发送 ${bytes.size} 字节，设备报告 $deviceSize。")
         return false
     }
 
-    appendLog("HTML upload complete; device reports $deviceSize bytes (expected $deviceExpected).")
+    appendLog("HTML 上传完成；设备报告 $deviceSize 字节（预期 $deviceExpected）。")
     htmlCompleteFlowImpl().value = true
     return true
 }
@@ -440,10 +440,10 @@ internal fun MainViewModel.verifyEvilTwinPasswordsImpl() {
             )
             activeCredentialSession = null
             upsertCredentialSessionLocked(finished)
-            appendLog("Correct password captured; stopping Evil Twin...")
+            appendLog("已捕获正确密码；正在停止恶魔双胞胎...")
             addHistory(
                 "evil_twin",
-                "Correct password captured for ${ssid.ifBlank { "target" }}",
+                "已捕获 ${ssid.ifBlank { "目标" }} 的正确密码",
                 HistoryLevel.SUCCESS,
             )
             true
@@ -495,11 +495,11 @@ internal fun MainViewModel.stopPortalImpl() {
             activeSession?.sendCommand("STOP_PORTAL", timeoutMs = 8_000)
         }.getOrNull()
         if (response?.optBoolean("ok") == true) {
-            appendLog("Portal stopped.")
-            savedCapture?.let { appendLog("Evil Twin capture saved: ${it.absolutePath}") }
-            addHistory("portal", "Portal stopped", HistoryLevel.SUCCESS)
+            appendLog("认证门户已停止。")
+            savedCapture?.let { appendLog("恶魔双胞胎抓包文件已保存：${it.absolutePath}") }
+            addHistory("portal", "认证门户已停止", HistoryLevel.SUCCESS)
         } else {
-            appendLog("Portal stop request sent, but the device did not confirm.")
+            appendLog("认证门户停止请求已发送，但设备未确认。")
         }
     }
 }

@@ -65,14 +65,14 @@ internal fun MainViewModel.startSerialMonitorImpl(device: UsbSerialDevice, baudR
     if (_serialMonitorConnected.value || _serialMonitorConnecting.value) return
 
     if (!usbManager.hasPermission(device.device)) {
-        _serialMonitorError.value = "USB permission is required."
-        appendLog("Serial Monitor: USB permission required for ${device.displayName}.", level = LogLevel.ERROR)
+        _serialMonitorError.value = "需要 USB 权限。"
+        appendLog("串口监视器：需要 ${device.displayName} 的 USB 权限。", level = LogLevel.ERROR)
         return
     }
 
     val fingerprint = deviceFingerprintImpl(device.device)
     if (deviceSessions.containsKey(fingerprint) || idleDeviceSessions.containsKey(fingerprint)) {
-        val message = "Disconnect the active NRSuite session before opening Serial Monitor."
+        val message = "打开串口监视器前，请先断开当前活跃的 NRSuite 会话。"
         _serialMonitorBlockingMessage.value = message
         _serialMonitorError.value = null
         appendLog(message, level = LogLevel.ERROR)
@@ -95,10 +95,10 @@ internal fun MainViewModel.startSerialMonitorImpl(device: UsbSerialDevice, baudR
                 _serialMonitorConnected.value = true
                 _serialMonitorConnecting.value = false
                 appendSerialMonitorLine(
-                    text = "Serial Monitor opened ${device.displayName} @ $baudRate baud.",
+                    text = "串口监视器已打开 ${device.displayName} @ $baudRate 波特率。",
                     level = LogLevel.USB,
                 )
-                appendLog("Serial Monitor opened ${device.displayName} @ $baudRate baud.", level = LogLevel.USB)
+                appendLog("串口监视器已打开 ${device.displayName} @ $baudRate 波特率。", level = LogLevel.USB)
             }
 
             val buffer = ByteArray(4096)
@@ -107,9 +107,9 @@ internal fun MainViewModel.startSerialMonitorImpl(device: UsbSerialDevice, baudR
                     transport.read(buffer, 250)
                 } catch (error: IOException) {
                     withContext(Dispatchers.Main) {
-                        _serialMonitorError.value = "Serial read failed: ${error.message}"
+                        _serialMonitorError.value = "串口读取失败：${error.message}"
                         appendSerialMonitorLine(
-                            text = "Serial read failed: ${error.message}",
+                            text = "串口读取失败：${error.message}",
                             level = LogLevel.ERROR,
                         )
                     }
@@ -121,12 +121,12 @@ internal fun MainViewModel.startSerialMonitorImpl(device: UsbSerialDevice, baudR
             }
         } catch (error: Throwable) {
             withContext(Dispatchers.Main) {
-                _serialMonitorError.value = error.message ?: "Serial Monitor failed."
+                _serialMonitorError.value = error.message ?: "串口监视器运行失败。"
                 appendSerialMonitorLine(
-                    text = "Serial Monitor failed: ${error.message ?: "unknown error"}",
+                    text = "串口监视器运行失败：${error.message ?: "未知错误"}",
                     level = LogLevel.ERROR,
                 )
-                appendLog("Serial Monitor failed: ${error.message}", level = LogLevel.ERROR)
+                appendLog("串口监视器运行失败：${error.message}", level = LogLevel.ERROR)
             }
         } finally {
             runCatching { transport.close() }
@@ -155,15 +155,15 @@ internal fun MainViewModel.stopSerialMonitorImpl() {
         scope.launch(Dispatchers.IO) {
             runCatching { transport.close() }
         }
-        appendSerialMonitorLine(text = "Serial Monitor closed.", level = LogLevel.USB)
-        appendLog("Serial Monitor closed.", level = LogLevel.USB)
+        appendSerialMonitorLine(text = "串口监视器已关闭。", level = LogLevel.USB)
+        appendLog("串口监视器已关闭。", level = LogLevel.USB)
     }
 }
 
 internal fun MainViewModel.sendSerialMonitorInputImpl() {
     val transport = serialMonitorTransport
     if (!_serialMonitorConnected.value || transport == null) {
-        _serialMonitorError.value = "Connect Serial Monitor before sending data."
+        _serialMonitorError.value = "发送数据前请先连接串口监视器。"
         return
     }
 
@@ -181,9 +181,9 @@ internal fun MainViewModel.sendSerialMonitorInputImpl() {
             transport.write(payload, 1000)
         } catch (error: Throwable) {
             withContext(Dispatchers.Main) {
-                _serialMonitorError.value = "Serial write failed: ${error.message}"
+                _serialMonitorError.value = "串口写入失败：${error.message}"
                 appendSerialMonitorLine(
-                    text = "Serial write failed: ${error.message}",
+                    text = "串口写入失败：${error.message}",
                     level = LogLevel.ERROR,
                 )
             }
@@ -194,13 +194,13 @@ internal fun MainViewModel.sendSerialMonitorInputImpl() {
 internal fun MainViewModel.exportSerialMonitorLogImpl() {
     val lines = _serialMonitorLogLines.value
     if (lines.isEmpty()) {
-        _serialMonitorError.value = "There is no Serial Monitor log to export."
+        _serialMonitorError.value = "没有可导出的串口监视器日志。"
         return
     }
 
     val rootUri = _exportDirectory.value
     if (rootUri == null) {
-        _serialMonitorError.value = "Set an NRSuite root directory before exporting."
+        _serialMonitorError.value = "导出前请先设置 NRSuite 根目录。"
         return
     }
 
@@ -220,19 +220,19 @@ internal fun MainViewModel.exportSerialMonitorLogImpl() {
                 logsDirectory,
                 "text/plain",
                 fileName,
-            ) ?: throw IOException("Storage provider did not create the log file")
+            ) ?: throw IOException("存储提供程序无法创建日志文件")
 
             app.contentResolver.openOutputStream(documentUri, "wt")?.use { output ->
                 output.write(logText.toByteArray(Charsets.UTF_8))
-            } ?: throw IOException("Could not open the export file")
+            } ?: throw IOException("无法打开导出文件")
 
             withContext(Dispatchers.Main) {
-                appendLog("Serial Monitor log exported to ${displayNameForTreeUri(rootUri)}/Logs/$fileName.")
+                appendLog("串口监视器日志已导出至 ${displayNameForTreeUri(rootUri)}/Logs/$fileName。")
             }
         } catch (error: Throwable) {
             withContext(Dispatchers.Main) {
-                _serialMonitorError.value = "Serial log export failed: ${error.message}"
-                appendLog("Serial Monitor export failed: ${error.message}", level = LogLevel.ERROR)
+                _serialMonitorError.value = "串口日志导出失败：${error.message}"
+                appendLog("串口监视器导出失败：${error.message}", level = LogLevel.ERROR)
             }
         }
     }

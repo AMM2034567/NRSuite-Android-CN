@@ -7,14 +7,14 @@ import androidx.compose.ui.graphics.Color
 fun categoryColor(category: String): Color = when (category) {
     "Detection" -> CategoryDetectionBlue
     "Wireless" -> NrAccent
-    "WiFi Recon" -> CategoryDetectionBlue
-    "WiFi Attacks" -> CategoryAttackOrange
-    "WiFi Defense" -> CategoryFirmwareGreen
-    "Tools" -> StatusNeutral
-    "Credentials" -> StatusAmber
+    "WiFi Recon", "WiFi 侦察" -> CategoryDetectionBlue
+    "WiFi Attacks", "WiFi 攻击" -> CategoryAttackOrange
+    "WiFi Defense", "WiFi 防御" -> CategoryFirmwareGreen
+    "Tools", "工具" -> StatusNeutral
+    "Credentials", "凭据" -> StatusAmber
     "HID" -> CategoryHidPurple
-    "Storage" -> CategoryStorageTeal
-    "Firmware" -> CategoryFirmwareGreen
+    "Storage", "存储" -> CategoryStorageTeal
+    "Firmware", "固件" -> CategoryFirmwareGreen
     "BLE" -> CategoryBleBlue
     "Mesh" -> CategoryMeshIndigo
     else -> StatusNeutral

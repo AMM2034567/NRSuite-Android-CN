@@ -80,7 +80,7 @@ class UsbSerialTransport(
                 "pid=0x${usbDevice.productId.toString(16)} name=${usbDevice.deviceName}",
         )
         if (!usbManager.hasPermission(usbDevice)) {
-            throw IOException("USB permission has not been granted for ${usbDevice.deviceName}")
+            throw IOException("未获得 ${usbDevice.deviceName} 的 USB 权限")
         }
 
         if (isCh34x) {
@@ -98,11 +98,11 @@ class UsbSerialTransport(
         }
 
         val openedConnection = usbManager.openDevice(usbDevice)
-            ?: throw IOException("Could not open USB device ${usbDevice.deviceName}")
+            ?: throw IOException("无法打开 USB 设备 ${usbDevice.deviceName}")
         val openedPort = driver.ports.firstOrNull()
             ?: run {
                 openedConnection.close()
-                throw IOException("No serial port found on ${usbDevice.deviceName}")
+                throw IOException("${usbDevice.deviceName} 上未找到串口")
             }
 
         try {
@@ -126,7 +126,7 @@ class UsbSerialTransport(
         } catch (t: Throwable) {
             runCatching { openedPort.close() }
             runCatching { openedConnection.close() }
-            throw if (t is IOException) t else IOException("Could not configure serial port", t)
+            throw if (t is IOException) t else IOException("无法配置串口", t)
         }
 
         if (isLibraryConfiguredNativeRaw) {
@@ -135,7 +135,7 @@ class UsbSerialTransport(
             }
             runCatching { openedPort.close() }
             runCatching { openedConnection.close() }
-            throw IOException("Could not configure native raw transport for ${usbDevice.deviceName}")
+            throw IOException("无法为 ${usbDevice.deviceName} 配置原生 Raw 传输")
         }
 
         connection = openedConnection
@@ -152,7 +152,7 @@ class UsbSerialTransport(
                 rawCount
             }
         } else {
-            val activePort = port ?: throw IOException("Serial port is not open")
+            val activePort = port ?: throw IOException("串口未打开")
             activePort.read(buffer, timeoutMs)
         }
 
@@ -203,10 +203,10 @@ class UsbSerialTransport(
         Log.d("NRSuiteWire", "TX ${data.size} bytes: $preview")
         if (nativeRawOpen) {
             if (!NativeUsbBridge.write(data, timeoutMs)) {
-                throw IOException("Native libusb write failed")
+                throw IOException("原生 libusb 写入失败")
             }
         } else {
-            val activePort = port ?: throw IOException("Serial port is not open")
+            val activePort = port ?: throw IOException("串口未打开")
             activePort.write(data, timeoutMs)
         }
     }

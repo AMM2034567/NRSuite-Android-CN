@@ -232,12 +232,12 @@ fun MeshScreen(
                 Tab(
                     selected = selectedTab == 0,
                     onClick = { selectedTab = 0 },
-                    text = { Text("Setup") },
+                    text = { Text("配置向导") },
                 )
                 Tab(
                     selected = selectedTab == 1,
                     onClick = { selectedTab = 1 },
-                    text = { Text("Network") },
+                    text = { Text("Mesh 拓扑网络") },
                 )
             }
 
@@ -311,7 +311,7 @@ fun MeshScreen(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = "Advanced",
+                    text = "高级设置",
                     style = MaterialTheme.typography.labelMedium,
                     color = NrOnSurfaceVariant,
                     modifier = Modifier.weight(1f),
@@ -333,14 +333,13 @@ fun MeshScreen(
                 ) {
                     Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Text(
-                            text = "Danger zone",
+                            text = "高风险操作区",
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.SemiBold,
                             color = StatusRed,
                         )
                         Text(
-                            text = "Clearing device keys removes mesh capability from the ESP32. " +
-                                "Forgetting credentials removes the encrypted copy on this phone.",
+                            text = "清除设备密钥将彻底移除 ESP32 的 Mesh 组网能力。遗忘凭据将从本机删除加密备份。",
                             style = MaterialTheme.typography.bodySmall,
                             color = NrOnSurfaceVariant,
                         )
@@ -351,7 +350,7 @@ fun MeshScreen(
                         ) {
                             Icon(Icons.Default.Delete, contentDescription = null, modifier = Modifier.size(16.dp))
                             Spacer(Modifier.size(6.dp))
-                            Text("Clear device keys")
+                            Text("清除设备密钥")
                         }
                         OutlinedButton(
                             onClick = { confirmForgetCredentials = true },
@@ -359,7 +358,7 @@ fun MeshScreen(
                             enabled = hasGlobalCredentials || hasStoredCredentials ||
                                 passphrase.isNotBlank() || keyId.isNotBlank(),
                         ) {
-                            Text("Forget saved credentials")
+                            Text("遗忘已存凭据")
                         }
                     }
                 }
@@ -377,7 +376,7 @@ fun MeshScreen(
                 ) {
                     Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                         Text(
-                            text = "Mesh error",
+                            text = "Mesh 组网错误",
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.SemiBold,
                             color = StatusRed,
@@ -391,7 +390,7 @@ fun MeshScreen(
                             )
                         }
                         TextButton(onClick = onClearError) {
-                            Text("Dismiss")
+                            Text("忽略")
                         }
                     }
                 }
@@ -424,7 +423,7 @@ fun MeshScreen(
             } else {
                 Icon(
                     imageVector = if (sessionActive) Icons.Default.Stop else Icons.Default.PlayArrow,
-                    contentDescription = if (sessionActive) "Deactivate mesh" else "Authenticate and activate mesh",
+                    contentDescription = if (sessionActive) "停止 Mesh 组网" else "认证并启动 Mesh 组网",
                 )
             }
         }
@@ -433,11 +432,11 @@ fun MeshScreen(
     if (confirmReplace) {
         AlertDialog(
             onDismissRequest = { confirmReplace = false },
-            title = { Text("Replace existing mesh keys?") },
+            title = { Text("替换现有 Mesh 密钥？") },
             text = {
                 Text(
-                    "This device is already provisioned. Replacing its keys will remove it from the current mesh " +
-                        "until other nodes are provisioned with the new passphrase too."
+                    "当前设备已完成入网烧录。替换其密钥后，在其他节点也烧录新密钥之前，" +
+                        "该设备将从现有 Mesh 网络中脱离并无法与其他节点通信。"
                 )
             },
             confirmButton = {
@@ -447,12 +446,12 @@ fun MeshScreen(
                         onProvision(passphrase, keyId.ifBlank { null }, channel)
                     },
                 ) {
-                    Text("Replace keys", color = StatusRed)
+                    Text("替换密钥", color = StatusRed)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { confirmReplace = false }) {
-                    Text("Cancel")
+                    Text("取消")
                 }
             },
         )
@@ -461,11 +460,11 @@ fun MeshScreen(
     if (confirmClearKeys) {
         AlertDialog(
             onDismissRequest = { confirmClearKeys = false },
-            title = { Text("Clear mesh keys?") },
+            title = { Text("清除 Mesh 密钥？") },
             text = {
                 Text(
-                    "This removes the derived keys from the device NVS. The node will remain standalone until it is " +
-                        "re-provisioned with the same or a new passphrase."
+                    "此操作将从设备的 NVS 存储中彻底抹除派生密钥。该节点将恢复独立状态，" +
+                        "直到使用相同或新的预共享密钥重新配置。"
                 )
             },
             confirmButton = {
@@ -475,12 +474,12 @@ fun MeshScreen(
                         onClearKeys()
                     },
                 ) {
-                    Text("Clear keys", color = StatusRed)
+                    Text("清除密钥", color = StatusRed)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { confirmClearKeys = false }) {
-                    Text("Cancel")
+                    Text("取消")
                 }
             },
         )
@@ -489,11 +488,11 @@ fun MeshScreen(
     if (confirmForgetCredentials) {
         AlertDialog(
             onDismissRequest = { confirmForgetCredentials = false },
-            title = { Text("Forget saved credentials?") },
+            title = { Text("遗忘已存凭据？") },
             text = {
                 Text(
-                    "This removes the encrypted mesh credentials from this phone. The ESP32 keeps its NVS keys, " +
-                        "but you will need the passphrase again to authenticate this node."
+                    "此操作将从本机删除加密保存的 Mesh 凭据。ESP32 仍会保留其 NVS 密钥，" +
+                        "但下次认证该节点时需要手动重新输入预共享密钥。"
                 )
             },
             confirmButton = {
@@ -503,12 +502,12 @@ fun MeshScreen(
                         onForgetPassphrase()
                     },
                 ) {
-                    Text("Forget credentials", color = StatusRed)
+                    Text("遗忘凭据", color = StatusRed)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { confirmForgetCredentials = false }) {
-                    Text("Cancel")
+                    Text("取消")
                 }
             },
         )
@@ -564,7 +563,7 @@ private fun MeshSetupTab(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(
-                    text = "Connect an NRSuite device over USB to continue.",
+                    text = "请通过 USB 连接 NRSuite 硬件设备以继续。",
                     style = MaterialTheme.typography.bodyMedium,
                     color = NrOnSurfaceVariant,
                     textAlign = TextAlign.Center,
@@ -574,7 +573,7 @@ private fun MeshSetupTab(
 
         MeshSetupStep.Passphrase -> MeshStepCard {
             Text(
-                text = "Set up this device",
+                text = "配置此节点设备",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
                 color = NrOnSurface,
@@ -604,7 +603,7 @@ private fun MeshSetupTab(
             )
 
             Text(
-                text = "Mesh channel",
+                text = "Mesh 射频信道",
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.SemiBold,
                 color = NrOnSurface,
@@ -617,7 +616,7 @@ private fun MeshSetupTab(
             )
             if (channel >= 12) {
                 Text(
-                    text = "Channels 12-13 are region-dependent. Use only where authorized.",
+                    text = "信道 12-13 受国家/地区法规限制，请仅在允许的合规区域使用。",
                     style = MaterialTheme.typography.bodySmall,
                     color = StatusAmber,
                 )
@@ -631,7 +630,7 @@ private fun MeshSetupTab(
             ) {
                 Icon(Icons.Default.Key, contentDescription = null, modifier = Modifier.size(18.dp))
                 Spacer(Modifier.size(8.dp))
-                Text(if (provisioning) "Setting up device..." else "Set up this device")
+                Text(if (provisioning) "正在配置设备..." else "写入配置并烧录")
             }
 
             if (!setupMessage.isNullOrBlank()) {
@@ -643,13 +642,13 @@ private fun MeshSetupTab(
             if (busy) {
                 MeshStepCard {
                     Text(
-                        text = "Identifying key…",
+                        text = "正在识别并校验密钥...",
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.SemiBold,
                         color = StatusAmber,
                     )
                     Text(
-                        text = "Verifying the saved/entered passphrase against this device.",
+                        text = "正在对比设备与本机保存/输入的预共享密钥...",
                         style = MaterialTheme.typography.bodySmall,
                         color = NrOnSurfaceVariant,
                     )
@@ -657,13 +656,13 @@ private fun MeshSetupTab(
             } else if (active) {
                 MeshStepCard {
                     Text(
-                        text = "Activated",
+                        text = "组网已就绪",
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.SemiBold,
                         color = StatusGreen,
                     )
                     Text(
-                        text = "Use the Network tab to view nodes.",
+                        text = "切换至“Mesh 拓扑网络”标签页即可查看在线节点。",
                         style = MaterialTheme.typography.bodySmall,
                         color = NrOnSurfaceVariant,
                     )
@@ -679,35 +678,33 @@ private fun MeshSetupTab(
                 when {
                     useSavedCredentials -> {
                         tone = ActionTone.Positive
-                        title = "Saved credentials found"
-                        description = "This node can authenticate without re-entering the passphrase. " +
-                            "Use the FAB to activate."
-                        buttonLabel = "Refresh status"
+                        title = "已检测到本机保存的凭据"
+                        description = "该节点无需重新输入密钥即可完成认证。点击右下角操作按钮启动 Mesh。"
+                        buttonLabel = "刷新状态"
                         buttonEnabled = connected
                         buttonAction = onRefresh
                     }
                     passphraseMatch == true -> {
                         tone = ActionTone.Positive
-                        title = "Identified"
-                        description = "Passphrase and stored key match. Use the FAB to activate."
-                        buttonLabel = "Refresh status"
+                        title = "密钥校验一致"
+                        description = "输入的预共享密钥与设备存储的密钥一致。点击右下角按钮启动 Mesh。"
+                        buttonLabel = "刷新状态"
                         buttonEnabled = connected
                         buttonAction = onRefresh
                     }
                     passphraseMatch == false -> {
                         tone = ActionTone.Warning
-                        title = "Different passphrase"
-                        description = "This device is already provisioned with a different passphrase. " +
-                            "Replacing its keys will remove it from the current mesh."
-                        buttonLabel = "Replace device keys"
+                        title = "密钥不一致"
+                        description = "此设备已使用不同的密钥完成过烧录。替换其密钥将导致其脱离当前的 Mesh 网络。"
+                        buttonLabel = "替换设备密钥"
                         buttonEnabled = canProvision
                         buttonAction = onReplaceKeys
                     }
                     else -> {
                         tone = ActionTone.Neutral
-                        title = "Already provisioned"
-                        description = "Enter the stored passphrase and verify it before activating."
-                        buttonLabel = "Check passphrase"
+                        title = "设备已烧录配置"
+                        description = "请输入已烧录的预共享密钥并验证一致性，然后启动 Mesh。"
+                        buttonLabel = "校验密钥"
                         buttonEnabled = canCheck
                         buttonAction = { onCheckPassphrase(passphrase) }
                     }
@@ -777,13 +774,13 @@ private fun MeshNetworkTab(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Text(
-                    text = "Mesh is not set up on this device",
+                    text = "此设备尚未配置 Mesh 组网",
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold,
                     color = StatusAmber,
                 )
                 Text(
-                    text = "Provision the shared passphrase first.",
+                    text = "请先配置并烧录预共享密钥。",
                     style = MaterialTheme.typography.bodySmall,
                     color = NrOnSurfaceVariant,
                     textAlign = TextAlign.Center,
@@ -792,7 +789,7 @@ private fun MeshNetworkTab(
                     onClick = onSwitchToSetup,
                     enabled = connected,
                 ) {
-                    Text("Go to Setup")
+                    Text("前往配置向导")
                 }
             }
         }
@@ -810,31 +807,34 @@ private fun MeshNetworkTab(
             StatusIndicator(
                 label = nodeId.ifBlank { "-" },
                 subtitle = if (sessionActive) {
-                    "active · session #${sessionId ?: "-"}"
+                    "运行中 · 会话 #${sessionId ?: "-"}"
                 } else {
-                    "inactive"
+                    "未运行"
                 },
                 color = localColor,
-                trailingBadge = role
-                    .takeIf { it in setOf("master", "client", "candidate") }
-                    ?.uppercase(),
+                trailingBadge = when (role.lowercase()) {
+                    "master" -> "主节点"
+                    "client" -> "子节点"
+                    "candidate" -> "候选节点"
+                    else -> role.takeIf { it in setOf("master", "client", "candidate") }?.uppercase()
+                },
                 trailingBadgeColor = localColor,
                 monospace = true,
             )
             Text(
-                text = "Network control",
+                text = "Mesh 网络控制",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
                 color = NrOnSurface,
             )
             Text(
-                text = "Role and activation are managed by app control and master election.",
+                text = "主从角色分配与组网启停由应用与设备间的主节点选举机制动态协同管理。",
                 style = MaterialTheme.typography.bodySmall,
                 color = NrOnSurfaceVariant,
             )
             Spacer(Modifier.height(4.dp))
             Text(
-                text = "Mesh channel",
+                text = "Mesh 通信信道",
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.SemiBold,
                 color = NrOnSurface,
@@ -851,7 +851,7 @@ private fun MeshNetworkTab(
                         onClick = { confirmChannelChange = true },
                         enabled = connected && !busy,
                     ) {
-                        Text("Apply channel $selectedChannel")
+                        Text("应用信道 $selectedChannel")
                     }
                 }
             } else {
@@ -864,7 +864,7 @@ private fun MeshNetworkTab(
             }
             if (selectedChannel >= 12) {
                 Text(
-                    text = "Channels 12-13 are region-dependent. Use only where authorized.",
+                    text = "信道 12-13 受国家/地区法规限制，请仅在允许的合规区域使用。",
                     style = MaterialTheme.typography.bodySmall,
                     color = StatusAmber,
                 )
@@ -886,7 +886,7 @@ private fun MeshNetworkTab(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = "Nodes (${nodes.size})",
+                    text = "远端节点 (${nodes.size})",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
                     color = NrOnSurface,
@@ -896,7 +896,7 @@ private fun MeshNetworkTab(
                     onClick = onRefresh,
                     enabled = connected && !busy,
                 ) {
-                    Icon(Icons.Default.Refresh, contentDescription = "Refresh mesh status")
+                    Icon(Icons.Default.Refresh, contentDescription = "刷新 Mesh 状态")
                 }
             }
 
@@ -916,13 +916,13 @@ private fun MeshNetworkTab(
                     onClick = onCopyStatus,
                     enabled = nodes.isNotEmpty(),
                 ) {
-                    Text("Copy status")
+                    Text("复制网络拓扑")
                 }
                 TextButton(
                     onClick = onClearNodes,
                     enabled = nodes.isNotEmpty(),
                 ) {
-                    Text("Clear node list")
+                    Text("清空节点列表")
                 }
             }
         }
@@ -931,11 +931,11 @@ private fun MeshNetworkTab(
     if (confirmChannelChange) {
         AlertDialog(
             onDismissRequest = { confirmChannelChange = false },
-            title = { Text("Change mesh channel?") },
+            title = { Text("更改 Mesh 信道？") },
             text = {
                 Text(
-                    "All nodes will be asked to move to channel $selectedChannel. " +
-                        "Any node that misses the switch will recover by scanning for the master."
+                    "网络中的所有节点都将收到切换到信道 $selectedChannel 的指令。" +
+                        "任何错过同步指令的节点将通过信道扫描自动重新寻找主节点以恢复连接。"
                 )
             },
             confirmButton = {
@@ -945,12 +945,12 @@ private fun MeshNetworkTab(
                         onApplyChannel(selectedChannel)
                     },
                 ) {
-                    Text("Change channel")
+                    Text("确认更改")
                 }
             },
             dismissButton = {
                 TextButton(onClick = { confirmChannelChange = false }) {
-                    Text("Cancel")
+                    Text("取消")
                 }
             },
         )
@@ -990,7 +990,7 @@ private fun MeshStepIndicator(current: MeshSetupStep) {
                 if (done) {
                     Icon(
                         imageVector = Icons.Default.Check,
-                        contentDescription = "Completed step",
+                        contentDescription = "已完成步骤",
                         tint = NrBackground,
                         modifier = Modifier.size(16.dp),
                     )
@@ -1041,15 +1041,15 @@ private fun SavedCredentialsCard(keyLabel: String?, onUse: () -> Unit) {
     ) {
         Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(
-                text = "Saved mesh credentials",
+                text = "已存 Mesh 凭据",
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.SemiBold,
                 color = NrOnSurface,
             )
             Text(
-                text = "Use the encrypted mesh credentials already stored on this phone" +
+                text = "直接使用本机保存的加密凭据" +
                     (keyLabel?.takeIf { it.isNotBlank() }?.let { " ($it)" } ?: "") +
-                    " to set up this new node without re-entering the passphrase.",
+                    " 配置此新节点，无需重新手动输入密钥。",
                 style = MaterialTheme.typography.bodySmall,
                 color = NrOnSurfaceVariant,
             )
@@ -1058,7 +1058,7 @@ private fun SavedCredentialsCard(keyLabel: String?, onUse: () -> Unit) {
                 colors = ButtonDefaults.buttonColors(containerColor = NrAccent),
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Text("Use saved credentials")
+                Text("使用已存凭据配置")
             }
         }
     }
@@ -1087,10 +1087,10 @@ private fun MeshPassphraseFields(
             enabled = enabled,
             singleLine = true,
             isError = passphrase.isNotBlank() && !passphraseValid,
-            label = { Text("Mesh passphrase") },
+            label = { Text("Mesh 预共享密钥 (Passphrase)") },
             supportingText = {
                 if (passphrase.isNotBlank() && !passphraseValid) {
-                    Text("Use at least 8 characters.", color = StatusRed)
+                    Text("密钥长度至少为 8 位字符。", color = StatusRed)
                 }
             },
             visualTransformation = if (showPassphrase) {
@@ -1110,7 +1110,7 @@ private fun MeshPassphraseFields(
                     enabled = enabled,
                     modifier = Modifier.weight(1f),
                 ) {
-                    Text("Generate passphrase")
+                    Text("随机生成密钥")
                 }
             } else {
                 Spacer(Modifier.weight(1f))
@@ -1119,7 +1119,7 @@ private fun MeshPassphraseFields(
                 onClick = onToggleShowPassphrase,
                 enabled = passphrase.isNotEmpty(),
             ) {
-                Text(if (showPassphrase) "Hide" else "Show")
+                Text(if (showPassphrase) "隐藏" else "显示")
             }
         }
         OutlinedTextField(
@@ -1129,10 +1129,10 @@ private fun MeshPassphraseFields(
             enabled = enabled,
             singleLine = true,
             isError = confirmPassphrase.isNotBlank() && !passphrasesMatch,
-            label = { Text("Confirm passphrase") },
+            label = { Text("确认预共享密钥") },
             supportingText = {
                 if (confirmPassphrase.isNotBlank() && !passphrasesMatch) {
-                    Text("Passphrases do not match.", color = StatusRed)
+                    Text("两次输入的密钥不一致。", color = StatusRed)
                 }
             },
             visualTransformation = if (showPassphrase) {
@@ -1147,7 +1147,7 @@ private fun MeshPassphraseFields(
             modifier = Modifier.fillMaxWidth(),
             enabled = enabled,
             singleLine = true,
-            label = { Text("Key label / ID (optional)") },
+            label = { Text("密钥备注名称 / 标识 (可选)") },
         )
     }
 }
@@ -1165,7 +1165,7 @@ private fun MeshOrDivider() {
                 .background(NrOutline),
         )
         Text(
-            text = "OR ENTER MANUALLY",
+            text = "或手动输入配置",
             style = MaterialTheme.typography.labelSmall,
             color = NrOnSurfaceVariant,
             modifier = Modifier.padding(horizontal = 8.dp),
@@ -1252,13 +1252,13 @@ private fun MeshEmptyNodesState() {
             modifier = Modifier.size(28.dp),
         )
         Text(
-            text = "No remote nodes yet",
+            text = "暂无远端节点",
             style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.SemiBold,
             color = NrOnSurface,
         )
         Text(
-            text = "Provisioned peers appear here after they join the mesh.",
+            text = "烧录了相同密钥的节点加入 Mesh 拓扑网络后将在此显示。",
             style = MaterialTheme.typography.bodySmall,
             color = NrOnSurfaceVariant,
             textAlign = TextAlign.Center,
@@ -1302,7 +1302,12 @@ private fun MeshNodeRow(node: MeshNodeStatus) {
                 Spacer(Modifier.height(3.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     NetworkStatusBadge(
-                        text = node.role.ifBlank { "unknown" }.uppercase(),
+                        text = when (node.role.lowercase()) {
+                            "master" -> "主节点"
+                            "client" -> "子节点"
+                            "candidate" -> "候选节点"
+                            else -> node.role.ifBlank { "未知" }
+                        },
                         color = meshRoleColor(node.role),
                     )
                     Spacer(Modifier.width(8.dp))
@@ -1315,24 +1320,24 @@ private fun MeshNodeRow(node: MeshNodeStatus) {
                 }
                 val healthText = buildString {
                     node.heap?.let {
-                        append("heap ")
+                        append("内存 ")
                         append(it / 1024)
                         append(" KB")
                     }
                     node.uptimeMs?.let {
                         if (isNotEmpty()) append(" · ")
-                        append("up ")
+                        append("在线 ")
                         append(it / 1000)
-                        append(" s")
+                        append(" 秒")
                     }
                     node.healthChannel?.let {
                         if (isNotEmpty()) append(" · ")
-                        append("ch ")
+                        append("信道 ")
                         append(it)
                     }
                     node.healthSeq?.let {
                         if (isNotEmpty()) append(" · ")
-                        append("seq ")
+                        append("序号 ")
                         append(it)
                     }
                 }
@@ -1347,7 +1352,7 @@ private fun MeshNodeRow(node: MeshNodeStatus) {
                 }
             }
             Text(
-                text = if (node.online) "online" else "offline",
+                text = if (node.online) "在线" else "离线",
                 style = MaterialTheme.typography.labelSmall,
                 color = if (node.online) StatusGreen else StatusNeutral,
             )

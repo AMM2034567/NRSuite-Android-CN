@@ -106,20 +106,19 @@ fun RogueApScreen(
                         Spacer(Modifier.width(10.dp))
                         Column(Modifier.weight(1f)) {
                             Text(
-                                text = "Vendor database not downloaded",
+                                text = "MAC 厂商数据库未下载",
                                 style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.SemiBold,
                             )
                             Text(
-                                text = "Vendor-based signals (unrecognized hardware, vendor mismatch) " +
-                                    "will be unavailable until this is downloaded.",
+                                text = "在下载数据库之前，基于厂商信息的研判（未知硬件、厂商不匹配等）将不可用。",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = NrOnSurfaceVariant,
                             )
                         }
                         Spacer(Modifier.width(8.dp))
                         TextButton(onClick = onDownloadOuiDatabase) {
-                            Text("Download")
+                            Text("下载")
                         }
                     }
                 }
@@ -162,9 +161,9 @@ fun RogueApScreen(
                 Icon(
                     imageVector = if (running) Icons.Default.Stop else Icons.Default.PlayArrow,
                     contentDescription = if (running) {
-                        "Stop Rogue AP detector"
+                        "停止伪造 AP 检测器"
                     } else {
-                        "Start Rogue AP detector"
+                        "启动伪造 AP 检测器"
                     },
                 )
             }
@@ -174,12 +173,11 @@ fun RogueApScreen(
     if (confirmStart) {
         AlertDialog(
             onDismissRequest = { confirmStart = false },
-            title = { Text("Start Rogue AP monitoring?") },
+            title = { Text("启动伪造 AP (Rogue AP) 监测？") },
             text = {
                 Text(
-                    "The ESP32 will repeatedly scan WiFi and compare nearby APs " +
-                        "sharing the same SSID for OUI and security mismatches. " +
-                        "This uses the WiFi radio."
+                    "ESP32 将持续扫描 WiFi 并对比周围相同 SSID 热点的 OUI 厂商信息及安全加密模式差异。" +
+                        "该功能将占用 WiFi 射频。"
                 )
             },
             confirmButton = {
@@ -189,12 +187,12 @@ fun RogueApScreen(
                         onStart()
                     },
                 ) {
-                    Text("Start")
+                    Text("启动")
                 }
             },
             dismissButton = {
                 TextButton(onClick = { confirmStart = false }) {
-                    Text("Cancel")
+                    Text("取消")
                 }
             },
         )
@@ -216,21 +214,21 @@ private fun RogueApStatusCard(
     ModuleStatusCard(
         icon = Icons.Default.Router,
         title = when {
-            !connected -> "Disconnected"
-            running -> "Monitoring"
-            else -> "Ready"
+            !connected -> "未连接设备"
+            running -> "正在监测"
+            else -> "就绪"
         },
         subtitle = when {
-            !connected -> "Connect a device before starting the detector."
-            running && scanning -> "Scanning for rogue APs..."
-            running -> "Monitoring rogue AP activity"
-            else -> "Capture a baseline, then start monitoring"
+            !connected -> "启动检测器前请先连接设备。"
+            running && scanning -> "正在扫描周围伪造 AP..."
+            running -> "正在监测伪造 AP 异常行为"
+            else -> "请先采集基线，然后启动监测"
         },
         state = state,
     ) {
         if (lastScanAt != null) {
             Text(
-                text = "Last scan: $lastScanAt",
+                text = "上次扫描: $lastScanAt",
                 style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
                 color = NrOnSurfaceVariant,
             )
@@ -250,12 +248,12 @@ private fun NearbyNetworksCard(
     ) {
         Column(Modifier.padding(14.dp)) {
             Text(
-                text = "Nearby networks",
+                text = "附近 WiFi 网络",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
             )
             Text(
-                text = "${nearbyNetworks.size} AP(s) seen in the latest scan",
+                text = "最新扫描发现 ${nearbyNetworks.size} 个热点 AP",
                 style = MaterialTheme.typography.bodySmall,
                 color = NrOnSurfaceVariant,
             )
@@ -281,13 +279,13 @@ private fun NearbyNetworksCard(
 private fun NearbyApRow(ap: NearbyAp) {
     val statusLabel = when {
         ap.suspicious && ap.category != null -> when (ap.category) {
-            RogueApCategory.EVIL_TWIN -> "Evil Twin"
-            RogueApCategory.FAKE_PORTAL -> "Fake Portal"
-            RogueApCategory.SECURITY_DOWNGRADE -> "Security downgrade"
-            RogueApCategory.UNKNOWN_ROGUE -> "Unknown Rogue"
+            RogueApCategory.EVIL_TWIN -> "恶魔双胞胎"
+            RogueApCategory.FAKE_PORTAL -> "虚假门户"
+            RogueApCategory.SECURITY_DOWNGRADE -> "安全协议降级"
+            RogueApCategory.UNKNOWN_ROGUE -> "未知伪造 AP"
         }
-        ap.likelyInfrastructureVendor -> "Likely legit"
-        else -> "Unclassified"
+        ap.likelyInfrastructureVendor -> "疑似合法"
+        else -> "未分类"
     }
     val statusColor = when {
         ap.suspicious && ap.category == RogueApCategory.EVIL_TWIN -> StatusRed
@@ -307,7 +305,7 @@ private fun NearbyApRow(ap: NearbyAp) {
     Column(Modifier.fillMaxWidth()) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                text = ap.ssid.ifBlank { "(hidden)" },
+                text = ap.ssid.ifBlank { "(隐藏)" },
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.weight(1f),
@@ -333,7 +331,7 @@ private fun NearbyApRow(ap: NearbyAp) {
         )
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                text = "ch ${ap.channel} · ${ap.rssi} dBm · ${rssiToProximity(ap.rssi).label} · ${ap.security}",
+                text = "信道 ${ap.channel} · ${ap.rssi} dBm · ${rssiToProximity(ap.rssi).label} · ${ap.security}",
                 style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
                 color = signalTint,
             )
@@ -344,7 +342,7 @@ private fun NearbyApRow(ap: NearbyAp) {
         }
         if (!ap.vendor.isNullOrBlank()) {
             Text(
-                text = "Vendor: ${ap.vendor}",
+                text = "厂商: ${ap.vendor}",
                 style = MaterialTheme.typography.bodySmall,
                 color = NrOnSurfaceVariant,
             )
@@ -371,15 +369,15 @@ private fun RogueApAlertsCard(
             ) {
                 Column(Modifier.weight(1f)) {
                     Text(
-                        text = "Suspicious APs",
+                        text = "可疑热点 AP",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
                     )
                     Text(
                         text = when {
-                            alerts.isEmpty() && running -> "Waiting for suspicious observations..."
-                            alerts.isEmpty() -> "No suspicious APs yet"
-                            else -> "${alerts.size} alert(s)"
+                            alerts.isEmpty() && running -> "正在等待捕获可疑行为..."
+                            alerts.isEmpty() -> "暂无可疑 AP"
+                            else -> "${alerts.size} 条告警"
                         },
                         style = MaterialTheme.typography.bodySmall,
                         color = NrOnSurfaceVariant,
@@ -390,7 +388,7 @@ private fun RogueApAlertsCard(
                         onClick = onClearAlerts,
                         enabled = !running,
                     ) {
-                        Text("Clear")
+                        Text("清空")
                     }
                 }
             }
@@ -421,10 +419,10 @@ private fun RogueApAlertRow(alert: RogueApAlert) {
         RogueApCategory.UNKNOWN_ROGUE -> StatusNeutral
     }
     val categoryLabel = when (alert.category) {
-        RogueApCategory.EVIL_TWIN -> "Evil Twin"
-        RogueApCategory.FAKE_PORTAL -> "Fake Portal"
-        RogueApCategory.SECURITY_DOWNGRADE -> "Security downgrade"
-        RogueApCategory.UNKNOWN_ROGUE -> "Unknown Rogue"
+        RogueApCategory.EVIL_TWIN -> "恶魔双胞胎"
+        RogueApCategory.FAKE_PORTAL -> "虚假门户"
+        RogueApCategory.SECURITY_DOWNGRADE -> "安全协议降级"
+        RogueApCategory.UNKNOWN_ROGUE -> "未知伪造 AP"
     }
 
     Card(
@@ -463,14 +461,14 @@ private fun RogueApAlertRow(alert: RogueApAlert) {
                 fontWeight = FontWeight.SemiBold,
             )
             Text(
-                text = "${alert.bssid} · ch ${alert.channel} · ${alert.rssi} dBm · " +
+                text = "${alert.bssid} · 信道 ${alert.channel} · ${alert.rssi} dBm · " +
                     rssiToProximity(alert.rssi).label,
                 style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
                 color = threatProximityColor(alert.rssi),
             )
             if (!alert.vendor.isNullOrBlank()) {
                 Text(
-                    text = "Vendor: ${alert.vendor}",
+                    text = "厂商: ${alert.vendor}",
                     style = MaterialTheme.typography.bodySmall,
                     color = NrOnSurfaceVariant,
                 )
@@ -497,8 +495,13 @@ private fun RogueApAlertRow(alert: RogueApAlert) {
             }
 
             Spacer(Modifier.height(6.dp))
+            val confidenceZh = when (alert.confidence) {
+                AlertConfidence.HIGH -> "高"
+                AlertConfidence.MEDIUM -> "中"
+                AlertConfidence.LOW -> "低"
+            }
             Text(
-                text = "Confidence: ${alert.confidence.name.lowercase().replaceFirstChar { it.uppercase() }}",
+                text = "置信度: $confidenceZh",
                 style = MaterialTheme.typography.labelSmall,
                 color = when (alert.confidence) {
                     AlertConfidence.HIGH -> StatusRed

@@ -158,14 +158,14 @@ internal fun ConnectionStatusIndicator(
 ) {
     val (label, color) = when (state) {
         ConnectionState.Disconnected -> when {
-            hasPendingPermissions -> "Connect" to StatusAmber
-            hasDevices && hasPermission -> "Connect" to CategoryDetectionBlue
-            hasDevices -> "Unpaired" to CategoryDetectionBlue
-            else -> "Offline" to StatusNeutral
+            hasPendingPermissions -> "连接" to StatusAmber
+            hasDevices && hasPermission -> "连接" to CategoryDetectionBlue
+            hasDevices -> "未配对" to CategoryDetectionBlue
+            else -> "离线" to StatusNeutral
         }
-        ConnectionState.Connecting -> "Connecting…" to StatusAmber
-        is ConnectionState.Connected -> (state.chip ?: "Online") to StatusGreen
-        is ConnectionState.Failed -> "Error" to StatusRed
+        ConnectionState.Connecting -> "正在连接…" to StatusAmber
+        is ConnectionState.Connected -> (state.chip ?: "在线") to StatusGreen
+        is ConnectionState.Failed -> "错误" to StatusRed
     }
 
     StatusIndicator(
@@ -234,13 +234,13 @@ internal fun HomeScreen(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        text = "Attached USB devices",
+                        text = "已接入的 USB 设备",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
                         modifier = Modifier.weight(1f),
                     )
                     TextButton(onClick = onRefreshDevices) {
-                        Text("Refresh")
+                        Text("刷新")
                     }
                 }
             }
@@ -248,7 +248,7 @@ internal fun HomeScreen(
             if (devices.isEmpty()) {
                 item {
                     Text(
-                        text = "No supported USB serial devices found. Plug in your NRSuite ESP32 over OTG.",
+                        text = "未发现支持的 USB 串口设备。请通过 OTG 连接您的 NRSuite ESP32 设备。",
                         style = MaterialTheme.typography.bodySmall,
                         color = NrOnSurfaceVariant,
                     )
@@ -272,7 +272,7 @@ internal fun HomeScreen(
 
         item {
             Text(
-                text = "Recently used",
+                text = "最近使用",
                 style = MaterialTheme.typography.labelMedium,
                 color = NrOnSurfaceVariant,
                 modifier = Modifier.padding(top = 4.dp),
@@ -315,7 +315,7 @@ internal fun HomeScreen(
 
         item {
             Text(
-                text = "Modules",
+                text = "功能模块",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.padding(top = 4.dp),
@@ -325,23 +325,23 @@ internal fun HomeScreen(
         item {
             val categories = listOf(
                 CategorySpec(
-                    name = "WiFi Recon",
+                    name = "WiFi 侦察",
                     icon = Icons.Default.WifiFind,
-                    iconTint = categoryColor("WiFi Recon"),
+                    iconTint = categoryColor("WiFi 侦察"),
                     moduleIds = listOf("wifi", "sniff", "hidden_ap"),
                     available = true,
                 ),
                 CategorySpec(
-                    name = "WiFi Attacks",
+                    name = "WiFi 攻击",
                     icon = Icons.Default.WifiOff,
-                    iconTint = categoryColor("WiFi Attacks"),
+                    iconTint = categoryColor("WiFi 攻击"),
                     moduleIds = listOf("beacon", "deauth", "evil_twin", "portal"),
                     available = true,
                 ),
                 CategorySpec(
-                    name = "WiFi Defense",
+                    name = "WiFi 防御",
                     icon = Icons.Default.Shield,
-                    iconTint = categoryColor("WiFi Defense"),
+                    iconTint = categoryColor("WiFi 防御"),
                     moduleIds = listOf("deauth_detector", "rogue_ap", "client_presence"),
                     available = true,
                 ),
@@ -360,16 +360,16 @@ internal fun HomeScreen(
                     available = true,
                 ),
                 CategorySpec(
-                    name = "Tools",
+                    name = "工具",
                     icon = Icons.Default.Search,
-                    iconTint = categoryColor("Tools"),
+                    iconTint = categoryColor("工具"),
                     moduleIds = listOf("mac_lookup"),
                     available = true,
                 ),
                 CategorySpec(
-                    name = "Credentials",
+                    name = "凭据",
                     icon = Icons.Default.Key,
-                    iconTint = categoryColor("Credentials"),
+                    iconTint = categoryColor("凭据"),
                     moduleIds = listOf("credential_manager", "wpa_cracker"),
                     available = true,
                 ),
@@ -381,34 +381,34 @@ internal fun HomeScreen(
                     available = true,
                 ),
                 CategorySpec(
-                    name = "Storage",
+                    name = "存储",
                     icon = Icons.Default.Folder,
-                    iconTint = categoryColor("Storage"),
+                    iconTint = categoryColor("存储"),
                     moduleIds = listOf("storage"),
                     available = true,
                 ),
                 CategorySpec(
-                    name = "Firmware",
+                    name = "固件",
                     icon = Icons.Default.Memory,
-                    iconTint = categoryColor("Firmware"),
+                    iconTint = categoryColor("固件"),
                     moduleIds = listOf("firmware", "serial_monitor"),
                     available = true,
                 ),
                 CategorySpec(
-                    name = "IR",
+                    name = "红外",
                     icon = Icons.Default.SettingsRemote,
-                    iconTint = categoryColor("IR"),
+                    iconTint = categoryColor("红外"),
                     moduleIds = listOf("ir"),
                     available = false,
-                    statusLabel = "Unavailable",
+                    statusLabel = "暂不可用",
                 ),
                 CategorySpec(
-                    name = "RF",
+                    name = "射频",
                     icon = Icons.Default.Radio,
-                    iconTint = categoryColor("RF"),
+                    iconTint = categoryColor("射频"),
                     moduleIds = listOf("rf"),
                     available = false,
-                    statusLabel = "Unavailable",
+                    statusLabel = "暂不可用",
                 ),
                 CategorySpec(
                     name = "RFID",
@@ -416,7 +416,7 @@ internal fun HomeScreen(
                     iconTint = categoryColor("RFID"),
                     moduleIds = listOf("rfid"),
                     available = false,
-                    statusLabel = "Unavailable",
+                    statusLabel = "暂不可用",
                 ),
             )
             CategoryGrid(
@@ -465,9 +465,9 @@ internal fun CategoryCard(
 ) {
     val count = category.moduleIds.size
     val countLabel = when {
-        count == 1 -> "1 module"
-        count > 1 -> "$count modules"
-        else -> "No modules"
+        count == 1 -> "1 个模块"
+        count > 1 -> "$count 个模块"
+        else -> "无模块"
     }
     val availabilityLabel = if (!category.available) {
         category.statusLabel
@@ -520,7 +520,7 @@ internal fun CategoryModulesScreen(
     ) {
         item {
             Text(
-                text = "${modules.size} modules",
+                text = "${modules.size} 个模块",
                 style = MaterialTheme.typography.bodySmall,
                 color = NrOnSurfaceVariant,
                 modifier = Modifier.padding(bottom = 4.dp),
@@ -550,12 +550,12 @@ internal fun DashboardDeviceCard(
             when (state) {
                 ConnectionState.Disconnected -> {
                     StatusIndicator(
-                        label = "No device connected",
+                        label = "未连接设备",
                         color = StatusAmber,
                     )
                     Spacer(Modifier.height(8.dp))
                     Text(
-                        text = "Plug in your NRSuite ESP32 with a USB OTG cable, then grant USB permission.",
+                        text = "请通过 USB OTG 数据线连接您的 NRSuite ESP32 设备，并授予 USB 权限。",
                         style = MaterialTheme.typography.bodySmall,
                         color = NrOnSurfaceVariant,
                     )
@@ -563,12 +563,12 @@ internal fun DashboardDeviceCard(
 
                 ConnectionState.Connecting -> {
                     StatusIndicator(
-                        label = "Connecting to device...",
+                        label = "正在连接设备...",
                         color = StatusAmber,
                     )
                     Spacer(Modifier.height(8.dp))
                     Text(
-                        text = "Waiting for the USB serial handshake and PING response.",
+                        text = "正在等待 USB 串口握手及 PING 响应。",
                         style = MaterialTheme.typography.bodySmall,
                         color = NrOnSurfaceVariant,
                     )
@@ -576,34 +576,34 @@ internal fun DashboardDeviceCard(
 
                 is ConnectionState.Connected -> {
                     StatusIndicator(
-                        label = "Connected to ${state.chip ?: "NRSuite device"}",
+                        label = "已连接到 ${state.chip ?: "NRSuite 设备"}",
                         color = StatusGreen,
                     )
                     Spacer(Modifier.height(8.dp))
                     Text(
-                        text = "fw: ${state.firmwareVersion ?: "unknown"}  ·  USB serial / CDC",
+                        text = "固件: ${state.firmwareVersion ?: "未知"}  ·  USB 串口 / CDC",
                         style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
                         color = NrOnSurfaceVariant,
                     )
                     Text(
-                        text = "id: ${state.deviceId ?: "unknown"}",
+                        text = "设备 ID: ${state.deviceId ?: "未知"}",
                         style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
                         color = NrOnSurfaceVariant,
                     )
                     Spacer(Modifier.height(12.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         OutlinedButton(onClick = onManageDevice) {
-                            Text("Manage device")
+                            Text("管理设备")
                         }
                         OutlinedButton(onClick = onDisconnect) {
-                            Text("Disconnect")
+                            Text("断开连接")
                         }
                     }
                 }
 
                 is ConnectionState.Failed -> {
                     StatusIndicator(
-                        label = "Connection problem",
+                        label = "连接故障",
                         color = StatusRed,
                     )
                     Spacer(Modifier.height(8.dp))
@@ -626,7 +626,7 @@ internal fun ModulesScreen(
 ) {
     var selectedCategory by rememberSaveable { mutableStateOf<String?>(null) }
     var moduleSearchQuery by rememberSaveable { mutableStateOf("") }
-    val categories = listOf(null to "All") + modules.map { it.category }.distinct().map { it to it }
+    val categories = listOf(null to "全部") + modules.map { it.category }.distinct().map { it to it }
     val categoryFiltered = if (selectedCategory == null) modules else modules.filter { it.category == selectedCategory }
     val filtered = categoryFiltered.filter { module ->
         val query = moduleSearchQuery.trim()
@@ -645,7 +645,7 @@ internal fun ModulesScreen(
             OutlinedTextField(
                 value = moduleSearchQuery,
                 onValueChange = { moduleSearchQuery = it },
-                placeholder = { Text("Search modules...") },
+                placeholder = { Text("搜索功能模块...") },
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
@@ -690,26 +690,26 @@ private fun OuiDatabaseDashboardWarning(
     val error = status is OuiDatabaseStatus.Error
     val borderColor = when {
         error -> StatusRed
-        downloading -> categoryColor("Tools")
+        downloading -> categoryColor("工具")
         else -> StatusAmber
     }
     val icon = if (downloading) Icons.Default.Download else Icons.Default.WarningAmber
     val iconTint = when {
         error -> StatusRed
-        downloading -> categoryColor("Tools")
+        downloading -> categoryColor("工具")
         else -> StatusAmber
     }
     val title = when (status) {
-        OuiDatabaseStatus.NotDownloaded -> "OUI/vendor database not downloaded"
-        OuiDatabaseStatus.Downloading -> "Updating OUI/vendor database…"
-        is OuiDatabaseStatus.Error -> "OUI/vendor database download failed"
+        OuiDatabaseStatus.NotDownloaded -> "未下载 OUI / 厂商数据库"
+        OuiDatabaseStatus.Downloading -> "正在更新 OUI / 厂商数据库…"
+        is OuiDatabaseStatus.Error -> "OUI / 厂商数据库下载失败"
         is OuiDatabaseStatus.Ready -> ""
     }
     val message = when (status) {
         OuiDatabaseStatus.NotDownloaded ->
-            "Vendor names and OUI-based signals will be unavailable until this is downloaded."
+            "下载该数据库前，将无法显示设备厂商名称及基于 OUI 的特征识别。"
         OuiDatabaseStatus.Downloading ->
-            "Downloading the IEEE OUI registry. Vendor names and OUI-based signals will be available when it finishes."
+            "正在下载 IEEE OUI 注册库。下载完成后即可使用厂商查询及基于 OUI 的特征识别。"
         is OuiDatabaseStatus.Error -> status.message
         is OuiDatabaseStatus.Ready -> ""
     }
@@ -754,7 +754,7 @@ private fun OuiDatabaseDashboardWarning(
             } else {
                 Spacer(Modifier.height(8.dp))
                 Button(onClick = onDownload) {
-                    Text(if (error) "Retry download" else "Download database")
+                    Text(if (error) "重试下载" else "下载数据库")
                 }
             }
         }

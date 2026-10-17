@@ -172,7 +172,7 @@ fun SniffScreen(
             ) {
                 Icon(
                     imageVector = if (sniffing) Icons.Default.Stop else Icons.Default.PlayArrow,
-                    contentDescription = if (sniffing) "Stop sniffing" else "Start sniffing",
+                    contentDescription = if (sniffing) "停止抓包" else "开始抓包",
                 )
             }
         }
@@ -233,12 +233,12 @@ private fun ConfigZone(
                 Spacer(Modifier.width(10.dp))
                 Column(Modifier.weight(1f)) {
                     Text(
-                        text = "Capture configuration",
+                        text = "抓包配置",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
                     )
                     Text(
-                        text = if (sniffing) "Capture running" else "Fixed channel or channel hopping",
+                        text = if (sniffing) "正在抓包" else "固定信道或跳频模式",
                         style = MaterialTheme.typography.bodySmall,
                         color = NrOnSurfaceVariant,
                     )
@@ -246,7 +246,7 @@ private fun ConfigZone(
                 IconButton(onClick = onToggle) {
                     Icon(
                         imageVector = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                        contentDescription = if (expanded) "Collapse" else "Expand",
+                        contentDescription = if (expanded) "折叠" else "展开",
                     )
                 }
             }
@@ -255,7 +255,7 @@ private fun ConfigZone(
                 Column {
                     Spacer(Modifier.height(10.dp))
                     Text(
-                        text = "Mode",
+                        text = "模式",
                         style = MaterialTheme.typography.labelLarge,
                     )
                     Spacer(Modifier.height(6.dp))
@@ -268,7 +268,7 @@ private fun ConfigZone(
                     if (fixedMode) {
                         Spacer(Modifier.height(10.dp))
                         Text(
-                            text = "Channel",
+                            text = "信道",
                             style = MaterialTheme.typography.labelLarge,
                         )
                         Spacer(Modifier.height(6.dp))
@@ -283,7 +283,7 @@ private fun ConfigZone(
                     } else {
                         Spacer(Modifier.height(10.dp))
                         Text(
-                            text = "Hop interval",
+                            text = "跳频间隔",
                             style = MaterialTheme.typography.labelLarge,
                         )
                         Spacer(Modifier.height(6.dp))
@@ -314,7 +314,7 @@ private fun ConfigZone(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text(
-                            text = "Target specific network",
+                            text = "针对特定目标网络",
                             style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier.weight(1f),
                         )
@@ -331,11 +331,11 @@ private fun ConfigZone(
                             onClick = onScanWifi,
                             enabled = connected && !sniffing && !scanning,
                         ) {
-                            Text(if (scanning) "Scanning..." else "Scan WiFi for targets")
+                            Text(if (scanning) "正在扫描..." else "扫描周围 WiFi 目标")
                         }
                         if (networks.isNotEmpty()) {
                             networks.forEach { network ->
-                                val ssid = network.optString("ssid").ifBlank { "(hidden)" }
+                                val ssid = network.optString("ssid").ifBlank { "(隐藏)" }
                                 val bssidValue = network.optString("bssid")
                                 val channelValue = network.optInt("channel", 1)
                                 NetworkTargetRow(
@@ -366,7 +366,7 @@ private fun ConfigZone(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text(
-                            text = "EAPOL-only capture",
+                            text = "仅捕获 EAPOL 握手包",
                             style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier.weight(1f),
                         )
@@ -383,7 +383,7 @@ private fun ConfigZone(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text(
-                            text = "Send deauth before capture",
+                            text = "抓包前发送 Deauth 攻击",
                             style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier.weight(1f),
                         )
@@ -397,7 +397,7 @@ private fun ConfigZone(
                     if (eapolOnly || deauthBeforeCapture || targetNetworkOnly) {
                         Spacer(Modifier.height(8.dp))
                         Text(
-                            text = "Target: ${targetBssid.ifBlank { "none selected — scan below" }}",
+                            text = "目标: ${targetBssid.ifBlank { "未选择 — 请在下方扫描选择" }}",
                             style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
                             color = if (validDeauthTarget) NrOnSurfaceVariant else StatusAmber,
                         )
@@ -407,14 +407,14 @@ private fun ConfigZone(
                             onValueChange = onClientChange,
                             modifier = Modifier.fillMaxWidth(),
                             enabled = !sniffing,
-                            label = { Text("Client MAC") },
+                            label = { Text("客户端 MAC") },
                             isError = !validDeauthClient,
                             singleLine = true,
                         )
                         Spacer(Modifier.height(6.dp))
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
-                                text = "Count",
+                                text = "攻击次数",
                                 style = MaterialTheme.typography.labelLarge,
                                 modifier = Modifier.weight(1f),
                             )
@@ -423,7 +423,7 @@ private fun ConfigZone(
                                 enabled = !sniffing && deauthCount > 0,
                             ) { Text("-", style = MaterialTheme.typography.titleLarge) }
                             Text(
-                                text = if (deauthCount <= 0) "default" else deauthCount.toString(),
+                                text = if (deauthCount <= 0) "默认" else deauthCount.toString(),
                                 style = MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily.Monospace),
                                 modifier = Modifier.padding(horizontal = 8.dp),
                             )
@@ -434,7 +434,7 @@ private fun ConfigZone(
                         }
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
-                                text = "Interval",
+                                text = "攻击间隔",
                                 style = MaterialTheme.typography.labelLarge,
                                 modifier = Modifier.weight(1f),
                             )
@@ -456,7 +456,7 @@ private fun ConfigZone(
 
                     Spacer(Modifier.height(12.dp))
                     Text(
-                        text = "Output",
+                        text = "导出目录",
                         style = MaterialTheme.typography.labelLarge,
                     )
                     Spacer(Modifier.height(4.dp))
@@ -471,14 +471,14 @@ private fun ConfigZone(
                             modifier = Modifier.weight(1f),
                         )
                         TextButton(onClick = onChooseExportDirectory) {
-                            Text("Change")
+                            Text("更改")
                         }
                     }
 
                     if (!connected) {
                         Spacer(Modifier.height(10.dp))
                         Text(
-                            text = "Connect a device before starting a capture.",
+                            text = "启动抓包前请先连接设备。",
                             style = MaterialTheme.typography.bodySmall,
                             color = StatusAmber,
                         )
@@ -510,7 +510,7 @@ private fun ResultZone(
                 .padding(16.dp),
         ) {
             Text(
-                text = "Live capture",
+                text = "实时抓包状态",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
             )
@@ -518,10 +518,10 @@ private fun ResultZone(
 
             StatusIndicator(
                 label = when {
-                    !connected -> "No device connected"
-                    sniffing -> "Capturing"
-                    packetCount > 0 -> "Stopped"
-                    else -> "Ready"
+                    !connected -> "未连接设备"
+                    sniffing -> "正在抓包"
+                    packetCount > 0 -> "已停止"
+                    else -> "就绪"
                 },
                 color = when {
                     !connected -> StatusNeutral
@@ -533,7 +533,7 @@ private fun ResultZone(
 
             Spacer(Modifier.height(16.dp))
             Text(
-                text = "Packets",
+                text = "捕获数据包数",
                 style = MaterialTheme.typography.labelLarge,
                 color = NrOnSurfaceVariant,
             )
@@ -545,19 +545,19 @@ private fun ResultZone(
 
             Spacer(Modifier.height(16.dp))
             Text(
-                text = "Capture file",
+                text = "抓包保存路径",
                 style = MaterialTheme.typography.labelLarge,
                 color = NrOnSurfaceVariant,
             )
             Text(
-                text = capturePath ?: "Not started",
+                text = capturePath ?: "尚未开始",
                 style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
                 color = NrOnSurfaceVariant,
             )
 
             Spacer(Modifier.height(16.dp))
             Text(
-                text = "EAPOL handshake",
+                text = "EAPOL 握手包捕获",
                 style = MaterialTheme.typography.labelLarge,
                 color = NrOnSurfaceVariant,
             )
@@ -575,14 +575,14 @@ private fun ResultZone(
             if (!connected) {
                 Spacer(Modifier.height(24.dp))
                 Text(
-                    text = "Connect a device before starting a capture.",
+                    text = "启动抓包前请先连接设备。",
                     style = MaterialTheme.typography.bodySmall,
                     color = NrOnSurfaceVariant,
                 )
             } else if (!sniffing && packetCount == 0L && capturePath == null) {
                 Spacer(Modifier.height(24.dp))
                 Text(
-                    text = "Tap the play button to start a capture.",
+                    text = "点击右下角开始按钮启动抓包。",
                     style = MaterialTheme.typography.bodySmall,
                     color = NrOnSurfaceVariant,
                 )

@@ -63,9 +63,12 @@ fun ModuleCard(
 ) {
     val statusLabel = module.statusLabel?.takeIf { it.isNotBlank() }
     val attentionLabel = statusLabel?.takeIf {
-        it in setOf("Firmware required", "Not supported", "OUI DB required", "Unavailable")
+        it in setOf(
+            "Firmware required", "Not supported", "OUI DB required", "Unavailable",
+            "需要固件", "不支持", "需要 OUI 数据库", "不可用", "暂不可用", "需要固件支持", "设备不支持"
+        )
     }
-    val deviceNeededLabel = statusLabel?.takeIf { it == "Device needed" }
+    val deviceNeededLabel = statusLabel?.takeIf { it == "Device needed" || it == "需要连接设备" || it == "需要设备" }
 
     Card(
         modifier = modifier

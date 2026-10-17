@@ -19,16 +19,16 @@ internal fun MainViewModel.startClientPresenceImpl(
 ) {
     val activeSession = session
     if (activeSession == null) {
-        appendLog("Connect to a device before starting client detection.")
+        appendLog("启动客户端探测前请先连接设备。")
         return
     }
     if (_clientPresenceRunning.value) return
-    if (!ensureRadioIdle("Client Detector")) return
+    if (!ensureRadioIdle("客户端探测器")) return
 
     val cleanTarget = targetBssid.trim().uppercase()
     if (mode == ClientPresenceMode.ACTIVE) {
         if (cleanTarget.isBlank() || !MainViewModel.MAC_PATTERN.matches(cleanTarget)) {
-            _actionError.value = "Select a valid target AP before starting active client detection."
+            _actionError.value = "启动主动客户端探测前请先选择有效的目标 AP。"
             return
         }
     }
@@ -45,7 +45,7 @@ internal fun MainViewModel.startClientPresenceImpl(
 
     scope.launch {
         if (mode == ClientPresenceMode.ACTIVE) {
-            appendLog("Sending reconnect burst to $cleanTarget before client detection...")
+            appendLog("正在向 $cleanTarget 发送重连突发数据包以进行客户端探测...")
             val deauth = activeSession.sendCommand(
                 "DEAUTH",
                 JSONObject().apply {
@@ -60,7 +60,7 @@ internal fun MainViewModel.startClientPresenceImpl(
             )
             _clientPresenceLastTriggerAt.value = timeHmNow()
             if (deauth?.optBoolean("ok") != true) {
-                appendLog("Reconnect burst failed or timed out; continuing with passive detection.")
+                appendLog("重连突发失败或超时；继续以被动模式探测。")
             }
         }
 
@@ -73,18 +73,15 @@ internal fun MainViewModel.startClientPresenceImpl(
         if (response?.optBoolean("ok") == true) {
             _clientPresenceRunning.value = true
             updateForegroundService()
-            appendLog(
-                "Client detection started (" +
-                    if (mode == ClientPresenceMode.ACTIVE) "active" else "passive" +
-                    " mode)."
-            )
+            val modeDesc = if (mode == ClientPresenceMode.ACTIVE) "主动模式" else "被动模式"
+            appendLog("客户端探测已启动 ($modeDesc)。")
             addHistory(
                 "client_presence",
-                "Client detection started (${if (mode == ClientPresenceMode.ACTIVE) "active" else "passive"})",
+                "客户端探测已启动 ($modeDesc)",
                 HistoryLevel.SUCCESS,
             )
         } else {
-            appendLog("Failed to start client detection: ${response?.optString("msg") ?: "timeout"}")
+            appendLog("启动客户端探测失败: ${response?.optString("msg") ?: "超时"}")
         }
     }
 }
@@ -98,10 +95,10 @@ internal fun MainViewModel.stopClientPresenceImpl() {
     scope.launch {
         val response = activeSession?.sendCommand("STOP_CLIENT_DETECT", timeoutMs = 6_000)
         if (response?.optBoolean("ok") == true) {
-            appendLog("Client detection stopped.")
-            addHistory("client_presence", "Client detection stopped", HistoryLevel.INFO)
+            appendLog("客户端探测已停止。")
+            addHistory("client_presence", "客户端探测已停止", HistoryLevel.INFO)
         } else {
-            appendLog("Client detection stop request sent without confirmation.")
+            appendLog("客户端探测停止请求已发送，但未收到确认。")
         }
     }
 }
@@ -115,7 +112,7 @@ internal fun MainViewModel.triggerClientReconnectBurstImpl() {
 
     val activeSession = session ?: return
     scope.launch {
-        appendLog("Forcing reconnect burst to $target...")
+        appendLog("正在强制向 $target 发送重连突发数据包...")
         runCatching { activeSession.sendCommand("STOP_CLIENT_DETECT", timeoutMs = 4_000) }
         val deauth = activeSession.sendCommand(
             "DEAUTH",
@@ -131,7 +128,7 @@ internal fun MainViewModel.triggerClientReconnectBurstImpl() {
         )
         _clientPresenceLastTriggerAt.value = timeHmNow()
         if (deauth?.optBoolean("ok") != true) {
-            appendLog("Reconnect burst failed; restarting passive detection.")
+            appendLog("重连突发失败；正在重新启动被动探测。")
         }
 
         val args = JSONObject().apply {
@@ -143,7 +140,7 @@ internal fun MainViewModel.triggerClientReconnectBurstImpl() {
         if (response?.optBoolean("ok") != true) {
             _clientPresenceRunning.value = false
             updateForegroundService()
-            appendLog("Failed to restart client detection after reconnect burst.")
+            appendLog("重连突发后重启客户端探测失败。")
         }
     }
 }
@@ -162,7 +159,7 @@ internal fun MainViewModel.recordClientPresenceEvent(event: JSONObject) {
 
     val existing = _clientPresenceClients.value.firstOrNull { it.mac == mac }
     val updated = if (existing == null) {
-        appendLog("Client detected: $mac ($subtype, $rssi dBm).")
+        appendLog("检测到客户端: $mac ($subtype, $rssi dBm)。")
         ClientObservation(
             mac = mac,
             bssid = bssid,

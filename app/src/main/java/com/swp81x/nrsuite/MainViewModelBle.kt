@@ -17,27 +17,27 @@ import org.json.JSONObject
 internal fun MainViewModel.setBlePayloadImpl(uri: Uri, name: String?) {
     _blePayloadUri.value = uri
     _blePayloadName.value = name ?: uri.lastPathSegment ?: "payload.txt"
-    appendLog("BLE payload selected: ${_blePayloadName.value}")
+    appendLog("已选择 BLE Payload：${_blePayloadName.value}")
 }
 
 internal fun MainViewModel.clearBlePayloadImpl() {
     _blePayloadUri.value = null
     _blePayloadName.value = null
     _bleSavedScriptText.value = null
-    appendLog("BLE payload cleared.")
+    appendLog("BLE Payload 已清除。")
 }
 
 internal fun MainViewModel.startBleImpl(advertiseName: String) {
     val activeSession = session
     if (activeSession == null) {
-        appendLog("Connect to a device before starting BLE HID.")
+        appendLog("启动 BLE HID 前请先连接设备。")
         return
     }
     if (_bleAdvertising.value) return
     val activeWifi = activeRadioLabel(includeBle = false)
     if (activeWifi != null) {
         appendLog(
-            "Cannot start BLE HID while $activeWifi is active. Stop $activeWifi first.",
+            "无法在 $activeWifi 运行时启动 BLE HID。请先停止 $activeWifi。",
             level = LogLevel.ERROR,
         )
         return
@@ -45,7 +45,7 @@ internal fun MainViewModel.startBleImpl(advertiseName: String) {
 
     scope.launch {
         val name = advertiseName.trim().ifBlank { "NRSuite Keyboard" }
-        appendLog("Starting BLE HID advertising as '$name'...")
+        appendLog("正在以 '$name' 启动 BLE HID 广播...")
         val response = activeSession.sendCommand(
             "BLE_START",
             JSONObject().put("name", name),
@@ -58,10 +58,10 @@ internal fun MainViewModel.startBleImpl(advertiseName: String) {
             clearBleRealtimeStateImpl()
             startBleStatusPollingImpl(activeSession)
             updateForegroundService()
-            appendLog("BLE HID advertising started.")
-            addHistory("ble", "BLE HID advertising started as '$name'", HistoryLevel.SUCCESS)
+            appendLog("BLE HID 广播已启动。")
+            addHistory("ble", "BLE HID 已作为 '$name' 启动广播", HistoryLevel.SUCCESS)
         } else {
-            appendLog("Failed to start BLE HID: ${response?.optString("msg") ?: "timeout or unsupported"}")
+            appendLog("启动 BLE HID 失败：${response?.optString("msg") ?: "超时或不受支持"}")
         }
     }
 }
@@ -78,13 +78,13 @@ internal fun MainViewModel.stopBleImpl() {
     val activeSession = session
     scope.launch {
         runCatching { activeSession?.sendCommand("BLE_RELEASE_ALL", timeoutMs = 3_000) }
-            .onFailure { e -> appendLog("BLE release failed: ${e.message}", level = LogLevel.ERROR) }
+            .onFailure { e -> appendLog("BLE 按键释放失败：${e.message}", level = LogLevel.ERROR) }
         runCatching { activeSession?.sendCommand("BLE_MOUSE_RELEASE", timeoutMs = 3_000) }
-            .onFailure { e -> appendLog("BLE mouse release failed: ${e.message}", level = LogLevel.ERROR) }
+            .onFailure { e -> appendLog("BLE 鼠标释放失败：${e.message}", level = LogLevel.ERROR) }
         val response = activeSession?.sendCommand("BLE_STOP", timeoutMs = 5_000)
         appendLog(
-            if (response?.optBoolean("ok") == true) "BLE HID stopped."
-            else "BLE stop request sent."
+            if (response?.optBoolean("ok") == true) "BLE HID 已停止。"
+            else "已发送 BLE 停止请求。"
         )
     }
 }
@@ -94,19 +94,19 @@ internal fun MainViewModel.runBlePayloadImpl() {
     val payloadUri = _blePayloadUri.value
     val savedScript = _bleSavedScriptText.value
     if (activeSession == null) {
-        appendLog("Connect to a device before running a BLE payload.")
+        appendLog("运行 BLE Payload 前请先连接设备。")
         return
     }
     if (!_bleConnected.value) {
-        appendLog("BLE host is not connected yet.")
+        appendLog("BLE 主机尚未连接。")
         return
     }
     if (_bleScriptRunning.value) {
-        appendLog("A BLE payload is already running.")
+        appendLog("已有 BLE Payload 正在运行中。")
         return
     }
     if (payloadUri == null && savedScript == null) {
-        appendLog("Choose a DuckyScript payload first.")
+        appendLog("请先选择 DuckyScript Payload。")
         return
     }
     scope.launch {
@@ -121,7 +121,7 @@ internal fun MainViewModel.runBlePayloadImpl() {
                 }.getOrNull()
             }
         if (script.isNullOrBlank()) {
-            appendLog("Could not read the selected BLE payload.")
+            appendLog("无法读取所选的 BLE Payload。")
             return@launch
         }
         runBleScriptImpl(activeSession, script)
@@ -153,7 +153,7 @@ internal fun MainViewModel.sendBleSpecialKeyImpl(key: String) {
                 JSONObject().put("key", key),
             )
         }.onFailure { e ->
-            appendLog("BLE command failed: ${e.message}", level = LogLevel.ERROR)
+            appendLog("BLE 指令执行失败：${e.message}", level = LogLevel.ERROR)
         }
         releaseMomentaryModifiersImpl(activeSession)
     }
@@ -173,7 +173,7 @@ internal fun MainViewModel.sendBleMouseMoveImpl(dx: Int, dy: Int) {
                 JSONObject().put("dx", dx).put("dy", dy),
             )
         }.onFailure { e ->
-            appendLog("BLE command failed: ${e.message}", level = LogLevel.ERROR)
+            appendLog("BLE 指令执行失败：${e.message}", level = LogLevel.ERROR)
         }
     }
 }
@@ -188,7 +188,7 @@ internal fun MainViewModel.sendBleMouseScrollImpl(wheel: Int) {
                 JSONObject().put("wheel", wheel),
             )
         }.onFailure { e ->
-            appendLog("BLE command failed: ${e.message}", level = LogLevel.ERROR)
+            appendLog("BLE 指令执行失败：${e.message}", level = LogLevel.ERROR)
         }
     }
 }
@@ -203,7 +203,7 @@ internal fun MainViewModel.sendBleMouseButtonImpl(button: String, down: Boolean)
                 JSONObject().put("button", button).put("down", down),
             )
         }.onFailure { e ->
-            appendLog("BLE command failed: ${e.message}", level = LogLevel.ERROR)
+            appendLog("BLE 指令执行失败：${e.message}", level = LogLevel.ERROR)
         }
     }
 }
@@ -214,7 +214,7 @@ internal fun MainViewModel.releaseBleMouseButtonsImpl() {
     scope.launch {
         runCatching { activeSession.sendCommandNoWait("BLE_MOUSE_RELEASE") }
             .onFailure { e ->
-                appendLog("BLE command failed: ${e.message}", level = LogLevel.ERROR)
+                appendLog("BLE 指令执行失败：${e.message}", level = LogLevel.ERROR)
             }
     }
 }
@@ -231,7 +231,7 @@ internal suspend fun MainViewModel.releaseMomentaryModifiersImpl(activeSession: 
                 JSONObject().put("key", key),
             )
         }.onFailure { e ->
-            appendLog("BLE command failed: ${e.message}", level = LogLevel.ERROR)
+            appendLog("BLE 指令执行失败：${e.message}", level = LogLevel.ERROR)
         }
     }
 }
@@ -248,7 +248,7 @@ internal fun MainViewModel.setBleModifierImpl(key: String, down: Boolean) {
         runCatching {
             activeSession.sendCommandNoWait(cmd, JSONObject().put("key", key))
         }.onFailure { e ->
-            appendLog("BLE command failed: ${e.message}", level = LogLevel.ERROR)
+            appendLog("BLE 指令执行失败：${e.message}", level = LogLevel.ERROR)
         }
     }
 }
@@ -265,7 +265,7 @@ private fun MainViewModel.ensureBleTypeConsumerImpl() {
                     JSONObject().put("text", payload),
                 )
             }.onFailure { e ->
-                appendLog("BLE command failed: ${e.message}", level = LogLevel.ERROR)
+                appendLog("BLE 指令执行失败：${e.message}", level = LogLevel.ERROR)
             }
             releaseMomentaryModifiersImpl(activeSession)
         }
@@ -283,11 +283,11 @@ internal fun MainViewModel.clearBleRealtimeStateImpl() {
 
 internal suspend fun MainViewModel.runBleScriptImpl(activeSession: NrSession, script: String) {
     if (!_bleConnected.value) {
-        appendLog("BLE host is not connected yet.")
+        appendLog("BLE 主机尚未连接。")
         return
     }
     if (_bleScriptRunning.value) {
-        appendLog("A BLE payload is already running.")
+        appendLog("已有 BLE Payload 正在运行中。")
         return
     }
 
@@ -301,9 +301,9 @@ internal suspend fun MainViewModel.runBleScriptImpl(activeSession: NrSession, sc
             )
         }.getOrNull()
         if (response?.optBoolean("ok") == true) {
-            appendLog("BLE script finished (${response.optInt("lines")} lines).")
+            appendLog("BLE 脚本执行完毕 (共 ${response.optInt("lines")} 行)。")
         } else {
-            appendLog("BLE script failed: ${response?.optString("msg") ?: "timeout or disconnected"}")
+            appendLog("BLE 脚本执行失败：${response?.optString("msg") ?: "超时或已断开连接"}")
         }
     } finally {
         _bleScriptRunning.value = false

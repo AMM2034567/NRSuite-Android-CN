@@ -26,7 +26,7 @@ internal fun MainViewModel.refreshDevicesImpl() {
         .map { it.device.deviceId }
         .toSet()
 
-    appendLog("Found ${found.size} supported USB serial device(s).")
+    appendLog("发现 ${found.size} 个受支持的 USB 串口设备。")
 
     // Reconcile active sessions against Android's authoritative attached-device
     // list. The serial prober can transiently miss an already-open device; only
@@ -41,7 +41,7 @@ internal fun MainViewModel.refreshDevicesImpl() {
         .map { it.key }
         .toList()
         .forEach { staleFingerprint ->
-            appendLog("Closing stale session for a detached USB device.", level = LogLevel.USB)
+            appendLog("正在关闭已断开连接 USB 设备的陈旧会话。", level = LogLevel.USB)
             disconnectSession(staleFingerprint, stopOperations = staleFingerprint == activeDeviceFingerprint)
         }
 
@@ -72,7 +72,7 @@ internal fun MainViewModel.refreshDevicesImpl() {
             _badUsbTargetDevice.value = null
             _badUsbProgress.value = 0
             _badUsbArmedFingerprints.update { it - targetFingerprint }
-            appendLog("BadUSB target disconnected; selection cleared.", tag = "USB")
+            appendLog("BadUSB 目标已断开连接；已清除选择。", tag = "USB")
         } else {
             _badUsbTargetDevice.value = found.firstOrNull {
                 it.device.deviceId == badUsbTarget.device.deviceId
@@ -86,8 +86,8 @@ internal fun MainViewModel.onUsbDeviceAttachedImpl() {
         _connectionState.value = ConnectionState.Disconnected
     }
     refreshDevices()
-    appendLog("USB device attached.", level = LogLevel.USB)
-    appendLog("Tap Connect to open a session when ready.", level = LogLevel.USB)
+    appendLog("USB 设备已插入。", level = LogLevel.USB)
+    appendLog("准备就绪后请点击“连接”以建立会话。", level = LogLevel.USB)
 }
 
 internal fun MainViewModel.deviceFingerprintImpl(device: UsbDevice): String {
@@ -109,7 +109,7 @@ internal fun MainViewModel.onUsbDeviceDetachedImpl(device: UsbDevice) {
         _badUsbArmedFingerprints.update { it - fingerprint }
     }
     refreshDevices()
-    appendLog("USB device detached: ${device.deviceName}", level = LogLevel.USB)
+    appendLog("USB 设备已拔出：${device.deviceName}", level = LogLevel.USB)
 
     val detachedFingerprint = runCatching { deviceFingerprintImpl(device) }.getOrNull()
     val allSessions = deviceSessions + idleDeviceSessions
@@ -121,7 +121,7 @@ internal fun MainViewModel.onUsbDeviceDetachedImpl(device: UsbDevice) {
         }?.key
 
     if (matchedFingerprint == null) {
-        appendLog("Detached device had no open session.", level = LogLevel.USB)
+        appendLog("拔出的设备未开启任何会话。", level = LogLevel.USB)
         return
     }
 
@@ -131,7 +131,7 @@ internal fun MainViewModel.onUsbDeviceDetachedImpl(device: UsbDevice) {
     if (_badUsbTargetDevice.value?.device?.deviceId == device.deviceId) {
         _badUsbTargetDevice.value = null
         _badUsbProgress.value = 0
-        appendLog("BadUSB target detached; selection cleared.", tag = "USB")
+        appendLog("BadUSB 目标已拔出；已清除选择。", tag = "USB")
     }
 
     // Only the detached device's session is torn down. Every other session,
@@ -146,8 +146,8 @@ internal fun MainViewModel.onPermissionResultImpl(device: UsbDevice, granted: Bo
     clearPermissionRequestImpl(device.deviceId)
     val reallyGranted = granted || usbManager.hasPermission(device)
     appendLog(
-        if (reallyGranted) "USB permission granted for ${device.deviceName}."
-        else "USB permission denied for ${device.deviceName}.",
+        if (reallyGranted) "已授予 ${device.deviceName} 的 USB 权限。"
+        else "已拒绝 ${device.deviceName} 的 USB 权限。",
         level = LogLevel.USB,
     )
 
@@ -160,7 +160,7 @@ internal fun MainViewModel.onPermissionResultImpl(device: UsbDevice, granted: Bo
             if (entry != null) {
                 startSerialMonitorImpl(entry, _serialMonitorBaud.value)
             } else {
-                appendLog("No supported USB serial driver for Serial Monitor.", level = LogLevel.ERROR)
+                appendLog("未找到适用于串口监视器的支持的 USB 串口驱动。", level = LogLevel.ERROR)
             }
         }
         return
@@ -183,20 +183,20 @@ internal fun MainViewModel.onPermissionResultImpl(device: UsbDevice, granted: Bo
 
 internal fun MainViewModel.connectImpl(device: UsbDevice) {
     if (!usbManager.hasPermission(device)) {
-        appendLog("USB permission is required before connecting.")
+        appendLog("连接前需要获取 USB 权限。")
         return
     }
 
     refreshDevicesImpl()
     if (usbManager.deviceList.values.none { it.deviceId == device.deviceId }) {
-        appendLog("USB device ${device.deviceName} is no longer attached.")
+        appendLog("USB 设备 ${device.deviceName} 已断开连接。")
         return
     }
 
     val entry = _devices.value.firstOrNull { it.device.deviceId == device.deviceId }
         ?: UsbSerialDeviceCatalog.find(usbManager, device)
     if (entry == null) {
-        appendLog("No supported USB serial driver for ${device.deviceName}.")
+        appendLog("未找到适用于 ${device.deviceName} 的支持的 USB 串口驱动。")
         return
     }
 
@@ -204,7 +204,7 @@ internal fun MainViewModel.connectImpl(device: UsbDevice) {
     val previousPrimary = activeDeviceFingerprint
 
     if (fingerprint in _disconnectingFingerprints.value) {
-        appendLog("${entry.displayName} is still disconnecting; try again in a moment.", tag = "USB")
+        appendLog("${entry.displayName} 正在断开连接；请稍后重试。", tag = "USB")
         return
     }
 
@@ -240,7 +240,7 @@ internal fun MainViewModel.connectImpl(device: UsbDevice) {
         }
 
         scope.launch {
-            appendLog("Reactivating ${entry.displayName} [$fingerprint]...", tag = "USB")
+            appendLog("正在重新激活 ${entry.displayName} [$fingerprint]...", tag = "USB")
             idle.session.prepareForReuse()
             val pong = idle.session.sendCommand(
                 "PING",
@@ -255,9 +255,9 @@ internal fun MainViewModel.connectImpl(device: UsbDevice) {
                 if (fingerprint == activeDeviceFingerprint) {
                     _connectionState.value = connected
                 }
-                appendLog("Connected to ${(connected as? ConnectionState.Connected)?.chip ?: "NRSuite device"} (reused idle session).", tag = "USB")
+                appendLog("已连接到 ${(connected as? ConnectionState.Connected)?.chip ?: "NRSuite 设备"}（复用空闲会话）。", tag = "USB")
             } else {
-                appendLog("Idle session did not respond to PING; reopening.", tag = "USB")
+                appendLog("空闲会话未响应 PING；正在重新打开。", tag = "USB")
                 deviceSessions.remove(fingerprint)
                 reactivated.observers.forEach { it.cancel() }
                 _deviceConnectionStates.update { it - fingerprint }
@@ -288,7 +288,7 @@ internal fun MainViewModel.connectImpl(device: UsbDevice) {
         it.opening && it.fingerprint != fingerprint
     }
     if (anotherDeviceOpening) {
-        appendLog("Another USB device is still connecting; try again in a moment.", tag = "USB")
+        appendLog("另一个 USB 设备正在连接中；请稍后重试。", tag = "USB")
         return
     }
 
@@ -298,7 +298,7 @@ internal fun MainViewModel.connectImpl(device: UsbDevice) {
         replacingState is ConnectionState.Connecting ||
         replacingState is ConnectionState.Connected
     ) {
-        appendLog("${entry.displayName} is already connected or connecting.")
+        appendLog("${entry.displayName} 已连接或正在连接中。")
         return
     }
 
@@ -346,7 +346,7 @@ internal fun MainViewModel.connectImpl(device: UsbDevice) {
 
     observe(fingerprint, newSession)
     scope.launch {
-        appendLog("Opening ${entry.displayName} [$fingerprint]...", tag = "USB")
+        appendLog("正在打开 ${entry.displayName} [$fingerprint]...", tag = "USB")
         usbOperationMutex.withLock {
             // Close any prior session for this same fingerprint before opening.
             replacing?.let { old ->

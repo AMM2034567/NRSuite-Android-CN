@@ -153,7 +153,7 @@ fun BleScannerScreen(
                 } else {
                     Icon(
                         imageVector = if (running) Icons.Default.Stop else Icons.Default.PlayArrow,
-                        contentDescription = if (running) "Stop BLE scan" else "Start BLE scan",
+                        contentDescription = if (running) "停止 BLE 扫描" else "启动 BLE 扫描",
                     )
                 }
             }
@@ -163,14 +163,14 @@ fun BleScannerScreen(
     if (confirmStart) {
         AlertDialog(
             onDismissRequest = { confirmStart = false },
-            title = { Text("Start BLE scan?") },
+            title = { Text("启动 BLE 扫描？") },
             text = {
                 Text(
                     if (active) {
-                        "Active mode sends BLE scan requests. Use only while testing " +
-                            "devices and environments you are authorized to assess."
+                        "主动模式将向周围发送 BLE 扫描请求 (Scan Request)。" +
+                            "请仅在您获得授权评估的设备与环境中进行测试。"
                     } else {
-                        "Passive mode listens for BLE advertisements without sending scan requests."
+                        "被动模式仅监听周围设备的 BLE 广播包，不主动发送扫描请求。"
                     }
                 )
             },
@@ -180,10 +180,10 @@ fun BleScannerScreen(
                         confirmStart = false
                         onStart()
                     },
-                ) { Text("Start") }
+                ) { Text("启动") }
             },
             dismissButton = {
-                TextButton(onClick = { confirmStart = false }) { Text("Cancel") }
+                TextButton(onClick = { confirmStart = false }) { Text("取消") }
             },
         )
     }
@@ -219,18 +219,18 @@ private fun BleScannerStatusCard(
                 Column {
                     Text(
                         text = when {
-                            !connected -> "Disconnected"
-                            running -> "Scanning"
-                            else -> "Ready"
+                            !connected -> "未连接设备"
+                            running -> "正在扫描"
+                            else -> "就绪"
                         },
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
                     )
                     Text(
                         text = when {
-                            !connected -> "Connect a device to begin"
-                            running -> "${if (active) "Active" else "Passive"} scan · $deviceCount device(s)"
-                            else -> "BLE device discovery"
+                            !connected -> "请先连接设备以开始扫描"
+                            running -> "${if (active) "主动" else "被动"}扫描 · 已发现 $deviceCount 台设备"
+                            else -> "低功耗蓝牙 (BLE) 设备发现"
                         },
                         style = MaterialTheme.typography.bodySmall,
                         color = NrOnSurfaceVariant,
@@ -262,12 +262,12 @@ private fun BleScannerConfigCard(
             ) {
                 Column(Modifier.weight(1f)) {
                     Text(
-                        text = "BLE Scanner configuration",
+                        text = "BLE 扫描配置",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
                     )
                     Text(
-                        text = "Scanner and BLE HID cannot run at the same time.",
+                        text = "BLE 扫描器与 BLE HID 键鼠模拟不能同时运行。",
                         style = MaterialTheme.typography.bodySmall,
                         color = NrOnSurfaceVariant,
                     )
@@ -275,7 +275,7 @@ private fun BleScannerConfigCard(
                 IconButton(onClick = onToggle) {
                     Icon(
                         imageVector = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                        contentDescription = if (expanded) "Collapse" else "Expand",
+                        contentDescription = if (expanded) "折叠" else "展开",
                     )
                 }
             }
@@ -286,13 +286,13 @@ private fun BleScannerConfigCard(
                     NrFilterChip(
                         selected = active,
                         onClick = { onActiveChange(true) },
-                        label = "Active",
+                        label = "主动扫描",
                         enabled = !running,
                     )
                     NrFilterChip(
                         selected = !active,
                         onClick = { onActiveChange(false) },
-                        label = "Passive",
+                        label = "被动监听",
                         enabled = !running,
                     )
                 }
@@ -323,15 +323,15 @@ private fun BleScannerResultsCard(
             ) {
                 Column(Modifier.weight(1f)) {
                     Text(
-                        text = "Discovered BLE devices",
+                        text = "已发现 BLE 设备",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
                     )
                     Text(
                         text = if (devices.isEmpty()) {
-                            "No BLE devices discovered yet"
+                            "暂未发现 BLE 设备"
                         } else {
-                            "${devices.size} of $totalCount device(s) shown"
+                            "显示 ${devices.size} / 共 $totalCount 台设备"
                         },
                         style = MaterialTheme.typography.bodySmall,
                         color = NrOnSurfaceVariant,
@@ -342,7 +342,7 @@ private fun BleScannerResultsCard(
                         onClick = onClear,
                         enabled = !running,
                     ) {
-                        Text("Clear")
+                        Text("清空")
                     }
                 }
             }
@@ -350,7 +350,7 @@ private fun BleScannerResultsCard(
             if (totalCount >= MAX_BLE_SCAN_DEVICES) {
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    text = "$MAX_BLE_SCAN_DEVICES devices — oldest entries are being replaced.",
+                    text = "已达 $MAX_BLE_SCAN_DEVICES 台设备上限 — 最早的记录将被替换。",
                     style = MaterialTheme.typography.bodySmall,
                     color = StatusAmber,
                 )
@@ -362,7 +362,7 @@ private fun BleScannerResultsCard(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = "Connectable only",
+                    text = "仅显示可连接设备",
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.weight(1f),
                 )
@@ -375,7 +375,7 @@ private fun BleScannerResultsCard(
             Spacer(Modifier.height(8.dp))
             if (devices.isEmpty()) {
                 Text(
-                    text = "Start a scan or clear the filter to see devices.",
+                    text = "启动扫描或清除过滤条件以查看发现的设备。",
                     style = MaterialTheme.typography.bodySmall,
                     color = NrOnSurfaceVariant,
                 )
@@ -406,7 +406,7 @@ private fun BleDeviceRow(device: BleDeviceObservation) {
                 service.contains("FE2C") -> "FastPair"
                 service.contains("111E") || service.contains("111F") -> "HFP"
                 service.contains("1812") -> "HID"
-                service.contains("180F") -> "Battery"
+                service.contains("180F") -> "电池服务"
                 else -> null
             }
         }.distinct()
@@ -421,7 +421,7 @@ private fun BleDeviceRow(device: BleDeviceObservation) {
         Column(Modifier.padding(10.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = device.name ?: "Unnamed device",
+                    text = device.name ?: "未命名设备",
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.weight(1f),
@@ -429,23 +429,23 @@ private fun BleDeviceRow(device: BleDeviceObservation) {
                 IconButton(
                     onClick = {
                         val text = buildString {
-                            appendLine("Name: ${device.name ?: "unknown"}")
-                            appendLine("Address: ${device.address}")
-                            appendLine("Address type: ${device.addressType}")
+                            appendLine("名称: ${device.name ?: "未知"}")
+                            appendLine("地址: ${device.address}")
+                            appendLine("地址类型: ${device.addressType}")
                             appendLine("RSSI: ${device.rssi} dBm")
-                            appendLine("Connectable: ${device.connectable}")
+                            appendLine("可连接: ${if (device.connectable) "是" else "否"}")
                             if (device.services.isNotEmpty()) {
-                                appendLine("Services: ${device.services.joinToString(", ")}")
+                                appendLine("服务 UUID: ${device.services.joinToString(", ")}")
                             }
-                            device.manufacturerData?.let { appendLine("Manufacturer: $it") }
-                            device.rawPayload?.let { appendLine("Raw payload: $it") }
+                            device.manufacturerData?.let { appendLine("厂商数据: $it") }
+                            device.rawPayload?.let { appendLine("原始负载: $it") }
                         }
-                        clipboard.copyWithToast(context, text, "BLE device copied")
+                        clipboard.copyWithToast(context, text, "BLE 设备信息已复制")
                     },
                 ) {
                     Icon(
                         imageVector = Icons.Default.ContentCopy,
-                        contentDescription = "Copy BLE device details",
+                        contentDescription = "复制 BLE 设备详情",
                         modifier = Modifier.size(18.dp),
                     )
                 }
@@ -458,7 +458,7 @@ private fun BleDeviceRow(device: BleDeviceObservation) {
             Spacer(Modifier.height(2.dp))
             Text(
                 text = "${device.rssi} dBm · ${rssiToProximity(device.rssi).label} · " +
-                    if (device.connectable) "connectable" else "not connectable",
+                    if (device.connectable) "可连接" else "不可连接",
                 style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
                 color = signalColor,
             )
@@ -480,7 +480,7 @@ private fun BleDeviceRow(device: BleDeviceObservation) {
             device.manufacturerData?.let { manufacturer ->
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    text = "Manufacturer: ${manufacturer.take(32)}",
+                    text = "厂商数据: ${manufacturer.take(32)}",
                     style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
                     color = NrOnSurfaceVariant,
                 )
@@ -488,13 +488,13 @@ private fun BleDeviceRow(device: BleDeviceObservation) {
             device.rawPayload?.let { rawPayload ->
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    text = "Raw: ${rawPayload.take(48)}",
+                    text = "原始负载: ${rawPayload.take(48)}",
                     style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
                     color = NrOnSurfaceVariant,
                 )
             }
             Text(
-                text = "Last seen: ${device.lastSeen} · ${device.sightings} sighting(s)",
+                text = "最近活跃: ${device.lastSeen} · 发现 ${device.sightings} 次",
                 style = MaterialTheme.typography.bodySmall,
                 color = NrOnSurfaceVariant,
             )

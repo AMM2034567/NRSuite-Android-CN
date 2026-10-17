@@ -75,7 +75,7 @@ fun NetworkTargetRow(
         ) {
             Column(Modifier.weight(1f)) {
                 Text(
-                    text = ssid.ifBlank { "(hidden)" },
+                    text = ssid.ifBlank { "(隐藏)" },
                     fontWeight = FontWeight.SemiBold,
                     style = MaterialTheme.typography.bodyMedium,
                 )

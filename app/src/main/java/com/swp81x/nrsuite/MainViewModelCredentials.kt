@@ -32,7 +32,7 @@ private data class CustomPcapAnalysis(
 private suspend fun MainViewModel.analyzeCustomPcapImpl(uri: Uri): CustomPcapAnalysis =
     withContext(Dispatchers.IO) {
         val input = app.contentResolver.openInputStream(uri)
-            ?: throw IOException("Could not open the selected PCAP.")
+            ?: throw IOException("无法打开所选的 PCAP 文件。")
         val parsed = WpaHandshake()
         val detected = LinkedHashMap<String, DetectedSsid>()
         PcapReader(input).forEachPacket { frame ->
@@ -51,7 +51,7 @@ private suspend fun MainViewModel.analyzeCustomPcapImpl(uri: Uri): CustomPcapAna
 private suspend fun MainViewModel.parseHandshakeFromUriImpl(uri: Uri): WpaHandshake =
     withContext(Dispatchers.IO) {
         val input = app.contentResolver.openInputStream(uri)
-            ?: throw IOException("Could not open the selected PCAP.")
+            ?: throw IOException("无法打开所选的 PCAP 文件。")
         val parsed = WpaHandshake()
         PcapReader(input).forEachPacket { frame ->
             WpaHandshakeParser.parse(frame, parsed)
@@ -100,11 +100,11 @@ internal suspend fun MainViewModel.saveCrackedCustomSessionImpl(sourceUri: Uri, 
         runCatching {
             val directory = File(app.filesDir, "Credentials")
             if (!directory.exists() && !directory.mkdirs()) {
-                throw IOException("Could not create credential capture directory")
+                throw IOException("无法创建凭据捕获目录")
             }
             val destination = File(directory, "wpa_cracker_${System.currentTimeMillis()}.pcap")
             val input = app.contentResolver.openInputStream(sourceUri)
-                ?: throw IOException("Could not open custom PCAP")
+                ?: throw IOException("无法打开自定义 PCAP 文件")
             input.use { source ->
                 destination.outputStream().use { sink ->
                     source.copyTo(sink)
@@ -112,14 +112,14 @@ internal suspend fun MainViewModel.saveCrackedCustomSessionImpl(sourceUri: Uri, 
             }
             destination
         }.onFailure { error ->
-            appendLog("Could not save cracked custom PCAP: ${error.message}", level = LogLevel.ERROR)
+            appendLog("无法保存已破解的自定义 PCAP: ${error.message}", level = LogLevel.ERROR)
         }.getOrNull()
     }
 
     val session = CredentialSession(
         id = System.currentTimeMillis().toString(),
         source = CredentialSource.WPA_CRACKER,
-        ssid = ssid.ifBlank { "(hidden)" },
+        ssid = ssid.ifBlank { "(隐藏 SSID)" },
         bssid = bssid?.toMacString().orEmpty(),
         channel = null,
         startedAt = timestampNow(),
@@ -137,7 +137,7 @@ internal suspend fun MainViewModel.saveCrackedCustomSessionImpl(sourceUri: Uri, 
     synchronized(credentialLock) {
         upsertCredentialSessionLocked(session)
     }
-    appendLog("Saved WPA Cracker result for ${ssid.ifBlank { displayName }}.")
+    appendLog("已保存 ${ssid.ifBlank { displayName }} 的 WPA 破解结果。")
 }
 
 internal fun MainViewModel.deleteCredentialSessionImpl(id: String) {
@@ -184,9 +184,9 @@ internal fun MainViewModel.selectCrackerSessionImpl(session: CredentialSession?)
     _crackerTested.value = 0
     _crackerSpeed.value = 0.0
     _crackerStatus.value = when {
-        session == null -> "Select a saved handshake, or choose a custom PCAP."
-        session.pcapPath.isNullOrBlank() -> "Selected session has no PCAP capture."
-        else -> "Ready: ${session.ssid.ifBlank { "target" }}"
+        session == null -> "请选择已保存的握手包，或选择自定义 PCAP。"
+        session.pcapPath.isNullOrBlank() -> "所选会话不包含 PCAP 抓包文件。"
+        else -> "就绪: ${session.ssid.ifBlank { "目标 AP" }}"
     }
 }
 
@@ -198,11 +198,11 @@ internal fun MainViewModel.setCrackerCustomPcapImpl(uri: Uri, name: String?) {
     resetCrackerCustomPcapStateImpl()
     _crackerCustomPcapUri.value = uri
     _crackerCustomPcapName.value = name ?: uri.lastPathSegment ?: "capture.pcap"
-    _crackerCustomPcapMessage.value = "Validating EAPOL handshake..."
+    _crackerCustomPcapMessage.value = "正在校验 EAPOL 握手包..."
     _crackerResult.value = null
     _crackerTested.value = 0
     _crackerSpeed.value = 0.0
-    _crackerStatus.value = "Validating custom PCAP..."
+    _crackerStatus.value = "正在校验自定义 PCAP..."
 
     scope.launch(Dispatchers.IO) {
         _crackerCustomPcapValidating.value = true
@@ -230,23 +230,23 @@ internal fun MainViewModel.setCrackerCustomPcapImpl(uri: Uri, name: String?) {
             _crackerCustomPcapValid.value = parsed.isComplete
             _crackerCustomPcapMessage.value = when {
                 parsed.isComplete && detected.isNotEmpty() ->
-                    "Valid M1/M2 EAPOL handshake detected. ${detected.size} SSID(s) found in PCAP."
+                    "检测到有效的 M1/M2 EAPOL 握手包。在 PCAP 中发现 ${detected.size} 个 SSID。"
                 parsed.isComplete ->
-                    "Valid M1/M2 EAPOL handshake detected. No SSID found; enter it manually."
+                    "检测到有效的 M1/M2 EAPOL 握手包。未发现 SSID；请手动输入。"
                 sawM1 || sawM2 ->
-                    "EAPOL frames found, but the M1+M2 handshake is incomplete."
+                    "发现 EAPOL 帧，但 M1+M2 握手包不完整。"
                 else ->
-                    "No EAPOL handshake found in this PCAP."
+                    "该 PCAP 中未发现 EAPOL 握手包。"
             }
             _crackerStatus.value = when {
                 !parsed.isComplete -> _crackerCustomPcapMessage.value
-                detected.isNotEmpty() -> "Custom PCAP validated. Select the target SSID and choose a wordlist."
-                else -> "Custom PCAP validated. Enter the target SSID and choose a wordlist."
+                detected.isNotEmpty() -> "自定义 PCAP 校验成功。请选择目标 SSID 并选择字典文件。"
+                else -> "自定义 PCAP 校验成功。请输入目标 SSID 并选择字典文件。"
             }
         } catch (t: Throwable) {
             _crackerCustomPcapValid.value = false
             _crackerCustomPcapValidating.value = false
-            _crackerCustomPcapMessage.value = "PCAP invalid: ${t.message ?: t.javaClass.simpleName}"
+            _crackerCustomPcapMessage.value = "PCAP 无效: ${t.message ?: t.javaClass.simpleName}"
             _crackerStatus.value = _crackerCustomPcapMessage.value
         } finally {
             _crackerCustomPcapValidating.value = false
@@ -276,7 +276,7 @@ internal fun MainViewModel.clearCrackerCustomPcapImpl() {
     if (_crackerRunning.value) return
     resetCrackerCustomPcapStateImpl()
     _crackerResult.value = null
-    _crackerStatus.value = "Select a saved handshake, or choose a custom PCAP."
+    _crackerStatus.value = "请选择已保存的握手包，或选择自定义 PCAP。"
 }
 
 internal fun MainViewModel.resetCrackerCustomPcapStateImpl() {
@@ -288,7 +288,7 @@ internal fun MainViewModel.resetCrackerCustomPcapStateImpl() {
     _crackerCustomSsidManual.value = true
     _crackerCustomPcapValid.value = false
     _crackerCustomPcapValidating.value = false
-    _crackerCustomPcapMessage.value = "No custom PCAP selected."
+    _crackerCustomPcapMessage.value = "未选择自定义 PCAP 文件。"
 }
 
 internal fun MainViewModel.setCrackerWordlistImpl(uri: Uri, name: String?) {
@@ -296,7 +296,7 @@ internal fun MainViewModel.setCrackerWordlistImpl(uri: Uri, name: String?) {
     _crackerWordlistUri.value = uri
     _crackerWordlistName.value = name ?: uri.lastPathSegment ?: "wordlist.txt"
     _crackerResult.value = null
-    _crackerStatus.value = "Wordlist selected: ${_crackerWordlistName.value}"
+    _crackerStatus.value = "已选择字典: ${_crackerWordlistName.value}"
 }
 
 internal fun MainViewModel.clearCrackerWordlistImpl() {
@@ -304,7 +304,7 @@ internal fun MainViewModel.clearCrackerWordlistImpl() {
     _crackerWordlistUri.value = null
     _crackerWordlistName.value = null
     _crackerResult.value = null
-    _crackerStatus.value = "Select a saved handshake and a wordlist."
+    _crackerStatus.value = "请选择已保存的握手包与字典文件。"
 }
 
 internal fun MainViewModel.startCrackerImpl() {
@@ -312,7 +312,7 @@ internal fun MainViewModel.startCrackerImpl() {
 
     val wordlistUri = _crackerWordlistUri.value
     if (wordlistUri == null) {
-        appendLog("WPA cracker: select a wordlist first.", level = LogLevel.ERROR)
+        appendLog("WPA 破解器: 请先选择字典文件。", level = LogLevel.ERROR)
         return
     }
 
@@ -326,20 +326,20 @@ internal fun MainViewModel.startCrackerImpl() {
     when {
         customUri != null -> {
             if (_crackerCustomPcapValidating.value) {
-                appendLog("WPA cracker: custom PCAP is still being validated.", level = LogLevel.ERROR)
+                appendLog("WPA 破解器: 自定义 PCAP 仍在校验中。", level = LogLevel.ERROR)
                 return
             }
             val customSsid = _crackerCustomSsid.value.trim()
             if (!_crackerCustomPcapValid.value) {
-                appendLog("WPA cracker: custom PCAP has no validated M1/M2 EAPOL handshake.", level = LogLevel.ERROR)
+                appendLog("WPA 破解器: 自定义 PCAP 中没有已校验的 M1/M2 EAPOL 握手包。", level = LogLevel.ERROR)
                 return
             }
             if (customSsid.isBlank() || customSsid.length > 32) {
-                appendLog("WPA cracker: enter the target SSID (1-32 characters) for the custom PCAP.", level = LogLevel.ERROR)
+                appendLog("WPA 破解器: 请为自定义 PCAP 输入目标 SSID (1-32 字符)。", level = LogLevel.ERROR)
                 return
             }
             ssid = customSsid
-            pcapLabel = _crackerCustomPcapName.value ?: "custom PCAP"
+            pcapLabel = _crackerCustomPcapName.value ?: "自定义 PCAP"
             savedSessionId = null
             parseHandshake = { parseHandshakeFromUriImpl(customUri) }
         }
@@ -347,16 +347,16 @@ internal fun MainViewModel.startCrackerImpl() {
         session != null -> {
             val pcapPath = session.pcapPath
             if (pcapPath.isNullOrBlank()) {
-                appendLog("WPA cracker: selected session has no PCAP capture.", level = LogLevel.ERROR)
+                appendLog("WPA 破解器: 所选会话不包含 PCAP 抓包。", level = LogLevel.ERROR)
                 return
             }
             val pcapFile = File(pcapPath)
             if (!pcapFile.exists()) {
-                appendLog("WPA cracker: PCAP file no longer exists.", level = LogLevel.ERROR)
+                appendLog("WPA 破解器: PCAP 文件已不存在。", level = LogLevel.ERROR)
                 return
             }
-            if (session.ssid.isBlank() || session.ssid == "(hidden)") {
-                appendLog("WPA cracker: the saved session has no usable SSID.", level = LogLevel.ERROR)
+            if (session.ssid.isBlank() || session.ssid == "(hidden)" || session.ssid == "(隐藏 SSID)") {
+                appendLog("WPA 破解器: 所选会话没有可用的 SSID。", level = LogLevel.ERROR)
                 return
             }
             ssid = session.ssid
@@ -375,7 +375,7 @@ internal fun MainViewModel.startCrackerImpl() {
         }
 
         else -> {
-            appendLog("WPA cracker: select a saved session or choose a custom PCAP.", level = LogLevel.ERROR)
+            appendLog("WPA 破解器: 请选择已保存的会话或选择自定义 PCAP。", level = LogLevel.ERROR)
             return
         }
     }
@@ -384,24 +384,24 @@ internal fun MainViewModel.startCrackerImpl() {
     _crackerResult.value = null
     _crackerTested.value = 0
     _crackerSpeed.value = 0.0
-    _crackerStatus.value = "Parsing handshake..."
-    appendLog("WPA cracker: parsing $pcapLabel...")
+    _crackerStatus.value = "正在解析握手包..."
+    appendLog("WPA 破解器: 正在解析 $pcapLabel...")
 
     crackerJob = scope.launch(Dispatchers.Default) {
         try {
             val handshake = parseHandshake()
             if (!handshake.isComplete) {
-                _crackerStatus.value = "No complete M1/M2 WPA2 handshake found in the capture."
-                appendLog("WPA cracker: no complete M1/M2 handshake found.", level = LogLevel.ERROR)
+                _crackerStatus.value = "抓包中未找到完整的 M1/M2 WPA2 握手包。"
+                appendLog("WPA 破解器: 未找到完整的 M1/M2 握手包。", level = LogLevel.ERROR)
                 return@launch
             }
 
-            _crackerStatus.value = "Testing wordlist..."
-            appendLog("WPA cracker: handshake ready; testing wordlist...")
+            _crackerStatus.value = "正在使用字典测试..."
+            appendLog("WPA 破解器: 握手包已就绪；正在测试字典...")
 
             val reader = withContext(Dispatchers.IO) {
                 app.contentResolver.openInputStream(wordlistUri)?.bufferedReader()
-            } ?: throw IOException("Could not open the selected wordlist.")
+            } ?: throw IOException("无法打开所选的字典文件。")
 
             val runningJob = coroutineContext[Job]
             val found = WpaCracker.crack(
@@ -416,13 +416,13 @@ internal fun MainViewModel.startCrackerImpl() {
             )
 
             if (runningJob?.isActive != true) {
-                _crackerStatus.value = "Cracker stopped."
+                _crackerStatus.value = "破解器已停止。"
                 return@launch
             }
 
             if (found != null) {
                 _crackerResult.value = found
-                _crackerStatus.value = "Password found: $found"
+                _crackerStatus.value = "已找到密码: $found"
                 if (savedSessionId != null) {
                     persistCrackedCredentialImpl(savedSessionId, found)
                 } else if (customUri != null) {
@@ -434,23 +434,23 @@ internal fun MainViewModel.startCrackerImpl() {
                         password = found,
                     )
                 }
-                appendLog("WPA cracker: password found.")
+                appendLog("WPA 破解器: 已找到密码。")
                 addHistory(
                     "wpa_cracker",
-                    "WPA2 password recovered for ${ssid.ifBlank { pcapLabel }}",
+                    "已破解 ${ssid.ifBlank { pcapLabel }} 的 WPA2 密码",
                     HistoryLevel.SUCCESS,
                 )
             } else {
-                _crackerStatus.value = "Password not found in the selected wordlist."
-                appendLog("WPA cracker: password not found.")
+                _crackerStatus.value = "在所选字典中未找到匹配密码。"
+                appendLog("WPA 破解器: 未找到密码。")
             }
         } catch (e: CancellationException) {
-            _crackerStatus.value = "Cracker stopped."
+            _crackerStatus.value = "破解器已停止。"
             throw e
         } catch (t: Throwable) {
-            _crackerStatus.value = "Cracker failed: ${t.message ?: t.javaClass.simpleName}"
+            _crackerStatus.value = "破解失败: ${t.message ?: t.javaClass.simpleName}"
             appendLog(
-                "WPA cracker failed: ${t.message ?: t.javaClass.simpleName}",
+                "WPA 破解器失败: ${t.message ?: t.javaClass.simpleName}",
                 level = LogLevel.ERROR,
             )
         } finally {
@@ -462,6 +462,6 @@ internal fun MainViewModel.startCrackerImpl() {
 
 internal fun MainViewModel.stopCrackerImpl() {
     if (!_crackerRunning.value) return
-    _crackerStatus.value = "Stopping..."
+    _crackerStatus.value = "正在停止..."
     crackerJob?.cancel()
 }

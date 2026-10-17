@@ -132,7 +132,7 @@ class MainViewModel(internal val app: Application) {
     internal val _exportDirectory = MutableStateFlow<Uri?>(null)
     val exportDirectory: StateFlow<Uri?> = _exportDirectory.asStateFlow()
 
-    private val _exportDirectoryName = MutableStateFlow("Not configured")
+    private val _exportDirectoryName = MutableStateFlow("未配置")
     val exportDirectoryName: StateFlow<String> = _exportDirectoryName.asStateFlow()
 
     internal val _requiresRootDirectory = MutableStateFlow(false)
@@ -536,7 +536,7 @@ class MainViewModel(internal val app: Application) {
     internal val _crackerResult = MutableStateFlow<String?>(null)
     val crackerResult: StateFlow<String?> = _crackerResult.asStateFlow()
 
-    internal val _crackerStatus = MutableStateFlow("Select a saved handshake and a wordlist.")
+    internal val _crackerStatus = MutableStateFlow("请选择已保存的握手包与字典文件。")
     val crackerStatus: StateFlow<String> = _crackerStatus.asStateFlow()
 
     internal val _crackerCustomPcapUri = MutableStateFlow<Uri?>(null)
@@ -554,7 +554,7 @@ class MainViewModel(internal val app: Application) {
     internal val _crackerCustomPcapValidating = MutableStateFlow(false)
     val crackerCustomPcapValidating: StateFlow<Boolean> = _crackerCustomPcapValidating.asStateFlow()
 
-    internal val _crackerCustomPcapMessage = MutableStateFlow("No custom PCAP selected.")
+    internal val _crackerCustomPcapMessage = MutableStateFlow("未选择自定义 PCAP 文件。")
     val crackerCustomPcapMessage: StateFlow<String> = _crackerCustomPcapMessage.asStateFlow()
 
     internal val _crackerCustomSsidOptions = MutableStateFlow<List<DetectedSsid>>(emptyList())
@@ -663,7 +663,7 @@ class MainViewModel(internal val app: Application) {
     internal val _bleProfileRunning = MutableStateFlow(false)
     val bleProfileRunning: StateFlow<Boolean> = _bleProfileRunning.asStateFlow()
 
-    internal val _bleProfileStatus = MutableStateFlow("Select a discovered BLE device")
+    internal val _bleProfileStatus = MutableStateFlow("请选择已发现的 BLE 设备")
     val bleProfileStatus: StateFlow<String> = _bleProfileStatus.asStateFlow()
 
     internal val _bleProfileServices = MutableStateFlow<List<BleServiceProfile>>(emptyList())
@@ -1385,25 +1385,25 @@ class MainViewModel(internal val app: Application) {
             return "BLE HID"
         }
         if (includeBle && (_bleScanStarting.value || _bleScanRunning.value || _bleScanStopping.value)) {
-            return "BLE Scanner"
+            return "BLE 扫描器"
         }
         if (includeBle && _bleProfileRunning.value) {
-            return "BLE GATT Profile"
+            return "BLE GATT 画像"
         }
         return when {
             _portalRunning.value -> {
-                if (_portalMode.value == "evil_twin") "Evil Twin" else "Captive Portal"
+                if (_portalMode.value == "evil_twin") "钓鱼热点 (Evil Twin)" else "强制认证门户"
             }
-            _sniffing.value -> "Packet Sniffer"
-            _beaconRunning.value -> "Beacon Broadcast"
-            _deauthRunning.value -> "Deauthentication"
-            _deauthDetectorRunning.value -> "Deauth Detector"
-            _rogueApRunning.value -> "Rogue AP Detector"
-            _rogueApScanning.value -> "Rogue AP baseline scan"
-            _clientPresenceRunning.value -> "Client Detector"
-            _hiddenApStarting.value -> "Hidden AP Revealer starting"
-            _hiddenApRunning.value -> "Hidden AP Revealer"
-            _scanning.value -> "WiFi Scan"
+            _sniffing.value -> "数据包嗅探器"
+            _beaconRunning.value -> "Beacon 广播"
+            _deauthRunning.value -> "Deauth 攻击"
+            _deauthDetectorRunning.value -> "Deauth 检测器"
+            _rogueApRunning.value -> "流氓 AP 检测器"
+            _rogueApScanning.value -> "流氓 AP 基准扫描"
+            _clientPresenceRunning.value -> "客户端探测器"
+            _hiddenApStarting.value -> "隐藏 AP 探测启动中"
+            _hiddenApRunning.value -> "隐藏 AP 探测器"
+            _scanning.value -> "WiFi 扫描"
             else -> null
         }
     }
@@ -1411,7 +1411,7 @@ class MainViewModel(internal val app: Application) {
     internal fun ensureRadioIdle(requested: String): Boolean {
         val active = activeRadioLabel()
         if (active == null) return true
-        val message = "Cannot start $requested while $active is active. Stop $active first."
+        val message = "无法在 $active 运行时启动 $requested。请先停止 $active。"
         appendLog(message, level = LogLevel.ERROR)
         _actionError.value = message
         return false
@@ -1424,19 +1424,19 @@ class MainViewModel(internal val app: Application) {
     internal fun updateForegroundService() {
         val context = app
         val activeText = when {
-            _meshActive.value -> "Mesh active"
-            _sniffing.value -> "Packet capture active"
-            _beaconRunning.value -> "Beacon broadcast active"
-            _portalRunning.value -> "Captive portal active"
-            _deauthRunning.value -> "Deauth burst active"
-            _deauthDetectorRunning.value -> "Deauth detector active"
-            _rogueApRunning.value -> "Rogue AP detector active"
-            _clientPresenceRunning.value -> "Client detector active"
-            _hiddenApStarting.value -> "Hidden AP Revealer scanning"
-            _hiddenApRunning.value -> "Hidden AP revealer active"
-            _bleScanStarting.value || _bleScanRunning.value || _bleScanStopping.value -> "BLE scanner active"
-            _bleProfileRunning.value -> "BLE profile active"
-            _bleAdvertising.value || _bleConnected.value -> "BLE HID active"
+            _meshActive.value -> "Mesh 网络运行中"
+            _sniffing.value -> "数据包抓取运行中"
+            _beaconRunning.value -> "Beacon 广播运行中"
+            _portalRunning.value -> "认证门户运行中"
+            _deauthRunning.value -> "Deauth 突发攻击运行中"
+            _deauthDetectorRunning.value -> "Deauth 检测运行中"
+            _rogueApRunning.value -> "流氓 AP 检测运行中"
+            _clientPresenceRunning.value -> "客户端探测运行中"
+            _hiddenApStarting.value -> "隐藏 AP 探测扫描中"
+            _hiddenApRunning.value -> "隐藏 AP 探测运行中"
+            _bleScanStarting.value || _bleScanRunning.value || _bleScanStopping.value -> "BLE 扫描运行中"
+            _bleProfileRunning.value -> "BLE 画像采集运行中"
+            _bleAdvertising.value || _bleConnected.value -> "BLE HID 运行中"
             else -> null
         }
         val intent = Intent(context, NrSuiteForegroundService::class.java)
@@ -1570,8 +1570,8 @@ class MainViewModel(internal val app: Application) {
                         "portal_viewed" -> {
                             _portalViews.update { it + 1 }
                             val ip = event.optString("client_ip", "unknown")
-                            appendLog("Portal viewed from $ip.")
-                            this@MainViewModel.portalLogImpl("GET / from $ip")
+                            appendLog("认证门户被来自 $ip 的客户端访问。")
+                            this@MainViewModel.portalLogImpl("GET / 来自 $ip")
                         }
                         "captive_data" -> {
                             _portalCapturedData.update { it + 1 }
@@ -1581,8 +1581,8 @@ class MainViewModel(internal val app: Application) {
                             val fields = data?.keys()?.asSequence()?.joinToString(", ") { key ->
                                 "$key=${data.optString(key)}"
                             } ?: ""
-                            appendLog("Captive data received from $ip.")
-                            this@MainViewModel.portalLogImpl("POST /login from $ip | UA: $userAgent | data: $fields")
+                            appendLog("收到来自 $ip 的认证提交数据。")
+                            this@MainViewModel.portalLogImpl("POST /login 来自 $ip | UA: $userAgent | 数据: $fields")
                             val details = linkedMapOf<String, String>()
                             data?.keys()?.forEach { key ->
                                 details[key] = data.optString(key)
@@ -1592,7 +1592,7 @@ class MainViewModel(internal val app: Application) {
                                 data?.optString("pass").orEmpty()
                             }
                             if (submittedPassword.isNotBlank() && _portalMode.value == "evil_twin") {
-                                appendLog("Captured password candidate (${submittedPassword.length} chars).")
+                                appendLog("捕获到候选密码 (${submittedPassword.length} 位)。")
                                 val capturedAt = java.time.LocalTime.now()
                                     .format(java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss"))
                                 _evilTwinPasswords.update {
@@ -1618,20 +1618,20 @@ class MainViewModel(internal val app: Application) {
                                         ?.let { it.copy(credentials = it.credentials + credential) }
                                 }
                                 _portalCredentials.update { (it + credential).takeLast(100) }
-                                appendLog("Portal credential captured (${details.size} field(s)).")
+                                appendLog("已捕获认证门户凭据 (${details.size} 个字段)。")
                             }
                         }
                         "client_associated" -> {
                             _portalClients.update { it + 1 }
                             val client = event.optString("client")
                             val rssi = event.optInt("rssi")
-                            appendLog("Client associated: $client ($rssi dBm).")
-                            this@MainViewModel.portalLogImpl("Client associated: $client ($rssi dBm)")
+                            appendLog("客户端已关联: $client ($rssi dBm)。")
+                            this@MainViewModel.portalLogImpl("客户端已关联: $client ($rssi dBm)")
                         }
                         "deauth_stats" -> {
                             _deauthSent.value = event.optInt("sent_frames", _deauthSent.value)
-                            appendLog("Deauth stats: ${_deauthSent.value} frame(s) sent.")
-                            this@MainViewModel.portalLogImpl("Deauth stats: ${_deauthSent.value} frame(s) sent")
+                            appendLog("Deauth 统计: 已发送 ${_deauthSent.value} 个数据帧。")
+                            this@MainViewModel.portalLogImpl("Deauth 统计: 已发送 ${_deauthSent.value} 个数据帧")
                         }
                         "deauth_detected" -> this@MainViewModel.recordDeauthDetectorFrame(event)
                         "deauth_detector_hop" -> {
@@ -1686,7 +1686,7 @@ class MainViewModel(internal val app: Application) {
         val canIdle = entry.device.driver is CdcAcmSerialDriver ||
             UsbSerialTransport.supportsNativeRaw(entry.device.driver)
         if (!canIdle) {
-            appendLog("Closing UART bridge session instead of idling it.", tag = "USB")
+            appendLog("正在关闭 UART 桥接会话而非置为空闲。", tag = "USB")
             disconnectSession(fingerprint, stopOperations = stopOperations, sendStopAll = true)
             return
         }
@@ -1697,7 +1697,7 @@ class MainViewModel(internal val app: Application) {
             stopActiveOperations()
         }
 
-        appendLog("Idling ${entry.device.displayName}...", tag = "USB")
+        appendLog("正在将 ${entry.device.displayName} 置为空闲...", tag = "USB")
         deviceSessions.remove(fingerprint)
         entry.observers.forEach { it.cancel() }
         entry.opening = false
@@ -1741,8 +1741,7 @@ class MainViewModel(internal val app: Application) {
 
         if (fingerprint in _disconnectingFingerprints.value) {
             appendLog(
-                "Timed out waiting for USB teardown of $fingerprint; " +
-                    "continuing may race the old connection.",
+                "等待 $fingerprint USB 关闭超时；继续操作可能与旧连接冲突。",
                 level = LogLevel.ERROR,
                 tag = "USB",
             )
@@ -1762,7 +1761,7 @@ class MainViewModel(internal val app: Application) {
             stopActiveOperations()
         }
 
-        appendLog("Disconnecting ${entry.device.displayName}...", tag = "USB")
+        appendLog("正在断开 ${entry.device.displayName}...", tag = "USB")
         deviceSessions.remove(fingerprint)
         idleDeviceSessions.remove(fingerprint)
         entry.observers.forEach { it.cancel() }
@@ -1788,7 +1787,7 @@ class MainViewModel(internal val app: Application) {
                     }
                     runCatching { entry.session.disconnect() }
                 }
-                appendLog("Disconnected ${entry.device.displayName}.", tag = "USB")
+                appendLog("已断开 ${entry.device.displayName}。", tag = "USB")
                 // The device list can still contain a just-detached device until
                 // its UsbDeviceConnection is actually closed.
                 runCatching { refreshDevices() }
@@ -1815,7 +1814,7 @@ class MainViewModel(internal val app: Application) {
         scope.launch(Dispatchers.IO) {
             val root = DocumentFile.fromTreeUri(app, rootUri)
             if (root == null) {
-                appendLog("Could not open the selected NRSuite root directory.")
+                appendLog("无法打开所选的 NRSuite 根目录。")
                 return@launch
             }
 
@@ -1828,12 +1827,12 @@ class MainViewModel(internal val app: Application) {
                 } else if (root.createDirectory(name) != null) {
                     readyDirectories += name
                 } else {
-                    appendLog("Could not create NRSuite/$name in the selected root.")
+                    appendLog("无法在所选根目录中创建 NRSuite/$name。")
                 }
             }
 
             if (readyDirectories.isNotEmpty()) {
-                appendLog("NRSuite root ready: ${readyDirectories.joinToString(", ")}.")
+                appendLog("NRSuite 根目录已就绪: ${readyDirectories.joinToString(", ")}。")
             }
         }
     }
@@ -1849,7 +1848,7 @@ class MainViewModel(internal val app: Application) {
             directoryUri,
             "application/vnd.tcpdump.pcap",
             displayName,
-        ) ?: throw IOException("Storage provider did not create a document")
+        ) ?: throw IOException("存储提供程序无法创建文档")
     }
 
     private fun createPcapDocument(treeUri: Uri, displayName: String): Uri {
@@ -1861,7 +1860,7 @@ class MainViewModel(internal val app: Application) {
             parentUri,
             "application/vnd.tcpdump.pcap",
             displayName,
-        ) ?: throw IOException("Storage provider did not create a document")
+        ) ?: throw IOException("存储提供程序无法创建文档")
     }
 
     internal fun displayNameForTreeUri(uri: Uri): String {
@@ -1875,7 +1874,7 @@ class MainViewModel(internal val app: Application) {
         }
         return uri.lastPathSegment?.substringAfterLast(':')?.substringAfterLast('/')?.trim()
             ?.takeIf { it.isNotBlank() }
-            ?: "Selected folder"
+            ?: "所选文件夹"
     }
 
     internal fun exportPcapToRootIfConfigured(sourceFile: File?) {
@@ -1896,17 +1895,17 @@ class MainViewModel(internal val app: Application) {
                     sourceFile.inputStream().use { input ->
                         input.copyTo(output)
                     }
-                } ?: throw IOException("Could not open export file")
+                } ?: throw IOException("无法打开导出文件")
 
                 appendLog(
-                    "Evil Twin PCAP exported to " +
+                    "钓鱼热点 PCAP 已导出至 " +
                         "${displayNameForTreeUri(rootUri)}/Pcap/$displayName",
                 )
             }.onFailure { error ->
                 synchronized(exportedCapturePaths) {
                     exportedCapturePaths.remove(key)
                 }
-                appendLog("Could not export Evil Twin PCAP: ${error.message}", level = LogLevel.ERROR)
+                appendLog("无法导出钓鱼热点 PCAP: ${error.message}", level = LogLevel.ERROR)
             }
         }
     }

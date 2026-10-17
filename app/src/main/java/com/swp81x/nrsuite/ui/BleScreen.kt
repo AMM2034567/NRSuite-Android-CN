@@ -116,7 +116,7 @@ fun BleScreen(
                 Tab(
                     selected = selectedTab == 0,
                     onClick = { selectedTab = 0 },
-                    text = { Text("Payload") },
+                    text = { Text("载荷执行") },
                 )
                 Tab(
                     selected = selectedTab == 1,
@@ -125,14 +125,14 @@ fun BleScreen(
                         if (!canRealtime) {
                             Toast.makeText(
                                 context,
-                                "Connect and pair to a BLE host to use Realtime HID.",
+                                "请先连接并配对 BLE 主机以使用实时 HID 交互。",
                                 Toast.LENGTH_SHORT,
                             ).show()
                         }
                     },
                     text = {
                         Text(
-                            text = "Realtime HID",
+                            text = "实时 HID 模拟",
                             color = if (canRealtime) {
                                 MaterialTheme.colorScheme.onSurface
                             } else {
@@ -196,7 +196,7 @@ fun BleScreen(
                 containerColor = StatusRed,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
             ) {
-                Icon(Icons.Default.Stop, contentDescription = "Stop BLE")
+                Icon(Icons.Default.Stop, contentDescription = "停止 BLE")
             }
         } else if (connected) {
             ModuleActionFab(
@@ -207,7 +207,7 @@ fun BleScreen(
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
             ) {
-                Icon(Icons.Default.PlayArrow, contentDescription = "Start BLE")
+                Icon(Icons.Default.PlayArrow, contentDescription = "启动 BLE")
             }
         }
     }
@@ -286,19 +286,19 @@ private fun RealtimeHidTab(
         ) {
             Column(Modifier.padding(14.dp)) {
                 Text(
-                    text = "Realtime keyboard",
+                    text = "实时虚拟键盘",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
                 )
                 Text(
-                    text = if (enabled) "Types as you type. Enter sends Return." else "Connect a BLE host to enable realtime input.",
+                    text = if (enabled) "即打即发，实时输入。Enter 发送回车换行。" else "请先连接 BLE 主机以启用实时输入。",
                     style = MaterialTheme.typography.bodySmall,
                     color = if (enabled) StatusGreen else StatusAmber,
                 )
 
                 Spacer(Modifier.height(10.dp))
                 Text(
-                    text = "Modifiers",
+                    text = "修饰键 (Modifiers)",
                     style = MaterialTheme.typography.labelMedium,
                     color = NrOnSurfaceVariant,
                 )
@@ -313,7 +313,7 @@ private fun RealtimeHidTab(
                             onClick = { onModifierChange(key, !active) },
                             enabled = enabled,
                         ) {
-                            Text(if (active) "$key ON" else key)
+                            Text(if (active) "$key [开]" else key)
                         }
                     }
                 }
@@ -324,12 +324,12 @@ private fun RealtimeHidTab(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Column(Modifier.weight(1f)) {
-                        Text("Hold modifiers", style = MaterialTheme.typography.bodyMedium)
+                        Text("保持修饰键锁定", style = MaterialTheme.typography.bodyMedium)
                         Text(
                             text = if (modifierHold) {
-                                "Modifiers stay active until tapped off."
+                                "修饰键将持续保持按下状态，直到手动点灭。"
                             } else {
-                                "Modifiers release after the next key/text input."
+                                "在下一次按键或文本输入后，修饰键将自动释放。"
                             },
                             style = MaterialTheme.typography.bodySmall,
                             color = NrOnSurfaceVariant,
@@ -344,7 +344,7 @@ private fun RealtimeHidTab(
 
                 Spacer(Modifier.height(10.dp))
                 Text(
-                    text = "Special keys",
+                    text = "特殊控制键",
                     style = MaterialTheme.typography.labelMedium,
                     color = NrOnSurfaceVariant,
                 )
@@ -371,13 +371,13 @@ private fun RealtimeHidTab(
                     enabled = enabled,
                     minLines = 2,
                     maxLines = 4,
-                    label = { Text("Type here") },
-                    placeholder = { Text("Realtime keyboard input") },
+                    label = { Text("在此输入文本") },
+                    placeholder = { Text("实时发送键盘按键") },
                 )
                 Spacer(Modifier.height(6.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedButton(onClick = onClearText, enabled = enabled && realtimeText.isNotEmpty()) {
-                        Text("Clear box")
+                        Text("清空输入框")
                     }
                 }
             }
@@ -391,12 +391,12 @@ private fun RealtimeHidTab(
         ) {
             Column(Modifier.padding(14.dp)) {
                 Text(
-                    text = "Mouse",
+                    text = "虚拟鼠标",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
                 )
                 Text(
-                    text = "Drag the touchpad to move. Buttons click. Use scroll for wheel.",
+                    text = "在触控板区域滑动以移动指针，按键对应鼠标按键，滚轮按钮控制上下滚动。",
                     style = MaterialTheme.typography.bodySmall,
                     color = NrOnSurfaceVariant,
                 )
@@ -435,7 +435,7 @@ private fun RealtimeHidTab(
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
-                        text = if (enabled) "Touchpad" else "Connect a host first",
+                        text = if (enabled) "触控板滑动区域" else "请先连接主机",
                         style = MaterialTheme.typography.bodySmall,
                         color = NrOnSurfaceVariant,
                     )
@@ -450,21 +450,21 @@ private fun RealtimeHidTab(
                             onMouseButton("LEFT", false)
                         },
                         enabled = enabled,
-                    ) { Text("Left") }
+                    ) { Text("左键") }
                     OutlinedButton(
                         onClick = {
                             onMouseButton("MIDDLE", true)
                             onMouseButton("MIDDLE", false)
                         },
                         enabled = enabled,
-                    ) { Text("Middle") }
+                    ) { Text("中键") }
                     OutlinedButton(
                         onClick = {
                             onMouseButton("RIGHT", true)
                             onMouseButton("RIGHT", false)
                         },
                         enabled = enabled,
-                    ) { Text("Right") }
+                    ) { Text("右键") }
                 }
 
                 Spacer(Modifier.height(8.dp))
@@ -473,11 +473,11 @@ private fun RealtimeHidTab(
                     OutlinedButton(
                         onClick = { onMouseScroll(1) },
                         enabled = enabled,
-                    ) { Text("Scroll up") }
+                    ) { Text("向上滚动") }
                     OutlinedButton(
                         onClick = { onMouseScroll(-1) },
                         enabled = enabled,
-                    ) { Text("Scroll down") }
+                    ) { Text("向下滚动") }
                 }
             }
         }
@@ -516,12 +516,12 @@ private fun ConfigCard(
                 Spacer(Modifier.width(10.dp))
                 Column(Modifier.weight(1f)) {
                     Text(
-                        text = "BLE HID",
+                        text = "BLE HID 键鼠模拟",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
                     )
                     Text(
-                        text = "BadBLE payloads and realtime HID",
+                        text = "BadBLE 脚本载荷与实时交互控制",
                         style = MaterialTheme.typography.bodySmall,
                         color = NrOnSurfaceVariant,
                     )
@@ -534,7 +534,7 @@ private fun ConfigCard(
                 onValueChange = onAdvertiseNameChange,
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !advertising,
-                label = { Text("Advertised name") },
+                label = { Text("BLE 广播名称") },
                 singleLine = true,
             )
 
@@ -544,18 +544,18 @@ private fun ConfigCard(
                 selectedName = selectedPayloadName,
                 onSelect = onUseSavedScript,
                 enabled = !bleScriptRunning,
-                label = "DuckyScript payload",
+                label = "DuckyScript 脚本载荷",
             )
             Spacer(Modifier.height(8.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Button(onClick = onChoosePayload, enabled = !bleScriptRunning) {
-                    Text("Choose payload")
+                    Text("选择载荷")
                 }
                 OutlinedButton(
                     onClick = onClearPayload,
                     enabled = !bleScriptRunning && selectedPayloadName != null,
                 ) {
-                    Text("Clear")
+                    Text("清除")
                 }
             }
 
@@ -564,7 +564,7 @@ private fun ConfigCard(
                 onClick = onRunPayload,
                 enabled = connected && bleConnected && selectedPayloadName != null && !bleScriptRunning,
             ) {
-                Text(if (bleScriptRunning) "Running payload..." else "Run payload")
+                Text(if (bleScriptRunning) "正在执行载荷..." else "执行载荷")
             }
         }
     }
@@ -584,14 +584,14 @@ private fun StatusCard(
         shape = RoundedCornerShape(12.dp),
     ) {
         Column(Modifier.padding(14.dp)) {
-            Text("BLE status", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+            Text("BLE 状态", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
             Spacer(Modifier.height(8.dp))
             StatusIndicator(
                 label = when {
-                    !connected -> "No device connected"
-                    bleConnected -> "Host connected"
-                    advertising -> "Advertising / waiting for host"
-                    else -> "Idle"
+                    !connected -> "未连接硬件设备"
+                    bleConnected -> "主机已连接"
+                    advertising -> "正在广播 / 等待主机连接"
+                    else -> "空闲"
                 },
                 color = when {
                     !connected -> StatusNeutral
@@ -603,7 +603,7 @@ private fun StatusCard(
             if (peer.isNotBlank()) {
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    text = "Peer: $peer",
+                    text = "对端主机: $peer",
                     style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
                     color = NrOnSurfaceVariant,
                 )

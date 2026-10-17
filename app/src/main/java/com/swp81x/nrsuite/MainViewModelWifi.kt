@@ -25,13 +25,13 @@ internal fun MainViewModel.saveBeaconListImpl(name: String, ssids: List<String>)
     val cleanSsids = ssids.map { it.trim() }.filter { it.isNotEmpty() }.distinct()
     _beaconListMap.update { it + (cleanName to cleanSsids) }
     persistBeaconListsImpl()
-    appendLog("Saved beacon SSID list '$cleanName' (${cleanSsids.size} SSIDs).")
+    appendLog("已保存 Beacon SSID 列表 '$cleanName' (${cleanSsids.size} 个 SSID)。")
 }
 
 internal fun MainViewModel.deleteBeaconListImpl(name: String) {
     _beaconListMap.update { it - name }
     persistBeaconListsImpl()
-    appendLog("Deleted beacon SSID list '$name'.")
+    appendLog("已删除 Beacon SSID 列表 '$name'。")
 }
 
 internal fun MainViewModel.loadBeaconListsImpl() {
@@ -65,25 +65,25 @@ internal fun MainViewModel.persistBeaconListsImpl() {
 internal fun MainViewModel.scanWifiImpl() {
     val activeSession = session
     if (activeSession == null) {
-        appendLog("Connect to a device before scanning.")
+        appendLog("扫描前请先连接设备。")
         return
     }
     if (_scanning.value) return
-    if (!ensureRadioIdle("WiFi Scan")) return
+    if (!ensureRadioIdle("WiFi 扫描")) return
 
     _networks.value = emptyList()
     _deauthDetectorTargets.value = emptyList()
     _scanning.value = true
     scope.launch {
-        appendLog("Starting WiFi scan...")
+        appendLog("正在启动 WiFi 扫描...")
         val count = activeSession.scanWifi()
         _scanning.value = false
         when {
-            count == null -> appendLog("WiFi scan timed out.")
-            count < 0 -> appendLog("WiFi scan failed.")
+            count == null -> appendLog("WiFi 扫描超时。")
+            count < 0 -> appendLog("WiFi 扫描失败。")
             else -> {
-                appendLog("WiFi scan complete: $count network(s).")
-                addHistory("scan", "WiFi scan complete: $count network(s)", HistoryLevel.SUCCESS)
+                appendLog("WiFi 扫描完成：发现 $count 个网络。")
+                addHistory("scan", "WiFi 扫描完成：发现 $count 个网络", HistoryLevel.SUCCESS)
             }
         }
     }
@@ -92,21 +92,21 @@ internal fun MainViewModel.scanWifiImpl() {
 internal fun MainViewModel.startDeauthImpl(bssid: String, channel: Int, client: String, count: Int, duration: Int, intervalMs: Int) {
     val activeSession = session
     if (activeSession == null) {
-        appendLog("Connect to a device before sending deauth frames.")
+        appendLog("发送 Deauth 帧前请先连接设备。")
         return
     }
     if (_deauthRunning.value) return
-    if (!ensureRadioIdle("Deauthentication")) return
+    if (!ensureRadioIdle("Deauth 突发攻击")) return
     this.stopLocalPortalImpl()
 
     val cleanBssid = bssid.trim().uppercase()
     val cleanClient = client.trim().ifBlank { "FF:FF:FF:FF:FF:FF" }.uppercase()
     if (!MainViewModel.MAC_PATTERN.matches(cleanBssid)) {
-        appendLog("Invalid target BSSID: $cleanBssid")
+        appendLog("无效的目标 BSSID：$cleanBssid")
         return
     }
     if (!MainViewModel.MAC_PATTERN.matches(cleanClient)) {
-        appendLog("Invalid client MAC: $cleanClient")
+        appendLog("无效的客户端 MAC 地址：$cleanClient")
         return
     }
 
@@ -132,10 +132,8 @@ internal fun MainViewModel.startDeauthImpl(bssid: String, channel: Int, client: 
     updateForegroundService()
 
     scope.launch {
-        appendLog(
-            "Starting deauth burst: $cleanBssid on channel $channel " +
-                "(client=$cleanClient, count=${if (count <= 0) "firmware default" else count})."
-        )
+        val countText = if (count <= 0) "固件默认值" else count.toString()
+        appendLog("正在启动 Deauth 突发攻击：目标 $cleanBssid (信道 $channel, 客户端 $cleanClient, 次数 $countText)。")
         val args = JSONObject().apply {
             put("bssid", cleanBssid)
             put("client", cleanClient)
@@ -149,10 +147,10 @@ internal fun MainViewModel.startDeauthImpl(bssid: String, channel: Int, client: 
         _deauthRunning.value = false
         updateForegroundService()
         if (response?.optBoolean("ok") == true) {
-            appendLog("Deauth burst completed.")
-            addHistory("deauth", "Deauth burst completed on $cleanBssid", HistoryLevel.SUCCESS)
+            appendLog("Deauth 突发攻击完成。")
+            addHistory("deauth", "针对 $cleanBssid 的 Deauth 突发攻击完成", HistoryLevel.SUCCESS)
         } else {
-            appendLog("Deauth request failed: ${response?.optString("msg") ?: "timeout"}")
+            appendLog("Deauth 请求失败：${response?.optString("msg") ?: "超时"}")
         }
     }
 }
@@ -160,25 +158,25 @@ internal fun MainViewModel.startDeauthImpl(bssid: String, channel: Int, client: 
 internal fun MainViewModel.startBeaconImpl(ssids: List<String>, channel: Int, intervalMs: Int, hidden: Boolean, randomBssid: Boolean) {
     val activeSession = session
     if (activeSession == null) {
-        appendLog("Connect to a device before starting beacon broadcast.")
+        appendLog("启动 Beacon 广播前请先连接设备。")
         return
     }
     if (_beaconRunning.value) return
-    if (!ensureRadioIdle("Beacon Broadcast")) return
+    if (!ensureRadioIdle("Beacon 广播")) return
     this.stopLocalPortalImpl()
 
     val cleanSsids = ssids.map { it.trim() }.filter { it.isNotEmpty() }.distinct()
     if (cleanSsids.isEmpty()) {
-        appendLog("At least one SSID is required.")
+        appendLog("至少需要一个 SSID。")
         return
     }
     if (cleanSsids.size > 32) {
-        appendLog("Firmware supports at most 32 SSIDs.")
+        appendLog("固件最多支持 32 个 SSID。")
         return
     }
 
     scope.launch {
-        appendLog("Starting beacon broadcast (${cleanSsids.size} SSID(s), channel $channel)...")
+        appendLog("正在启动 Beacon 广播 (${cleanSsids.size} 个 SSID，信道 $channel)...")
         val args = JSONObject().apply {
             put("ssids", cleanSsids.joinToString("\n"))
             put("channel", channel.coerceIn(1, 13))
@@ -193,11 +191,11 @@ internal fun MainViewModel.startBeaconImpl(ssids: List<String>, channel: Int, in
             _beaconSent.value = 0
             _beaconSsidCount.value = response.optInt("ssids", cleanSsids.size)
             _beaconChannel.value = response.optInt("channel", channel)
-            appendLog("Beacon broadcast started.")
-            addHistory("beacon", "Beacon broadcast started (${cleanSsids.size} SSIDs)", HistoryLevel.SUCCESS)
+            appendLog("Beacon 广播已启动。")
+            addHistory("beacon", "Beacon 广播已启动 (${cleanSsids.size} 个 SSID)", HistoryLevel.SUCCESS)
             startBeaconStatusPollingImpl(activeSession)
         } else {
-            appendLog("Failed to start beacon broadcast: ${response?.optString("msg") ?: "timeout"}")
+            appendLog("启动 Beacon 广播失败：${response?.optString("msg") ?: "超时"}")
         }
     }
 }
@@ -215,10 +213,10 @@ internal fun MainViewModel.stopBeaconImpl() {
         if (response?.optBoolean("ok") == true) {
             _beaconSent.value = response.optInt("sent", _beaconSent.value)
             _beaconSsidCount.value = response.optInt("ssids", _beaconSsidCount.value)
-            appendLog("Beacon stopped. Frames sent: ${_beaconSent.value}.")
-            addHistory("beacon", "Beacon stopped; ${_beaconSent.value} frames sent", HistoryLevel.SUCCESS)
+            appendLog("Beacon 广播已停止。已发送帧数：${_beaconSent.value}。")
+            addHistory("beacon", "Beacon 广播已停止；已发送 ${_beaconSent.value} 帧", HistoryLevel.SUCCESS)
         } else {
-            appendLog("Beacon stop request sent, but the device did not confirm.")
+            appendLog("已发送 Beacon 停止请求，但设备未确认。")
         }
     }
 }
@@ -242,11 +240,11 @@ internal fun MainViewModel.startBeaconStatusPollingImpl(activeSession: NrSession
 internal fun MainViewModel.startSniffImpl(request: SniffRequest) {
     val activeSession = session
     if (activeSession == null) {
-        appendLog("Connect to a device before sniffing.")
+        appendLog("嗅探前请先连接设备。")
         return
     }
     if (_sniffing.value) return
-    if (!ensureRadioIdle("Packet Sniffer")) return
+    if (!ensureRadioIdle("数据包嗅探器")) return
     beaconStatusJob?.cancel()
     beaconStatusJob = null
     _beaconRunning.value = false
@@ -256,7 +254,7 @@ internal fun MainViewModel.startSniffImpl(request: SniffRequest) {
     val exportUri = _exportDirectory.value
     if (exportUri == null) {
         _requiresRootDirectory.value = true
-        appendLog("Choose an NRSuite root directory before starting a capture.")
+        appendLog("开始抓包前请先选择 NRSuite 根目录。")
         return
     }
     val writerResult = runCatching {
@@ -265,12 +263,12 @@ internal fun MainViewModel.startSniffImpl(request: SniffRequest) {
         val documentUri = createPcapDocumentInDirectory(pcapDirUri, captureName)
         val outputStream = app.contentResolver
             .openOutputStream(documentUri, "wt")
-            ?: throw IOException("Could not open export file")
+            ?: throw IOException("无法打开导出文件")
         val displayName = displayNameForTreeUri(exportUri)
         PcapWriter(outputStream, closeOutput = true) to "$displayName/Pcap/$captureName"
     }
     val (writer, captureDisplayPath) = writerResult.getOrElse { error ->
-        appendLog("Could not create capture output: ${error.message}")
+        appendLog("无法创建抓包输出文件：${error.message}")
         return
     }
 
@@ -281,7 +279,7 @@ internal fun MainViewModel.startSniffImpl(request: SniffRequest) {
     _sniffing.value = true
     updateForegroundService()
 
-    appendLog("Capture file: $captureDisplayPath")
+    appendLog("抓包文件：$captureDisplayPath")
 
     val eapolState = EapolHandshake()
     var eapolStopRequested = false
@@ -294,7 +292,7 @@ internal fun MainViewModel.startSniffImpl(request: SniffRequest) {
                     writer.writePacket(frame)
                     _sniffPacketCount.update { it + 1 }
                 } catch (t: Throwable) {
-                    appendLog("PCAP write error: ${t.message}")
+                    appendLog("PCAP 写入错误：${t.message}")
                 }
             }
 
@@ -304,7 +302,7 @@ internal fun MainViewModel.startSniffImpl(request: SniffRequest) {
                 val targetMatches = MainViewModel.MAC_PATTERN.matches(request.targetBssid.trim().uppercase())
                 if (!eapolStopRequested && targetMatches && eapolState.isComplete) {
                     eapolStopRequested = true
-                    appendLog("[+] Valid 4-Way Handshake captured!")
+                    appendLog("[+] 成功捕获到有效的 4 次握手包！")
                     stopSniffImpl()
                 }
             }
@@ -318,7 +316,7 @@ internal fun MainViewModel.startSniffImpl(request: SniffRequest) {
                 val cleanClient = request.client.trim()
                     .ifBlank { "FF:FF:FF:FF:FF:FF" }
                     .uppercase()
-                appendLog("Sending deauth burst before capture...")
+                appendLog("抓包前正在发送 Deauth 突发攻击...")
                 val deauthResponse = activeSession.sendCommand(
                     "DEAUTH",
                     JSONObject().apply {
@@ -332,10 +330,10 @@ internal fun MainViewModel.startSniffImpl(request: SniffRequest) {
                     timeoutMs = 20_000,
                 )
                 if (deauthResponse?.optBoolean("ok") != true) {
-                    appendLog("Deauth burst failed or timed out; continuing with capture.")
+                    appendLog("Deauth 突发攻击失败或超时；继续执行抓包。")
                 }
             } else {
-                appendLog("Skipping deauth trigger: invalid target BSSID.")
+                appendLog("跳过 Deauth 触发：无效的目标 BSSID。")
             }
         }
 
@@ -354,14 +352,14 @@ internal fun MainViewModel.startSniffImpl(request: SniffRequest) {
         val response = activeSession.sendCommand("START_SNIFF", args, timeoutMs = 12_000)
         if (response?.optBoolean("ok") == true) {
             val message = if (request.fixedMode) {
-                "Sniffing started on channel ${request.channel.coerceIn(1, 13)}."
+                "已在信道 ${request.channel.coerceIn(1, 13)} 上启动抓包。"
             } else {
-                "Channel-hopping sniffing started."
+                "已启动跳频抓包。"
             }
             appendLog(message)
             addHistory("sniff", message, HistoryLevel.SUCCESS)
         } else {
-            appendLog("Failed to start sniffing: ${response?.optString("msg") ?: "timeout"}")
+            appendLog("启动抓包失败：${response?.optString("msg") ?: "超时"}")
             stopSniffImpl()
         }
     }
@@ -380,8 +378,8 @@ internal fun MainViewModel.stopSniffImpl() {
         val response = activeSession?.sendCommand("STOP_SNIFF", timeoutMs = 6_000)
         if (response != null) {
             appendLog(
-                "Capture stopped: captured=${response.optInt("captured")}, " +
-                    "sent=${response.optInt("sent")}, dropped=${response.optInt("dropped")}"
+                "抓包已停止：已捕获=${response.optInt("captured")}，" +
+                    "已发送=${response.optInt("sent")}，已丢弃=${response.optInt("dropped")}"
             )
         }
         withContext(Dispatchers.IO) {
@@ -389,8 +387,8 @@ internal fun MainViewModel.stopSniffImpl() {
         }
         pcapWriter = null
         _capturePath.value?.let {
-            appendLog("Capture saved: $it")
-            addHistory("sniff", "Capture saved: $it", HistoryLevel.SUCCESS)
+            appendLog("抓包已保存：$it")
+            addHistory("sniff", "抓包已保存：$it", HistoryLevel.SUCCESS)
         }
     }
 }

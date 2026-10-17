@@ -68,10 +68,10 @@ internal fun MainViewModel.detectTrackerCandidate(
     )
 
     if (existing == null) {
-        appendLog("Potential tracker detected: $address (${name ?: "unnamed"}, $rssi dBm, $trackerType).")
+        appendLog("检测到潜在追踪器：$address（${name ?: "未命名"}, $rssi dBm, $trackerType）。")
         addHistory(
             "tracker_detector",
-            "Tracker candidate detected: ${name ?: address} ($trackerType)",
+            "检测到疑似追踪器：${name ?: address} ($trackerType)",
             HistoryLevel.ERROR,
         )
     }

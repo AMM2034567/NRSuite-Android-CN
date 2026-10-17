@@ -20,21 +20,21 @@ internal fun MainViewModel.loadOuiDatabaseImpl() {
 internal fun MainViewModel.downloadOuiDatabaseImpl() {
     _requiresOuiDatabase.value = false
     preferences.edit().putBoolean(PREF_OUI_DB_PROMPTED, true).apply()
-    appendLog("Downloading OUI/vendor database...")
+    appendLog("正在下载 OUI/厂商数据库...")
 
     scope.launch {
         ouiDatabaseRepository.download()
         when (val status = ouiDatabaseRepository.status.value) {
             is OuiDatabaseStatus.Ready -> {
-                appendLog("OUI/vendor database ready: ${status.vendorCount} prefixes.")
+                appendLog("OUI/厂商数据库就绪：共 ${status.vendorCount} 个前缀。")
                 addHistory(
                     "oui_db",
-                    "OUI/vendor database updated: ${status.vendorCount} prefixes",
+                    "OUI/厂商数据库已更新：共 ${status.vendorCount} 个前缀",
                     HistoryLevel.SUCCESS,
                 )
             }
             is OuiDatabaseStatus.Error -> {
-                appendLog("OUI/vendor database update failed: ${status.message}", level = com.swp81x.nrsuite.core.log.LogLevel.ERROR)
+                appendLog("OUI/厂商数据库更新失败：${status.message}", level = com.swp81x.nrsuite.core.log.LogLevel.ERROR)
             }
             else -> Unit
         }

@@ -97,12 +97,12 @@ fun DuckyEditorScreen(
         ) {
             Column(Modifier.padding(14.dp)) {
                 Text(
-                    text = "DuckyScript editor",
+                    text = "DuckyScript 脚本编辑器",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
                 )
                 Text(
-                    text = "Create a script, then export it and choose it from BadUSB or BLE.",
+                    text = "编写载荷脚本并导出，可直接在 BadUSB 或 BLE 模块中调用执行。",
                     style = MaterialTheme.typography.bodySmall,
                     color = NrOnSurfaceVariant,
                 )
@@ -124,7 +124,7 @@ fun DuckyEditorScreen(
                         onClick = { showSaveDialog = true },
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = accent),
                     ) {
-                        Text("Save")
+                        Text("保存")
                     }
                     if (selectedName != null) {
                         IconButton(
@@ -132,7 +132,7 @@ fun DuckyEditorScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Delete,
-                                contentDescription = "Delete selected DuckyScript",
+                                contentDescription = "删除选中的 DuckyScript 脚本",
                                 tint = StatusRed,
                             )
                         }
@@ -147,7 +147,7 @@ fun DuckyEditorScreen(
                         onClick = { importPicker.launch(arrayOf("text/plain", "*/*")) },
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = accent),
                     ) {
-                        Text("Import .txt")
+                        Text("导入 .txt")
                     }
                     Button(
                         onClick = { exportLauncher.launch("ducky.txt") },
@@ -156,12 +156,12 @@ fun DuckyEditorScreen(
                             contentColor = MaterialTheme.colorScheme.onPrimary,
                         ),
                     ) {
-                        Text("Export .txt")
+                        Text("导出 .txt")
                     }
                 }
                 Spacer(Modifier.height(6.dp))
                 Text(
-                    text = "Shortcuts: STRING, STRINGLN, DELAY, REM, CTRL/ALT/GUI/SHIFT key combos.",
+                    text = "常用指令: STRING, STRINGLN, DELAY, REM 以及 CTRL/ALT/GUI/SHIFT 组合键。",
                     style = MaterialTheme.typography.bodySmall,
                     color = NrOnSurfaceVariant,
                 )
@@ -174,7 +174,7 @@ fun DuckyEditorScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f),
-            label = { Text("DuckyScript") },
+            label = { Text("DuckyScript 脚本代码") },
             textStyle = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
         )
     }
@@ -182,9 +182,9 @@ fun DuckyEditorScreen(
     confirmDeleteName?.let { name ->
         AlertDialog(
             onDismissRequest = { confirmDeleteName = null },
-            title = { Text("Delete DuckyScript?") },
+            title = { Text("删除 DuckyScript 脚本？") },
             text = {
-                Text("Delete \"$name\"? This cannot be undone.")
+                Text("确定删除脚本 \"$name\"？此操作不可撤销。")
             },
             confirmButton = {
                 TextButton(
@@ -194,12 +194,12 @@ fun DuckyEditorScreen(
                         confirmDeleteName = null
                     },
                 ) {
-                    Text("Delete")
+                    Text("删除")
                 }
             },
             dismissButton = {
                 TextButton(onClick = { confirmDeleteName = null }) {
-                    Text("Cancel")
+                    Text("取消")
                 }
             },
         )
@@ -208,12 +208,12 @@ fun DuckyEditorScreen(
     if (showSaveDialog) {
         AlertDialog(
             onDismissRequest = { showSaveDialog = false },
-            title = { Text("Save DuckyScript") },
+            title = { Text("保存 DuckyScript 脚本") },
             text = {
                 OutlinedTextField(
                     value = saveName,
                     onValueChange = { saveName = it },
-                    label = { Text("Script name") },
+                    label = { Text("脚本名称") },
                     singleLine = true,
                 )
             },
@@ -226,12 +226,12 @@ fun DuckyEditorScreen(
                         showSaveDialog = false
                     },
                 ) {
-                    Text("Save")
+                    Text("保存")
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showSaveDialog = false }) {
-                    Text("Cancel")
+                    Text("取消")
                 }
             },
         )

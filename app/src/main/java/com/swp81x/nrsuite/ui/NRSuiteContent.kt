@@ -405,20 +405,20 @@ internal fun NRSuiteContent(viewModel: MainViewModel) {
         val supported = featureSupported
         val requiresOuiDb = module.id == "mac_lookup" && ouiDatabaseStatus !is OuiDatabaseStatus.Ready
         val availabilityLabel = when {
-            !module.available -> module.statusLabel ?: "Unavailable"
-            requiresOuiDb -> "OUI DB required"
-            !isDeviceConnected && requiresDevice -> "Device needed"
+            !module.available -> module.statusLabel ?: "暂不可用"
+            requiresOuiDb -> "需要 OUI 数据库"
+            !isDeviceConnected && requiresDevice -> "需要连接设备"
             isDeviceConnected && !supported -> when {
-                module.id in setOf("ble", "ble_scanner", "tracker_detector", "ble_profile", "badusb") -> "Not supported"
-                else -> "Firmware required"
+                module.id in setOf("ble", "ble_scanner", "tracker_detector", "ble_profile", "badusb") -> "设备不支持"
+                else -> "需要固件支持"
             }
             else -> null
         }
         val availabilityColor = when (availabilityLabel) {
             null -> null
-            "Device needed" -> StatusNeutral
-            "Unavailable" -> StatusNeutral.copy(alpha = 0.5f)
-            "Not supported" -> StatusRed
+            "Device needed", "需要连接设备", "需要设备" -> StatusNeutral
+            "Unavailable", "暂不可用", "不可用" -> StatusNeutral.copy(alpha = 0.5f)
+            "Not supported", "设备不支持", "不支持" -> StatusRed
             else -> StatusAmber
         }
         module.copy(
@@ -538,7 +538,7 @@ internal fun NRSuiteContent(viewModel: MainViewModel) {
     }
 
     LaunchedEffect(exportDirectoryName) {
-        if (exportDirectoryName == "Not configured") {
+        if (exportDirectoryName == "Not configured" || exportDirectoryName == "未配置") {
             showRootDirectoryDialog = true
         }
     }
@@ -744,8 +744,8 @@ internal fun NRSuiteContent(viewModel: MainViewModel) {
 
                 uiScope.launch {
                     val result = snackbarHostState.showSnackbar(
-                        message = "${device.displayName} detected - tap to connect",
-                        actionLabel = "Connect",
+                        message = "${device.displayName} 已检测到 - 点击连接",
+                        actionLabel = "连接",
                         withDismissAction = false,
                         duration = SnackbarDuration.Short,
                     )
@@ -760,27 +760,27 @@ internal fun NRSuiteContent(viewModel: MainViewModel) {
     val activeModule = liveModules.firstOrNull { it.id == activeModuleId }
     val moduleUnavailableMessage = activeModule?.let { module ->
         when (module.statusLabel) {
-            "Device needed" ->
-                "No device connected. Connect your NRSuite ESP32 to run ${module.title}."
-            "Not supported" ->
-                "${module.title} is not supported by the connected ESP32" +
-                    (connectedChip?.let { " ($it)" } ?: "") + "."
-            "Firmware required" ->
-                "The connected firmware is missing the required feature for ${module.title}."
-            "OUI DB required" ->
-                "Download the OUI/vendor database before using ${module.title}."
-            "Unavailable" ->
-                "${module.title} is not available yet."
+            "Device needed", "需要连接设备", "需要设备" ->
+                "未连接设备。请连接您的 NRSuite ESP32 设备以运行${module.title}。"
+            "Not supported", "设备不支持", "不支持" ->
+                "${module.title}不受已连接的 ESP32" +
+                    (connectedChip?.let { " ($it)" } ?: "") + "支持。"
+            "Firmware required", "需要固件支持", "需要固件" ->
+                "当前连接的固件缺少运行${module.title}所需的功能特性。"
+            "OUI DB required", "需要 OUI 数据库" ->
+                "使用${module.title}前，请先下载 OUI / 厂商数据库。"
+            "Unavailable", "暂不可用", "不可用" ->
+                "${module.title}目前暂不可用。"
             else -> null
         }
     }
     val showBack = activeModuleId != null || selectedCategory != null
     val activeTitle = when {
-        activeModuleId == "firmware" -> "Flasher"
-        activeModuleId == "wpa_cracker" -> "WPA Cracker"
-        activeModuleId == "devices" -> "Devices"
+        activeModuleId == "firmware" -> "固件烧录器"
+        activeModuleId == "wpa_cracker" -> "WPA 破解器"
+        activeModuleId == "devices" -> "设备管理"
         activeModule != null -> activeModule.title
-        activeModuleId == "settings" -> "Settings"
+        activeModuleId == "settings" -> "设置"
         selectedCategory != null -> selectedCategory!!
         else -> "NRSuite"
     }
@@ -808,7 +808,7 @@ internal fun NRSuiteContent(viewModel: MainViewModel) {
                         }) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Back",
+                                contentDescription = "返回",
                             )
                         }
                     }
@@ -827,7 +827,7 @@ internal fun NRSuiteContent(viewModel: MainViewModel) {
                     IconButton(onClick = { activeModuleId = "settings" }) {
                         Icon(
                             imageVector = Icons.Default.Settings,
-                            contentDescription = "Settings",
+                            contentDescription = "设置",
                             tint = NrOnSurfaceVariant,
                         )
                     }
@@ -891,12 +891,12 @@ internal fun NRSuiteContent(viewModel: MainViewModel) {
         if (showRootDirectoryDialog) {
             AlertDialog(
                 onDismissRequest = { showRootDirectoryDialog = false },
-                title = { Text("NRSuite root directory") },
+                title = { Text("NRSuite 工作根目录") },
                 text = {
                     Text(
-                        text = "NRSuite needs a root folder for PCAP captures, logs, " +
-                            "DuckyScripts, and portal exports. Choose a folder now, " +
-                            "or tap Later and choose it when starting a capture.",
+                        text = "NRSuite 需要一个根文件夹来存放 PCAP 抓包、运行日志、" +
+                            "DuckyScript 脚本以及认证门户导出文件。您可以现在选择一个文件夹，" +
+                            "或稍后在启动抓包时再进行选择。",
                         color = NrOnSurfaceVariant,
                     )
                 },
@@ -906,12 +906,12 @@ internal fun NRSuiteContent(viewModel: MainViewModel) {
                         rootDirectoryPickerActive = true
                         folderPicker.launch(null)
                     }) {
-                        Text("Choose folder")
+                        Text("选择文件夹")
                     }
                 },
                 dismissButton = {
                     OutlinedButton(onClick = { showRootDirectoryDialog = false }) {
-                        Text("Later")
+                        Text("稍后")
                     }
                 },
             )
@@ -920,11 +920,11 @@ internal fun NRSuiteContent(viewModel: MainViewModel) {
         if (showOuiDatabaseDialog && !showRootDirectoryDialog && !rootDirectoryPickerActive) {
             AlertDialog(
                 onDismissRequest = { showOuiDatabaseDialog = false },
-                title = { Text("MAC vendor database") },
+                title = { Text("MAC 厂商数据库") },
                 text = {
                     Text(
-                        text = "Download the IEEE OUI registry now for offline MAC/vendor lookup? " +
-                            "You can also do this later in Settings.",
+                        text = "是否立即下载 IEEE OUI 注册库以支持离线 MAC/厂商查询？" +
+                            "您也可以稍后在“设置”中下载。",
                         color = NrOnSurfaceVariant,
                     )
                 },
@@ -933,12 +933,12 @@ internal fun NRSuiteContent(viewModel: MainViewModel) {
                         showOuiDatabaseDialog = false
                         viewModel.downloadOuiDatabase()
                     }) {
-                        Text("Download")
+                        Text("立即下载")
                     }
                 },
                 dismissButton = {
                     OutlinedButton(onClick = { showOuiDatabaseDialog = false }) {
-                        Text("Later")
+                        Text("稍后")
                     }
                 },
             )
@@ -947,7 +947,7 @@ internal fun NRSuiteContent(viewModel: MainViewModel) {
         actionError?.let { message ->
             AlertDialog(
                 onDismissRequest = viewModel::consumeActionError,
-                title = { Text("Action blocked") },
+                title = { Text("操作受阻") },
                 text = {
                     Text(
                         text = message,
@@ -956,7 +956,7 @@ internal fun NRSuiteContent(viewModel: MainViewModel) {
                 },
                 confirmButton = {
                     TextButton(onClick = viewModel::consumeActionError) {
-                        Text("OK")
+                        Text("确定")
                     }
                 },
             )
